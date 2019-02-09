@@ -8,6 +8,12 @@
     <string name="sj_fragment_title">Schedule Journey</string>
     <string name="profile_fragment_title">Profile</string>
     <string name="addresses">Addresses</string>
+    <string name="from_label">From</string>
+    <string name="to_label">To</string>
+    <string name="preferences_label">Preferences</string>
+    <string name="gender_label">Gender</string>
+    <string name="method_label">Method</string>
+    <string name="search_button">Search</string>
     <string-array name="gender_array">
         <item>Male</item>
         <item>Female</item>
