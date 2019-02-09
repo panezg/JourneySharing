@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">JourneySharing</string>
+    <string name="nav_schedule_journey_title">Schedule Journey</string>
+    <string name="nav_on_demand_journey_title">On Demand Journey</string>
+    <string name="nav_profile_title">Profile</string>
+    <string name="main_activity_title">Welcome</string>
+    <string name="odj_fragment_title">On Demand Journey</string>
+    <string name="sj_fragment_title">Schedule Journey</string>
+    <string name="profile_fragment_title">Profile</string>
+    <string name="addresses">Addresses</string>
+    <string-array name="gender_array">
+        <item>Male</item>
+        <item>Female</item>
+    </string-array>
+    <string-array name="methods_array">
+        <item>Walking</item>
+        <item>Taxi</item>
+    </string-array>
+</resources>
