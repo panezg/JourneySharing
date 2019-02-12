@@ -52,7 +52,7 @@ public class ProfileFragment extends Fragment {
         editor.putString(PHONE, phoneEditText.getText().toString());
         editor.apply();
 
-        //Toast.makeText(this, "Profile Saved!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this.getActivity(), "Saved!", Toast.LENGTH_SHORT).show();
     }
 
     private void loadData() {
