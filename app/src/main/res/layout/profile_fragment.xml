@@ -17,6 +17,7 @@
         android:text="@string/profile_fragment_title"/>
 
     <include
+        android:id="@+id/user_info_include"
         layout="@layout/user_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

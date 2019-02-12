@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 
 public class ProfileFragment extends Fragment {
 
@@ -26,7 +27,11 @@ public class ProfileFragment extends Fragment {
     private Button.OnClickListener mSaveOnClickListener = new View.OnClickListener() {
         public void onClick(View v) {
         Log.d("myTag", "This is my message from button");
-
+        View userInfoLayout = getView().findViewById(R.id.user_info_include);
+        EditText namesEditText = userInfoLayout.findViewById(R.id.names_text);
+        EditText phoneEditText = userInfoLayout.findViewById(R.id.phone_number_text);
+        Log.d("myTag", "Names: " + namesEditText.getText().toString());
+        Log.d("myTag", "Phone: " + phoneEditText.getText().toString());
         }
     };
 
