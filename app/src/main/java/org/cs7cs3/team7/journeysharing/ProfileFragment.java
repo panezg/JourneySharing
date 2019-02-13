@@ -14,19 +14,26 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class ProfileFragment extends Fragment {
 
     private ProfileViewModel mViewModel;
-    public static final String SHARE_PREFS = "sharedPrefs";
-    public static final String NAME = "name";
-    public static final String PHONE = "phone";
+    private static final String SHARE_PREFS = "sharedPrefs";
+    private static final String NAME = "name";
+    private static final String PHONE = "phone";
+    private static final String GENDER_POSITION = "SelectedPosition";
+
     private String name;
     private String phone;
+    private int genderSpinnerPosition;
+
+    private SharedPreferences.Editor editor;
 
     public static ProfileFragment newInstance() {
         return new ProfileFragment();
@@ -40,25 +47,31 @@ public class ProfileFragment extends Fragment {
     };
 
     private void saveData() {
-        Log.d("myTag", "This is my message from button");
+        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences(SHARE_PREFS, Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+
         View userInfoLayout = getView().findViewById(R.id.user_info_include);
+        Log.d("myTag", "This is my message from button");
         EditText namesEditText = userInfoLayout.findViewById(R.id.names_text);
         EditText phoneEditText = userInfoLayout.findViewById(R.id.phone_number_text);
-        Log.d("myTag", "Names: " + namesEditText.getText().toString());
-        Log.d("myTag", "Phone: " + phoneEditText.getText().toString());
-        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences(SHARE_PREFS, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Spinner genderSpinner = userInfoLayout.findViewById(R.id.gender_spinner);
+        Log.d("myTag", "Name Saved: " + namesEditText.getText().toString());
+        Log.d("myTag", "Phone Saved: " + phoneEditText.getText().toString());
+        Log.d("myTag", "Gender saved: " + genderSpinner.getItemAtPosition(genderSpinnerPosition));
+
         editor.putString(NAME, namesEditText.getText().toString());
         editor.putString(PHONE, phoneEditText.getText().toString());
+        editor.putInt(GENDER_POSITION, genderSpinnerPosition);
         editor.apply();
 
-        Toast.makeText(this.getActivity(), "Saved!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this.getActivity(), "Profile Saved!", Toast.LENGTH_SHORT).show();
     }
 
     private void loadData() {
         SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences(SHARE_PREFS, Context.MODE_PRIVATE);
         name = sharedPreferences.getString(NAME, "");
         phone = sharedPreferences.getString(PHONE, "");
+        genderSpinnerPosition = sharedPreferences.getInt(GENDER_POSITION, 0);
     }
 
     private void updateView() {
@@ -67,6 +80,8 @@ public class ProfileFragment extends Fragment {
         namesEditText.setText(name);
         EditText phoneEditText = userInfoLayout.findViewById(R.id.phone_number_text);
         phoneEditText.setText(phone);
+        Spinner genderSpinner = userInfoLayout.findViewById(R.id.gender_spinner);
+        genderSpinner.setSelection(genderSpinnerPosition);
     }
 
     @Override
@@ -85,6 +100,23 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         final Button button = getView().findViewById(R.id.save_button);
+
+        // Keep the spinner selected listener works before press the "save" button.
+        View userInfoLayout = getView().findViewById(R.id.user_info_include);
+        Spinner genderSpinner = userInfoLayout.findViewById(R.id.gender_spinner);
+        genderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.d("myTag", "Gender Selected: " + parent.getItemAtPosition(position).toString());
+                genderSpinnerPosition = position;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
+
         button.setOnClickListener(mSaveOnClickListener);
         loadData();
         updateView();
