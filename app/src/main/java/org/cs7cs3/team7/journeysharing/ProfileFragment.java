@@ -41,6 +41,7 @@ public class ProfileFragment extends Fragment {
 
     // Create an anonymous implementation of OnClickListener
     private Button.OnClickListener mSaveOnClickListener = new View.OnClickListener() {
+        @Override
         public void onClick(View v) {
             saveData();
         }
@@ -98,11 +99,11 @@ public class ProfileFragment extends Fragment {
     }
 
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        final Button button = getView().findViewById(R.id.save_button);
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        final Button button = view.findViewById(R.id.save_button);
 
         // Keep the spinner selected listener works before press the "save" button.
-        View userInfoLayout = getView().findViewById(R.id.user_info_include);
+        View userInfoLayout = view.findViewById(R.id.user_info_include);
         Spinner genderSpinner = userInfoLayout.findViewById(R.id.gender_spinner);
         genderSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

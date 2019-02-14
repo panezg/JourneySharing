@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
                     loadFragment(scheduleJourneyFragment);
                     return true;
                 case R.id.nav_on_demand_journey:
-                    Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance();
+                    Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance("", "");
                     loadFragment(onDemandJourneyFragment);
                     return true;
                 case R.id.nav_profile:
