@@ -1,5 +1,6 @@
 package org.cs7cs3.team7.journeysharing;
 
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.os.Bundle;
@@ -25,7 +26,8 @@ public class OnDemandJourneyFragment extends Fragment {
     private View.OnClickListener mAddressOnClickListener = new View.OnClickListener() {
         public void onClick(View v) {
             Log.d("myTag", "This is my message");
-
+            Fragment TypeAddressFragment = org.cs7cs3.team7.journeysharing.TypeAddressFragment.newInstance();
+            loadFragment(TypeAddressFragment);
         }
     };
 
@@ -48,5 +50,15 @@ public class OnDemandJourneyFragment extends Fragment {
         View toButton = addressLayout.findViewById(R.id.to_button);
         fromButton.setOnClickListener(mAddressOnClickListener);
         toButton.setOnClickListener(mAddressOnClickListener);
+    }
+
+    private void loadFragment(Fragment fragment) {
+        // load fragment
+        FragmentTransaction transaction = this.getActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_container, fragment);
+        transaction.addToBackStack(null);
+        //transaction.addToBackStack(fragment.toString());
+        //transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        transaction.commit();
     }
 }
