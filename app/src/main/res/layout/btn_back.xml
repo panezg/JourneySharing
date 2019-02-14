@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="30dp"
+    android:layout_height="30dp"
+    android:clickable="true"
+    android:orientation="horizontal"
+    android:gravity="left"
+    android:onClick="back"
+    android:focusable="true">
+
+    <ImageView
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:src="@drawable/back" />
+</LinearLayout>
