@@ -8,7 +8,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ViewMatch extends AppCompatActivity {
 
@@ -18,15 +17,15 @@ public class ViewMatch extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.viewMatch);
+        setContentView(R.layout.view_match);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,testData());
         custoList.setAdapter(adapter);
         initialWork();
     }
 
     public void initialWork(){
-        timeDispaly = (TextView) findViewById(R.id.viewMatch_timeDispaly);
-        custoList = (ListView) findViewById(R.id.viewMatch_cusList);
+        timeDispaly = (TextView) findViewById(R.id.view_match_timeDispaly);
+        custoList = (ListView) findViewById(R.id.view_match_cusList);
     }
 
     public ArrayList<String> testData(){

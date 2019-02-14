@@ -16,7 +16,7 @@
             android:layout_marginEnd="8dp"
             android:text="Commute Trip" />
         <TextView
-            android:id="@+id/viewMatch_time"
+            android:id="@+id/view_match_time"
             android:text="time:"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -25,7 +25,7 @@
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="50dp" />
         <TextView
-            android:id="@+id/viewMatch_timeDispaly"
+            android:id="@+id/view_match_timeDispaly"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
@@ -35,7 +35,7 @@
             android:text="XX:XX am   2019-1-11"
             />
         <ListView
-            android:id="@+id/viewMatch_cusList"
+            android:id="@+id/view_match_cusList"
             android:layout_width="200dp"
             android:layout_height="200dp"
             android:layout_alignParentTop="true"
