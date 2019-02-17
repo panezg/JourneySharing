@@ -18,6 +18,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
+                //depending on state, would need to change to use ViewMatchFragment
                 case R.id.nav_schedule_journey:
                     Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
                     loadFragment(scheduleJourneyFragment);

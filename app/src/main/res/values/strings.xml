@@ -18,6 +18,8 @@
     <string name="phone_number_label">Phone Number</string>
     <string name="user_info_label">User Info</string>
     <string name="save_button">Save</string>
+    <string name="match_group_label">Matched with</string>
+    <string name="match_details_label">Match Details</string>
     <string-array name="gender_array">
         <item>Male</item>
         <item>Female</item>
