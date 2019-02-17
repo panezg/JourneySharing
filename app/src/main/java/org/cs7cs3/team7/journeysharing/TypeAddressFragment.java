@@ -17,7 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class TypeAddressFragment extends Fragment {
-    private TypeAddressViewModel mViewModel;
+    private TypeAddressViewModel viewModel;
     private static final String IS_DESTINATION = "isDestination?";
     private static final String START_POINT = "start from where?";
     private static final String DESTINATION = "where wanna to go?";
@@ -33,26 +33,25 @@ public class TypeAddressFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        viewModel = ViewModelProviders.of(this).get(TypeAddressViewModel.class);
+    }
+
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.type_address, container, false);
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(TypeAddressViewModel.class);
-        // TODO: Use the ViewModel
-    }
-
-    @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        final Button saveAddress = view.findViewById(R.id.save_address_button);
+        final Button button = view.findViewById(R.id.ok_button);
 
-        saveAddress.setOnClickListener(new View.OnClickListener() {
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EditText inputAddress = getView().findViewById(R.id.input_address);
+                EditText inputAddress = getView().findViewById(R.id.address_text);
                 String address = inputAddress.getText().toString();
                 Bundle bundle = getArguments();
                 String resetValue = bundle.getBoolean(IS_DESTINATION) ? DESTINATION : START_POINT;
