@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProviders;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        OnDemandJourneyViewModel mViewModel = ViewModelProviders.of(this).get(OnDemandJourneyViewModel.class);
+        mViewModel.init();
         setContentView(R.layout.main_activity);
 
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);

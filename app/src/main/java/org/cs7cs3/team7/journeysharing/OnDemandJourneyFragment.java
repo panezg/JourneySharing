@@ -1,6 +1,7 @@
 package org.cs7cs3.team7.journeysharing;
 
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.os.Bundle;
@@ -19,6 +20,10 @@ public class OnDemandJourneyFragment extends Fragment {
 
     private OnDemandJourneyViewModel mViewModel;
     private String TAG = "myTag";
+    TextView fromAddress;
+    TextView toAddress;
+
+
 
     public static OnDemandJourneyFragment newInstance() {
         return new OnDemandJourneyFragment();
@@ -27,10 +32,9 @@ public class OnDemandJourneyFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(OnDemandJourneyViewModel.class);
-        mViewModel.init();
-        Log.d(TAG, "From:"+mViewModel.getFrom().getValue());
-        Log.d(TAG, "To:"+mViewModel.getTo().getValue());
+
+       // mViewModel.init();
+
     }
 
     @Override
@@ -43,28 +47,46 @@ public class OnDemandJourneyFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        View addressLayout = getView().findViewById(R.id.address_include);
+        fromAddress = addressLayout.findViewById(R.id.from_text);
+        toAddress = addressLayout.findViewById((R.id.to_text));
+        final View fromButton = addressLayout.findViewById(R.id.from_button);
+        final View toButton = addressLayout.findViewById(R.id.to_button);
+        mViewModel = ViewModelProviders.of(getActivity()).get(OnDemandJourneyViewModel.class);
+        mViewModel.getFrom().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String msg) {
+                fromAddress.setText(msg);
+            }
+        });
+
+        ViewModelProviders.of(getActivity()).get(OnDemandJourneyViewModel.class).getTo().observe(this, (msg)->{
+            toAddress.setText(msg);
+        });
+
+
+        fromButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mViewModel.setIsDestination(false);
+                Fragment fromFragment = TypeAddressFragment.newInstance();
+                loadFragment(fromFragment);
+            }
+        });
+        toButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mViewModel.setIsDestination(true);
+                Fragment fromFragment = TypeAddressFragment.newInstance();
+                loadFragment(fromFragment);
+            }
+        });
     }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        Log.d(TAG, "msg is from 'onViewCreated': ");
-        View addressLayout = getView().findViewById(R.id.address_include);
-        TextView fromAddress = addressLayout.findViewById(R.id.from_text);
-        fromAddress.setText(mViewModel.getFrom().getValue());
-        TextView toAddress = addressLayout.findViewById((R.id.to_text));
-        toAddress.setText(mViewModel.getTo().getValue());
-        final View fromButton = addressLayout.findViewById(R.id.from_button);
-        final View toButton = addressLayout.findViewById(R.id.to_button);
-        fromButton.setOnClickListener((v) -> {
-            mViewModel.setIsDestination(false);
-            Fragment fromFragment = TypeAddressFragment.newInstance();
-            loadFragment(fromFragment);
-        });
-        toButton.setOnClickListener((v) -> {
-            mViewModel.setIsDestination(true);
-            Fragment fromFragment = TypeAddressFragment.newInstance();
-            loadFragment(fromFragment);
-        });
+        Log.d("myTag", "msg is from 'onViewCreated': ");
+
     }
 
     private void loadFragment(Fragment fragment) {
@@ -72,8 +94,6 @@ public class OnDemandJourneyFragment extends Fragment {
         FragmentTransaction transaction = this.getActivity().getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.frame_container, fragment);
         transaction.addToBackStack(null);
-        //transaction.addToBackStack(fragment.toString());
-        //transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         transaction.commit();
     }
 }

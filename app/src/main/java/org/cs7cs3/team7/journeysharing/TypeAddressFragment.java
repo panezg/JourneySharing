@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.util.Objects;
+
 public class TypeAddressFragment extends Fragment {
     private OnDemandJourneyViewModel mViewModel;
     private final String TAG = "myTag";
@@ -27,19 +29,13 @@ public class TypeAddressFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(OnDemandJourneyViewModel.class);
-        mViewModel.init();
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.type_address, container, false);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        final Button button = view.findViewById(R.id.ok_button);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        mViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(OnDemandJourneyViewModel.class);
+        final Button button = getView().findViewById(R.id.ok_button);
 
         button.setOnClickListener( (v) -> {
             EditText inputAddress = getView().findViewById(R.id.address_text);
@@ -57,6 +53,17 @@ public class TypeAddressFragment extends Fragment {
 
             loadFragment(onDemandJourneyFragment);
         });
+    }
+
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.type_address, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+
     }
 
     private void loadFragment(Fragment fragment) {
