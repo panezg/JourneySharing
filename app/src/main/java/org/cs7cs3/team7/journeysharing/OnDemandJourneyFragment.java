@@ -1,7 +1,6 @@
 package org.cs7cs3.team7.journeysharing;
 
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
 import android.os.Bundle;
@@ -20,9 +19,6 @@ public class OnDemandJourneyFragment extends Fragment {
 
     private OnDemandJourneyViewModel mViewModel;
     private String TAG = "myTag";
-
-    private static final String START_POINT = "from_where";
-    private static final String DESTINATION = "to_where";
 
     public static OnDemandJourneyFragment newInstance() {
         return new OnDemandJourneyFragment();
@@ -51,7 +47,7 @@ public class OnDemandJourneyFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        Log.d("myTag", "msg is from 'onViewCreated': ");
+        Log.d(TAG, "msg is from 'onViewCreated': ");
         View addressLayout = getView().findViewById(R.id.address_include);
         TextView fromAddress = addressLayout.findViewById(R.id.from_text);
         fromAddress.setText(mViewModel.getFrom().getValue());
@@ -59,21 +55,15 @@ public class OnDemandJourneyFragment extends Fragment {
         toAddress.setText(mViewModel.getTo().getValue());
         final View fromButton = addressLayout.findViewById(R.id.from_button);
         final View toButton = addressLayout.findViewById(R.id.to_button);
-        fromButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mViewModel.setIsDestination(false);
-                Fragment fromFragment = TypeAddressFragment.newInstance();
-                loadFragment(fromFragment);
-            }
+        fromButton.setOnClickListener((v) -> {
+            mViewModel.setIsDestination(false);
+            Fragment fromFragment = TypeAddressFragment.newInstance();
+            loadFragment(fromFragment);
         });
-        toButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mViewModel.setIsDestination(true);
-                Fragment fromFragment = TypeAddressFragment.newInstance();
-                loadFragment(fromFragment);
-            }
+        toButton.setOnClickListener((v) -> {
+            mViewModel.setIsDestination(true);
+            Fragment fromFragment = TypeAddressFragment.newInstance();
+            loadFragment(fromFragment);
         });
     }
 

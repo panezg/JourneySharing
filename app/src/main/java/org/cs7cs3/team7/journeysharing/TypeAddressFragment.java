@@ -18,9 +18,6 @@ import android.widget.EditText;
 
 public class TypeAddressFragment extends Fragment {
     private OnDemandJourneyViewModel mViewModel;
-    private static final String IS_DESTINATION = "isDestination?";
-    private static final String START_POINT = "start from where?";
-    private static final String DESTINATION = "where wanna to go?";
     private final String TAG = "myTag";
 
     public static TypeAddressFragment newInstance() {
@@ -44,24 +41,21 @@ public class TypeAddressFragment extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         final Button button = view.findViewById(R.id.ok_button);
 
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                EditText inputAddress = getView().findViewById(R.id.address_text);
-                String address = inputAddress.getText().toString();
-                if(mViewModel.getIsDestination().getValue()){
-                    mViewModel.setTo(address);
-                }else {
-                    mViewModel.setFrom(address);
-                }
-                Log.d(TAG, "From:"+mViewModel.getFrom().getValue());
-                Log.d(TAG, "To:"+mViewModel.getTo().getValue());
-
-                Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance();
-
-
-                loadFragment(onDemandJourneyFragment);
+        button.setOnClickListener( (v) -> {
+            EditText inputAddress = getView().findViewById(R.id.address_text);
+            String address = inputAddress.getText().toString();
+            if (mViewModel.getIsDestination().getValue()) {
+                mViewModel.setTo(address);
+            } else {
+                mViewModel.setFrom(address);
             }
+            Log.d(TAG, "From:" + mViewModel.getFrom().getValue());
+            Log.d(TAG, "To:" + mViewModel.getTo().getValue());
+
+            Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance();
+
+
+            loadFragment(onDemandJourneyFragment);
         });
     }
 
