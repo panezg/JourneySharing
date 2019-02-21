@@ -4,4 +4,5 @@ import androidx.lifecycle.ViewModel;
 
 public class OnDemandJourneyViewModel extends ViewModel {
     // TODO: Implement the ViewModel
+
 }
