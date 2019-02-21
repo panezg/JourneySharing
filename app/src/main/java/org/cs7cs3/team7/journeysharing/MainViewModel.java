@@ -50,23 +50,14 @@ public class MainViewModel extends ViewModel {
 
     //Getter and Setter of ProfileFragment.
     public MutableLiveData<String> getNames() {
-        if (names == null) {
-            names = new MutableLiveData<String>();
-        }
         return names;
     }
 
     public MutableLiveData<String> getPhone() {
-        if (phone == null) {
-            phone = new MutableLiveData<String>();
-        }
         return phone;
     }
 
     public MutableLiveData<Integer> getGenderItemIndexSelected() {
-        if (genderItemIndexSelected == null) {
-            genderItemIndexSelected = new MutableLiveData<Integer>();
-        }
         return genderItemIndexSelected;
     }
 
@@ -81,17 +72,29 @@ public class MainViewModel extends ViewModel {
     public void setGenderItemIndexSelected(int genderItemIndexSelected) {
         this.genderItemIndexSelected.setValue(genderItemIndexSelected);
     }
+
+
     /*
-    ------------------------------------ ViewModel For local File -----------------------------------
+    ------------------------------------ Initialization -----------------------------------
      */
 
     public void init() {
+
+        // Initialization of data in OnDemandJourneyFragment
         from = new MutableLiveData<>();
-        from.setValue("default");
+        from.setValue("Default");
         to = new MutableLiveData<>();
-        to.setValue("default");
+        to.setValue("Default");
         isDestination = new MutableLiveData<>();
         isDestination.setValue(false);
+
+        // Initialization of data in ProfileFragment.
+        names = new MutableLiveData<String>();
+        names.setValue("");
+        genderItemIndexSelected = new MutableLiveData<Integer>();
+        genderItemIndexSelected.setValue(0);
+        phone = new MutableLiveData<String>();
+        phone.setValue("");
     }
 
 
