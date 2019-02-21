@@ -17,25 +17,21 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class TypeAddressFragment extends Fragment {
-    private TypeAddressViewModel viewModel;
+    private OnDemandJourneyViewModel mViewModel;
     private static final String IS_DESTINATION = "isDestination?";
     private static final String START_POINT = "start from where?";
     private static final String DESTINATION = "where wanna to go?";
+    private final String TAG = "myTag";
 
-    public static TypeAddressFragment newInstance(boolean isDestination, String toAddress, String fromAddress) {
-        Bundle bundle = new Bundle();
-        TypeAddressFragment fragment = new TypeAddressFragment();
-        bundle.putBoolean(IS_DESTINATION, isDestination);
-        bundle.putString(START_POINT, toAddress);
-        bundle.putString(DESTINATION, fromAddress);
-        fragment.setArguments(bundle);
-        return fragment;
+    public static TypeAddressFragment newInstance() {
+       return new TypeAddressFragment();
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = ViewModelProviders.of(this).get(TypeAddressViewModel.class);
+        mViewModel = ViewModelProviders.of(this).get(OnDemandJourneyViewModel.class);
+        mViewModel.init();
     }
 
     @Override
@@ -53,12 +49,16 @@ public class TypeAddressFragment extends Fragment {
             public void onClick(View v) {
                 EditText inputAddress = getView().findViewById(R.id.address_text);
                 String address = inputAddress.getText().toString();
-                Bundle bundle = getArguments();
-                String resetValue = bundle.getBoolean(IS_DESTINATION) ? DESTINATION : START_POINT;
-                bundle.putString(resetValue, address);
-                Log.d("myTag", "msg is from 'TypeAddressFragment");
-                Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance(bundle.getString(START_POINT), bundle.getString(DESTINATION));
-                Log.d("myTag", "start point: " + bundle.getString(START_POINT) + "\n destination: " + bundle.getString(DESTINATION));
+                if(mViewModel.getIsDestination().getValue()){
+                    mViewModel.setTo(address);
+                }else {
+                    mViewModel.setFrom(address);
+                }
+                Log.d(TAG, "From:"+mViewModel.getFrom().getValue());
+                Log.d(TAG, "To:"+mViewModel.getTo().getValue());
+
+                Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance();
+
 
                 loadFragment(onDemandJourneyFragment);
             }
