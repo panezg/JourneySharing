@@ -37,9 +37,9 @@ public class OnDemandJourneyViewModel extends ViewModel {
 
     public void init() {
         from = new MutableLiveData<>();
-        from.setValue("");
+        from.setValue("default");
         to = new MutableLiveData<>();
-        to.setValue("");
+        to.setValue("default");
         isDestination = new MutableLiveData<>();
         isDestination.setValue(false);
     }
