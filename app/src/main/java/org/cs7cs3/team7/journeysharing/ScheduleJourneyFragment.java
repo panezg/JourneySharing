@@ -14,8 +14,6 @@ import android.view.ViewGroup;
 
 public class ScheduleJourneyFragment extends Fragment {
 
-    private ScheduleJourneyViewModel mViewModel;
-
     public static ScheduleJourneyFragment newInstance() {
         return new ScheduleJourneyFragment();
     }
@@ -29,8 +27,6 @@ public class ScheduleJourneyFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(ScheduleJourneyViewModel.class);
-        // TODO: Use the ViewModel
     }
 
 }
