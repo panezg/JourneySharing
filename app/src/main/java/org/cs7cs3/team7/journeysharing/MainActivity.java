@@ -18,12 +18,13 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
+                //depending on state, would need to change to use ViewMatchFragment
                 case R.id.nav_schedule_journey:
                     Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
                     loadFragment(scheduleJourneyFragment);
                     return true;
                 case R.id.nav_on_demand_journey:
-                    Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance();
+                    Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance("", "");
                     loadFragment(onDemandJourneyFragment);
                     return true;
                 case R.id.nav_profile:
@@ -43,8 +44,14 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         //loading default fragment
-        Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
-        loadFragment(scheduleJourneyFragment);
+        //TODO: If basic flow hasn't completed, then load Profile; else, load default
+        //need some kind of global property
+        Fragment profileFragment = ProfileFragment.newInstance();
+        loadFragment(profileFragment);
+        //TODO: don't allow navigation
+        //else
+        //Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
+        //loadFragment(scheduleJourneyFragment);
     }
 
     private void loadFragment(Fragment fragment) {
