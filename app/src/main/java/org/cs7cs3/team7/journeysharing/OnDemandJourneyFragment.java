@@ -86,6 +86,7 @@ public class OnDemandJourneyFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         Log.d("myTag", "msg is from 'onViewCreated': ");
+        //getActivity();
 
     }
 

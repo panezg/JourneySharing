@@ -22,6 +22,8 @@ public class ProfileFragment extends Fragment {
 
     private ProfileViewModel viewModel;
     private int genderItemIndexSelected = 0;
+    private EditText name_edit;
+
 
     // Create an anonymous implementation of OnClickListener
     private Button.OnClickListener mSaveOnClickListener = new View.OnClickListener() {
@@ -70,6 +72,8 @@ public class ProfileFragment extends Fragment {
             }
         });
         button.setOnClickListener(mSaveOnClickListener);
+        name_edit = userInfoLayout.findViewById(R.id.names_text);
+
         updateView();
     }
 
