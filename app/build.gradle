@@ -54,5 +54,9 @@ dependencies {
     // For Kotlin use lifecycle-reactivestreams-ktx
     // optional - Test helpers for LiveData
     testImplementation 'androidx.arch.core:core-testing:2.0.0'
+
+    //google maps services
+    implementation 'com.google.maps:google-maps-services:0.9.1'
+    implementation 'org.slf4j:slf4j-simple:1.7.25'
 }
 
