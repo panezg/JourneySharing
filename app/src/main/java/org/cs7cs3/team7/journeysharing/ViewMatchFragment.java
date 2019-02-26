@@ -21,7 +21,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 public class ViewMatchFragment extends Fragment {
-    private ViewMatchViewModel viewModel;
+
+    private MainViewModel mViewModel;
 
     public static ViewMatchFragment newInstance() {
         return new ViewMatchFragment();
@@ -30,7 +31,6 @@ public class ViewMatchFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = ViewModelProviders.of(this).get(ViewMatchViewModel.class);
     }
 
     @Override
@@ -44,10 +44,13 @@ public class ViewMatchFragment extends Fragment {
         View matchGroupLayout = view.findViewById(R.id.match_group_include);
         ListView matchedGroupListView = matchGroupLayout.findViewById(R.id.matched_group_list);
 
-        viewModel.getNamesList().observe(this, namesList -> {
+        //TODO: Need to add more detail to the list, as well as handle clicks that display the profile of users
+        /*
+        mViewModel.getNamesList().observe(this, namesList -> {
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_list_item_1, namesList);
             matchedGroupListView.setAdapter(adapter);
         });
+        */
     }
 
     //TODO: Need to add more detail to the list, as well as handle clicks that display the profile of users
