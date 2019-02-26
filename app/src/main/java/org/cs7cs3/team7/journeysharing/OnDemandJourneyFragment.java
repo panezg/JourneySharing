@@ -14,19 +14,20 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 public class OnDemandJourneyFragment extends Fragment {
     
     private MainViewModel mViewModel;
-
-    private String TAG = "myTag";
     private TextView fromAddress;
     private TextView toAddress;
+    private Button fromButton;
+    private Button toButton;
 
+    private String TAG = "myTag";
 
-
-    public static OnDemandJourneyFragment newInstance() {
+    static OnDemandJourneyFragment newInstance() {
         return new OnDemandJourneyFragment();
     }
 
@@ -45,12 +46,16 @@ public class OnDemandJourneyFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        // Init the layout.
+        //TODO: Exception here should be handled.
         View addressLayout = getView().findViewById(R.id.address_include);
-        fromAddress = addressLayout.findViewById(R.id.from_text);
-        toAddress = addressLayout.findViewById((R.id.to_text));
-        final View fromButton = addressLayout.findViewById(R.id.from_button);
-        final View toButton = addressLayout.findViewById(R.id.to_button);
+
+        //TODO: Exception here should be handled.
+        // Inti the ViewModel.
         mViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
+
+        // Inti the 'fromAddress' TextView and automatically update the View content.
+        fromAddress = addressLayout.findViewById(R.id.from_text);
         mViewModel.getFrom().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String msg) {
@@ -58,6 +63,8 @@ public class OnDemandJourneyFragment extends Fragment {
             }
         });
 
+        // Inti the 'toAddress' TextView and automatically update the View content.
+        toAddress = addressLayout.findViewById((R.id.to_text));
         ViewModelProviders.of(getActivity()).get(MainViewModel.class).getTo().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String msg) {
@@ -65,7 +72,8 @@ public class OnDemandJourneyFragment extends Fragment {
             }
         });
 
-
+        // Init the 'from' button and Set the onClick event listener.
+        fromButton = addressLayout.findViewById(R.id.from_button);
         fromButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,6 +82,9 @@ public class OnDemandJourneyFragment extends Fragment {
                 loadFragment(fromFragment);
             }
         });
+
+        // Init the 'to' button.
+        toButton = addressLayout.findViewById(R.id.to_button);
         toButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -86,13 +97,12 @@ public class OnDemandJourneyFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        Log.d("myTag", "msg is from 'onViewCreated': ");
-        //getActivity();
-
+        Log.d("myTag", "msg is from 'onViewCreated': do nothing");
     }
 
     private void loadFragment(Fragment fragment) {
         // load fragment
+        //TODO: exception here should be handled.
         FragmentTransaction transaction = this.getActivity().getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.frame_container, fragment);
         transaction.addToBackStack(null);

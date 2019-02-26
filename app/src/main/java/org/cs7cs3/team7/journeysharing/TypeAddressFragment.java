@@ -15,15 +15,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-
 import java.util.Objects;
 
 public class TypeAddressFragment extends Fragment {
 
-    MainViewModel mViewModel;
+    private MainViewModel mViewModel;
+    private Button addressSaveButton;
+    private EditText inputAddress;
+
     private final String TAG = "myTag";
 
-    public static TypeAddressFragment newInstance() {
+    static TypeAddressFragment newInstance() {
        return new TypeAddressFragment();
     }
 
@@ -35,23 +37,30 @@ public class TypeAddressFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(MainViewModel.class);
-        final Button button = getView().findViewById(R.id.ok_button);
 
-        button.setOnClickListener( (v) -> {
-            EditText inputAddress = getView().findViewById(R.id.address_text);
+        // Inti the ViewModel.
+        mViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(MainViewModel.class);
+
+        //TODO: Exception here should be handled.
+        // Inti the addressSaveButton and Set its onClick listener.
+        addressSaveButton = getView().findViewById(R.id.ok_button);
+
+        // Inti the EditView 'inputAddress'.
+        inputAddress = getView().findViewById(R.id.address_text);
+
+        addressSaveButton.setOnClickListener( (v) -> {
             String address = inputAddress.getText().toString();
+            //TODO: Exception here should be handled.
             if (mViewModel.getIsDestination().getValue()) {
                 mViewModel.setTo(address);
             } else {
                 mViewModel.setFrom(address);
             }
+
             Log.d(TAG, "From:" + mViewModel.getFrom());
             Log.d(TAG, "To:" + mViewModel.getTo());
 
             Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance();
-
-
             loadFragment(onDemandJourneyFragment);
         });
     }
@@ -67,8 +76,9 @@ public class TypeAddressFragment extends Fragment {
 
     }
 
+    // Load fragment
     private void loadFragment(Fragment fragment) {
-        // load fragment
+        //TODO: Exception here should be handled.
         FragmentTransaction transaction = this.getActivity().getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.frame_container, fragment);
         transaction.addToBackStack(null);

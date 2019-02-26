@@ -1,7 +1,5 @@
 package org.cs7cs3.team7.journeysharing;
 
-import androidx.lifecycle.ViewModelProviders;
-
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,7 +12,7 @@ import android.view.ViewGroup;
 
 public class ScheduleJourneyFragment extends Fragment {
 
-    public static ScheduleJourneyFragment newInstance() {
+    static ScheduleJourneyFragment newInstance() {
         return new ScheduleJourneyFragment();
     }
 
