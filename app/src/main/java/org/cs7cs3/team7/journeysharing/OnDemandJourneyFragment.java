@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class OnDemandJourneyFragment extends Fragment {
@@ -24,6 +25,8 @@ public class OnDemandJourneyFragment extends Fragment {
     private TextView toAddress;
     private Button fromButton;
     private Button toButton;
+
+    private Button searchButton;
 
     private String TAG = "myTag";
 
@@ -73,7 +76,7 @@ public class OnDemandJourneyFragment extends Fragment {
         });
 
         // Init the 'from' button and Set the onClick event listener.
-        fromButton = addressLayout.findViewById(R.id.from_button);
+        fromButton = getView().findViewById(R.id.from_button);
         fromButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,6 +88,7 @@ public class OnDemandJourneyFragment extends Fragment {
 
         // Init the 'to' button.
         toButton = addressLayout.findViewById(R.id.to_button);
+        //getView().findViewById(R.id.)
         toButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -93,6 +97,17 @@ public class OnDemandJourneyFragment extends Fragment {
                 loadFragment(fromFragment);
             }
         });
+
+        LinearLayout layout = getView().findViewById(R.id.linear_layout);
+        //getView().findViewById(R.layout.on_demand_journey_fragment).findViewById();
+        searchButton = (Button) layout.getChildAt(4);
+        searchButton.setOnClickListener(view -> {
+            Log.d(TAG, "buttong pressed");
+            Fragment onDemandJourneyFragment = ViewMatchFragment.newInstance();
+            loadFragment(onDemandJourneyFragment);
+        });
+
+       // View curView = getView().findViewById(R.layout.on_demand_journey_fragment);
     }
 
     @Override

@@ -3,8 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    tools:context=".OnDemandJourneyFragment">
+    android:layout_height="wrap_content">
+    <!--tools:context=".OnDemandJourneyFragment"-->
+
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
