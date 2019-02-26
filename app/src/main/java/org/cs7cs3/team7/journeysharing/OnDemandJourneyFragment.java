@@ -17,11 +17,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 public class OnDemandJourneyFragment extends Fragment {
+    
+    private MainViewModel mViewModel;
 
-    private OnDemandJourneyViewModel mViewModel;
     private String TAG = "myTag";
-    TextView fromAddress;
-    TextView toAddress;
+    private TextView fromAddress;
+    private TextView toAddress;
 
 
 
@@ -32,9 +33,6 @@ public class OnDemandJourneyFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-       // mViewModel.init();
-
     }
 
     @Override
@@ -52,7 +50,7 @@ public class OnDemandJourneyFragment extends Fragment {
         toAddress = addressLayout.findViewById((R.id.to_text));
         final View fromButton = addressLayout.findViewById(R.id.from_button);
         final View toButton = addressLayout.findViewById(R.id.to_button);
-        mViewModel = ViewModelProviders.of(getActivity()).get(OnDemandJourneyViewModel.class);
+        mViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
         mViewModel.getFrom().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String msg) {
@@ -60,8 +58,11 @@ public class OnDemandJourneyFragment extends Fragment {
             }
         });
 
-        ViewModelProviders.of(getActivity()).get(OnDemandJourneyViewModel.class).getTo().observe(this, (msg)->{
-            toAddress.setText(msg);
+        ViewModelProviders.of(getActivity()).get(MainViewModel.class).getTo().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String msg) {
+                toAddress.setText(msg);
+            }
         });
 
 

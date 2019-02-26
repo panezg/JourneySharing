@@ -14,37 +14,33 @@ import androidx.lifecycle.ViewModelProviders;
 public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                //depending on state, would need to change to use ViewMatchFragment
-                case R.id.nav_schedule_journey:
-                    Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
-                    loadFragment(scheduleJourneyFragment);
-                    return true;
-                case R.id.nav_on_demand_journey:
-                    Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance();
-                    loadFragment(onDemandJourneyFragment);
-                    return true;
-                case R.id.nav_profile:
-                    Fragment profileFragment = ProfileFragment.newInstance();
-                    loadFragment(profileFragment);
-                    return true;
-            }
-            return false;
+            = item -> {
+        switch (item.getItemId()) {
+            //depending on state, would need to change to use ViewMatchFragment
+            case R.id.nav_schedule_journey:
+                Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
+                loadFragment(scheduleJourneyFragment);
+                return true;
+            case R.id.nav_on_demand_journey:
+                Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance();
+                loadFragment(onDemandJourneyFragment);
+                return true;
+            case R.id.nav_profile:
+                Fragment profileFragment = ProfileFragment.newInstance();
+                loadFragment(profileFragment);
+                return true;
         }
+        return false;
     };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        OnDemandJourneyViewModel mViewModel = ViewModelProviders.of(this).get(OnDemandJourneyViewModel.class);
+        MainViewModel mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         mViewModel.init();
         setContentView(R.layout.main_activity);
 
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         //loading default fragment
         //TODO: If basic flow hasn't completed, then load Profile; else, load default

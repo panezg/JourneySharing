@@ -1,7 +1,9 @@
 package org.cs7cs3.team7.journeysharing;
 
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -20,10 +22,15 @@ import android.widget.Toast;
 
 public class ProfileFragment extends Fragment {
 
-    private ProfileViewModel viewModel;
-    private int genderItemIndexSelected = 0;
-    private EditText name_edit;
+    private static final String NAME = "names";
+    private static final String PHONE = "phone";
+    private static final String GENDER_POSITION = "SelectedPosition";
+    private static final String PROFILE = "profile shared preferences";
 
+    private MainViewModel mViewModel;
+    private SharedPreferences sharedPreferences;
+
+    private int genderItemIndexSelected = 0;
 
     // Create an anonymous implementation of OnClickListener
     private Button.OnClickListener mSaveOnClickListener = new View.OnClickListener() {
@@ -40,10 +47,6 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        viewModel = ViewModelProviders.of(this, new CustomViewModelFactory(this.getContext())).get(ProfileViewModel.class);
-        //itemSelector.setOnClickListener(item -> {
-        //    model.select(item);
-        //});
     }
 
     @Override
@@ -54,6 +57,7 @@ public class ProfileFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         final Button button = view.findViewById(R.id.save_button);
 
         // Keep the spinner selected listener works before press the "save" button.
@@ -72,35 +76,74 @@ public class ProfileFragment extends Fragment {
             }
         });
         button.setOnClickListener(mSaveOnClickListener);
-        name_edit = userInfoLayout.findViewById(R.id.names_text);
-
-        updateView();
+        //updateView();
     }
 
     private void save() {
         View userInfoLayout = getView().findViewById(R.id.user_info_include);
         Log.d("myTag", "This is my message from button");
         EditText namesEditText = userInfoLayout.findViewById(R.id.names_text);
+        mViewModel.getNames().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String msg) {
+                namesEditText.setText(msg);
+            }
+        });
         EditText phoneEditText = userInfoLayout.findViewById(R.id.phone_number_text);
+        mViewModel.getPhone().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(@Nullable String msg) {
+                phoneEditText.setText(msg);
+            }
+        });
         Spinner genderSpinner = userInfoLayout.findViewById(R.id.gender_spinner);
+        mViewModel.getGenderItemIndexSelected().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(@Nullable Integer msg) {
+                genderSpinner.setSelection(msg);
+            }
+        });
         Log.d("myTag", "Name Saved: " + namesEditText.getText().toString());
         Log.d("myTag", "Phone Saved: " + phoneEditText.getText().toString());
         Log.d("myTag", "Gender saved: " + genderSpinner.getSelectedItem());
-        viewModel.getNames().setValue(namesEditText.getText().toString());
-        viewModel.getPhone().setValue(phoneEditText.getText().toString());
-        viewModel.getGenderItemIndexSelected().setValue(genderItemIndexSelected);
-        Log.d("myTag", "Gender saved: " + genderSpinner.getSelectedItem());
-        viewModel.saveData();
+        mViewModel.setNames(namesEditText.getText().toString());
+        mViewModel.setPhone(phoneEditText.getText().toString());
+        mViewModel.setGenderItemIndexSelected(genderItemIndexSelected);
+        saveProfileToLocal();
         Toast.makeText(this.getActivity(), "Profile Saved!", Toast.LENGTH_SHORT).show();
+        Log.d("myTag", "Name Saved? " + sharedPreferences.getString(NAME, "").equals(mViewModel.getNames().getValue()));
+        Log.d("myTag", "Phone Saved? " + sharedPreferences.getString(PHONE, "").equals(mViewModel.getPhone().getValue()));
+        //Log.d("myTag", "Gender Position Saved? " + sharedPreferences.getInt(GENDER_POSITION, Integer.MAX_VALUE).equals(mViewModel.getGenderItemIndexSelected()));
+
     }
 
+    /*
     private void updateView() {
         View userInfoLayout = getView().findViewById(R.id.user_info_include);
         EditText namesEditText = userInfoLayout.findViewById(R.id.names_text);
-        namesEditText.setText(viewModel.getNames().getValue());
+        namesEditText.setText(mViewModel.getNames().getValue());
         EditText phoneEditText = userInfoLayout.findViewById(R.id.phone_number_text);
-        phoneEditText.setText(viewModel.getPhone().getValue());
+        phoneEditText.setText(mViewModel.getPhone().getValue());
         Spinner genderSpinner = userInfoLayout.findViewById(R.id.gender_spinner);
-        genderSpinner.setSelection(viewModel.getGenderItemIndexSelected().getValue());
+        genderSpinner.setSelection(mViewModel.getGenderItemIndexSelected().getValue());
+    }
+    */
+
+    /*
+    private void loadData() {
+        mViewModel.getNames().setValue(sharedPreferences.getString(NAME, ""));
+        mViewModel.getPhone().setValue(sharedPreferences.getString(PHONE, ""));
+        getGenderItemIndexSelected().setValue(sharedPreferences.getInt(GENDER_POSITION, 0));
+    }
+    */
+
+    public void saveProfileToLocal() {
+        //TODO: Exception shoudl be handled here
+        sharedPreferences = getActivity().getSharedPreferences(PROFILE, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(NAME, mViewModel.getNames().getValue());
+        editor.putString(PHONE, mViewModel.getPhone().getValue());
+        editor.putInt(GENDER_POSITION, mViewModel.getGenderItemIndexSelected().getValue());
+        editor.apply();
     }
 }

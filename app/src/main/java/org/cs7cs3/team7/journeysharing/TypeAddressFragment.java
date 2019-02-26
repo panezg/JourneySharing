@@ -19,7 +19,8 @@ import android.widget.EditText;
 import java.util.Objects;
 
 public class TypeAddressFragment extends Fragment {
-    private OnDemandJourneyViewModel mViewModel;
+
+    MainViewModel mViewModel;
     private final String TAG = "myTag";
 
     public static TypeAddressFragment newInstance() {
@@ -34,7 +35,7 @@ public class TypeAddressFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(OnDemandJourneyViewModel.class);
+        mViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(MainViewModel.class);
         final Button button = getView().findViewById(R.id.ok_button);
 
         button.setOnClickListener( (v) -> {
@@ -45,8 +46,8 @@ public class TypeAddressFragment extends Fragment {
             } else {
                 mViewModel.setFrom(address);
             }
-            Log.d(TAG, "From:" + mViewModel.getFrom().getValue());
-            Log.d(TAG, "To:" + mViewModel.getTo().getValue());
+            Log.d(TAG, "From:" + mViewModel.getFrom());
+            Log.d(TAG, "To:" + mViewModel.getTo());
 
             Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance();
 
