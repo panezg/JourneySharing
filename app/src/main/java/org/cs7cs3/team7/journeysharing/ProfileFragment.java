@@ -32,7 +32,7 @@ public class ProfileFragment extends Fragment {
     private EditText namesEditText;
     private EditText phoneEditText;
     private Spinner genderSpinner;
-    private Button button;
+    private Button saveProfileButton;
 
     static ProfileFragment newInstance() {
         return new ProfileFragment();
@@ -100,9 +100,9 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        // Init the 'Save' button.
-        button = getView().findViewById(R.id.save_button);
-        button.setOnClickListener( new View.OnClickListener() {
+        // Init the 'Save' saveProfileButton.
+        saveProfileButton = getView().findViewById(R.id.save_button);
+        saveProfileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 saveData();
@@ -124,12 +124,13 @@ public class ProfileFragment extends Fragment {
         mViewModel.setNames(names);
         mViewModel.setPhone(phone);
         mViewModel.setGenderItemIndexSelected(index);
+        mViewModel.saveUserProfile();
         saveProfileToLocal();
     }
 
     // Save the data currently at the ViewModel to the local file.
     public void saveProfileToLocal() {
-        Log.d("myTag", "This is my message from Save button");
+        Log.d("myTag", "This is my message from Save saveProfileButton");
 
         //TODO: Exception here should be handled.
         //Init the sharedPreferences.

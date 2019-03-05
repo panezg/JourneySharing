@@ -1,8 +1,22 @@
 package org.cs7cs3.team7.journeysharing;
 
+import android.util.Log;
+
+import com.google.gson.JsonObject;
+
+import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
+import org.cs7cs3.team7.journeysharing.httpservice.HttpService;
+
+import java.io.IOException;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class MainViewModel extends ViewModel {
     /*
@@ -97,5 +111,31 @@ public class MainViewModel extends ViewModel {
         phone.setValue("");
     }
 
+    public void saveUserProfile(){
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://www.baidu.com/")
+                .build();
+        HTTPService httpService = retrofit.create(HTTPService.class);
+        Call<ResponseBody> repos = httpService.test();
+        repos.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+//                JsonObject post = new JsonObject().get(response.body().toString()).getAsJsonObject();
+//                if (post.get("Level").getAsString().contains("Administrator")) {
+//
+//                }
+                try {
+                    Log.d("JINCHIServer", response.body().string());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            }
+        });
+
+    }
 
 }
