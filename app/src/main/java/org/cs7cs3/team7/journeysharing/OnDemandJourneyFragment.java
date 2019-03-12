@@ -100,7 +100,7 @@ public class OnDemandJourneyFragment extends Fragment {
 
         LinearLayout layout = getView().findViewById(R.id.linear_layout);
         //getView().findViewById(R.layout.on_demand_journey_fragment).findViewById();
-        searchButton = (Button) layout.getChildAt(4);
+        searchButton = (Button) layout.getChildAt(5);
         searchButton.setOnClickListener(view -> {
             Log.d(TAG, "buttong pressed");
             Fragment onDemandJourneyFragment = ViewMatchFragment.newInstance();

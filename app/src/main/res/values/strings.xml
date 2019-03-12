@@ -31,4 +31,8 @@
         <item>Walking</item>
         <item>Taxi</item>
     </string-array>
+    <string-array name="types_array">
+        <item>Commute</item>
+        <item>Real Time</item>
+    </string-array>
 </resources>

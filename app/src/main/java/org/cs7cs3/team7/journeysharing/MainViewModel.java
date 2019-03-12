@@ -113,7 +113,7 @@ public class MainViewModel extends ViewModel {
 
     public void saveUserProfile(){
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("https://www.baidu.com/")
+                .baseUrl("http://35.190.162.77:8080")
                 .build();
         HTTPService httpService = retrofit.create(HTTPService.class);
         Call<ResponseBody> repos = httpService.test();
@@ -124,6 +124,7 @@ public class MainViewModel extends ViewModel {
 //                if (post.get("Level").getAsString().contains("Administrator")) {
 //
 //                }
+
                 try {
                     Log.d("JINCHIServer", response.body().string());
                 } catch (IOException e) {
