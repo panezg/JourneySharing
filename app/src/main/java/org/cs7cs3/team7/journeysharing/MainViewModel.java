@@ -2,10 +2,7 @@ package org.cs7cs3.team7.journeysharing;
 
 import android.util.Log;
 
-import com.google.gson.JsonObject;
-
 import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
-import org.cs7cs3.team7.journeysharing.httpservice.HttpService;
 
 import java.io.IOException;
 
