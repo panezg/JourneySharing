@@ -7,8 +7,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 
 public interface HTTPService {
-    @GET("users/{user}/repos")
-    Call<ResponseBody> listRepos(@Path("user") String user);
+
     @GET("/")
     Call<ResponseBody> test();
 }
