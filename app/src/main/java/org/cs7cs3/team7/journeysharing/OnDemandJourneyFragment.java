@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.dyhdyh.widget.loadingbar.LoadingBar;
 
 public class OnDemandJourneyFragment extends Fragment {
     
@@ -26,6 +27,7 @@ public class OnDemandJourneyFragment extends Fragment {
     private Button fromButton;
     private Button toButton;
 
+    private View mParent;
     private Button searchButton;
 
     private String TAG = "myTag";
@@ -99,12 +101,14 @@ public class OnDemandJourneyFragment extends Fragment {
         });
 
         LinearLayout layout = getView().findViewById(R.id.linear_layout);
+        mParent=layout.findViewById(R.id.content);
         //getView().findViewById(R.layout.on_demand_journey_fragment).findViewById();
         searchButton = (Button) layout.getChildAt(5);
         searchButton.setOnClickListener(view -> {
             Log.d(TAG, "buttong pressed");
-            Fragment onDemandJourneyFragment = ViewMatchFragment.newInstance();
-            loadFragment(onDemandJourneyFragment);
+            LoadingBar.show(mParent);
+//            Fragment onDemandJourneyFragment = ViewMatchFragment.newInstance();
+//            loadFragment(onDemandJourneyFragment);
         });
 
        // View curView = getView().findViewById(R.layout.on_demand_journey_fragment);
