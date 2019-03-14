@@ -3,6 +3,20 @@
     package="org.cs7cs3.team7.journeysharing">
 
 
+    <uses-permission
+        android:name="android.permission.INTERNET"
+        android:required="true"/>
+
+    <!-- WIFI Direct, Ethernet, Multicast- and Bonjour-Beacon -->
+    <uses-permission
+        android:name="android.permission.ACCESS_WIFI_STATE"
+        android:required="true"/>
+    <uses-permission
+        android:name="android.permission.CHANGE_WIFI_STATE"
+        android:required="true"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
