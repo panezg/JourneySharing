@@ -3,17 +3,12 @@ package org.cs7cs3.team7.journeysharing;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,11 +18,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
-
-import org.cs7cs3.team7.wifidirect.Message;
-import org.cs7cs3.team7.wifidirect.NetworkManager;
-import org.cs7cs3.team7.wifidirect.Utility;
-
 
 public class ProfileFragment extends Fragment {
 
@@ -43,10 +33,6 @@ public class ProfileFragment extends Fragment {
     private EditText phoneEditText;
     private Spinner genderSpinner;
     private Button saveProfileButton;
-    private Button start;
-    private Button sendButton;
-    private EditText msg;
-    private NetworkManager netwrokManager;
 
     static ProfileFragment newInstance() {
         return new ProfileFragment();
@@ -122,39 +108,6 @@ public class ProfileFragment extends Fragment {
                 saveData();
             }
         });
-
-        msg = (EditText)getView().findViewById(R.id.msgTv);
-        start = getView().findViewById(R.id.start);
-        start.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("JINCHI","in onClick button handler");
-                netwrokManager.initiateNetworkActivity();
-            }
-        });
-
-        sendButton = getView().findViewById(R.id.sendButton);
-        sendButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("JINCHI", "in onClick sendButton handler");
-                Message message=new Message();
-                message.setMessageText(msg.getText().toString());
-                netwrokManager.sendMessage(message);
-            }
-        });
-        netwrokManager=new  NetworkManager(this.getActivity());
-
-        //local broadcast message receiver to listen to message sent from peers
-        BroadcastReceiver messageReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                Message message = Utility.fromJson(intent.getStringExtra("message"));
-                Utility.toast(message.getMessageText(),getContext());
-                Log.d("JINCHI", "Local broadcast received in general receiver: " + message);
-            }
-        };
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(messageReceiver, new IntentFilter("MESSAGE_RECEIVED"));
     }
 
     // Load data from the shared preferences file in local.
@@ -197,37 +150,5 @@ public class ProfileFragment extends Fragment {
 
         // Toast message for user.
         Toast.makeText(this.getActivity(), "Profile Saved!", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d("JINCHI", "in onResume() of MainActivity");
-        Log.d("JINCHI", "WiFi Direct Broadcast receiver registered with intent filter");
-        netwrokManager.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.d("JINCHI", "in onPause() of MainActivity");
-        netwrokManager.onPause();
-    }
-
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.d("JINCHI", "in onStop() of MainActivity");
-        netwrokManager.onStop();
-    }
-
-    @Override
-    public void onDestroy() {
-        //TODO: Need to review this
-        super.onDestroy();
-        Log.d("JINCHI", "in onDestroy() of MainActivity");
-        netwrokManager.onDestroy();
-        Log.d("JINCHI", "in onDestroy() of MainActivity");
     }
 }
