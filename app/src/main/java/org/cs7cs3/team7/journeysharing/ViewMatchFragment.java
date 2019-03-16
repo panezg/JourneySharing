@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProviders;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.UserHandle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
+
+import org.cs7cs3.team7.wifidirect.UserInfo;
 
 import java.util.ArrayList;
 
@@ -77,10 +80,11 @@ public class ViewMatchFragment extends Fragment {
     }
 
     private void initData() {
-        //TODO: Read the data from the mainViewModel.
         listData = new ArrayList<String>();
-        for (int i = 0; i < 30; i++) {
-            listData.add("这是第 " + i + " 条数据");
+        ArrayList<UserInfo> membersList = mViewModel.getMembersList().getValue();
+        for(UserInfo user : membersList) {
+            // TODO: What format should the members info be displayed into??
+            listData.add(user.toString());
         }
     }
 

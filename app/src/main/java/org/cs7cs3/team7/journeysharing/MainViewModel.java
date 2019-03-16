@@ -3,8 +3,10 @@ package org.cs7cs3.team7.journeysharing;
 import android.util.Log;
 
 import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
+import org.cs7cs3.team7.wifidirect.UserInfo;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -24,6 +26,24 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<String> from;
     private MutableLiveData<String> to;
     private MutableLiveData<Boolean> isDestination;
+    private MutableLiveData<UserInfo> sender;
+    private MutableLiveData<ArrayList<UserInfo>> membersList;
+
+    public MutableLiveData<UserInfo> getSender() {
+        return sender;
+    }
+
+    public void setSender(UserInfo sender) {
+        this.sender.setValue(sender);
+    }
+
+    public MutableLiveData<ArrayList<UserInfo>> getMembersList() {
+        return membersList;
+    }
+
+    public void setMembersList(ArrayList<UserInfo> membersList) {
+        this.membersList.setValue(membersList);
+    }
 
     //Getter and Setter of OnDemandJourneyFragment.
     public LiveData<String> getFrom() {
@@ -106,6 +126,11 @@ public class MainViewModel extends ViewModel {
         genderItemIndexSelected.setValue(0);
         phone = new MutableLiveData<String>();
         phone.setValue("");
+
+        sender = new MutableLiveData<>();
+        sender.setValue(new UserInfo(names.getValue(), phone.getValue(), to.getValue()));
+        membersList = new MutableLiveData<>();
+        membersList.setValue(new ArrayList<>());
     }
 
     public void saveUserProfile(){

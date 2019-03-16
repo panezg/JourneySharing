@@ -46,7 +46,7 @@ public class ProfileFragment extends Fragment {
     private Button start;
     private Button sendButton;
     private EditText msg;
-    private NetworkManager netwrokManager;
+    private NetworkManager networkManager;
 
     static ProfileFragment newInstance() {
         return new ProfileFragment();
@@ -129,7 +129,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.d("JINCHI","in onClick button handler");
-                netwrokManager.initiateNetworkActivity();
+                networkManager.initiateNetworkActivity();
             }
         });
 
@@ -138,12 +138,12 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.d("JINCHI", "in onClick sendButton handler");
-                Message message=new Message();
+                Message message = new Message();
                 message.setMessageText(msg.getText().toString());
-                netwrokManager.sendMessage(message);
+                networkManager.sendMessage(message);
             }
         });
-        netwrokManager=new  NetworkManager(this.getActivity());
+        networkManager = new NetworkManager(this.getActivity());
 
         //local broadcast message receiver to listen to message sent from peers
         BroadcastReceiver messageReceiver = new BroadcastReceiver() {
@@ -204,14 +204,14 @@ public class ProfileFragment extends Fragment {
         super.onResume();
         Log.d("JINCHI", "in onResume() of MainActivity");
         Log.d("JINCHI", "WiFi Direct Broadcast receiver registered with intent filter");
-        netwrokManager.onResume();
+        networkManager.onResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         Log.d("JINCHI", "in onPause() of MainActivity");
-        netwrokManager.onPause();
+        networkManager.onPause();
     }
 
 
@@ -219,7 +219,7 @@ public class ProfileFragment extends Fragment {
     public void onStop() {
         super.onStop();
         Log.d("JINCHI", "in onStop() of MainActivity");
-        netwrokManager.onStop();
+        networkManager.onStop();
     }
 
     @Override
@@ -227,7 +227,7 @@ public class ProfileFragment extends Fragment {
         //TODO: Need to review this
         super.onDestroy();
         Log.d("JINCHI", "in onDestroy() of MainActivity");
-        netwrokManager.onDestroy();
+        networkManager.onDestroy();
         Log.d("JINCHI", "in onDestroy() of MainActivity");
     }
 }
