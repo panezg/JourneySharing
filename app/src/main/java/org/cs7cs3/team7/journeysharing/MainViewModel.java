@@ -6,7 +6,8 @@ import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
 import org.cs7cs3.team7.wifidirect.UserInfo;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
+
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -27,7 +28,7 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<String> to;
     private MutableLiveData<Boolean> isDestination;
     private MutableLiveData<UserInfo> sender;
-    private MutableLiveData<ArrayList<UserInfo>> membersList;
+    private MutableLiveData<HashMap<String, UserInfo>> membersList;
 
     public MutableLiveData<UserInfo> getSender() {
         return sender;
@@ -37,11 +38,11 @@ public class MainViewModel extends ViewModel {
         this.sender.setValue(sender);
     }
 
-    public MutableLiveData<ArrayList<UserInfo>> getMembersList() {
+    public MutableLiveData<HashMap<String, UserInfo>> getMembersList() {
         return membersList;
     }
 
-    public void setMembersList(ArrayList<UserInfo> membersList) {
+    public void setMembersList(HashMap<String, UserInfo>membersList) {
         this.membersList.setValue(membersList);
     }
 
@@ -130,7 +131,7 @@ public class MainViewModel extends ViewModel {
         sender = new MutableLiveData<>();
         sender.setValue(new UserInfo(names.getValue(), phone.getValue(), to.getValue()));
         membersList = new MutableLiveData<>();
-        membersList.setValue(new ArrayList<>());
+        membersList.setValue(new HashMap<>());
     }
 
     public void saveUserProfile(){

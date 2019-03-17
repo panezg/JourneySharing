@@ -1,6 +1,6 @@
 package org.cs7cs3.team7.wifidirect;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Message {
     private String fromMAC;
@@ -10,7 +10,7 @@ public class Message {
 
     // User Info
     private UserInfo sender;
-    private ArrayList<UserInfo> list;
+    private HashMap<String, UserInfo> list;
 
     public UserInfo getSender() {
         return sender;
@@ -20,11 +20,11 @@ public class Message {
         this.sender = sender;
     }
 
-    public ArrayList<UserInfo> getList() {
+    public HashMap<String, UserInfo> getList() {
         return list;
     }
 
-    public void setList(ArrayList<UserInfo> list) {
+    public void setList(HashMap<String, UserInfo> list) {
         this.list = list;
     }
 
