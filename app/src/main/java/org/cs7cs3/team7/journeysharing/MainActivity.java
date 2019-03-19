@@ -1,7 +1,10 @@
 package org.cs7cs3.team7.journeysharing;
 
 import android.os.Bundle;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+
+import org.cs7cs3.team7.wifidirect.NetworkManagerFactory;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -44,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         //need some kind of global property
         Fragment profileFragment = ProfileFragment.newInstance();
         loadFragment(profileFragment);
+        NetworkManagerFactory.setSimulatorModeOn(true);
         //TODO: don't allow navigation
         //else
         //Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();

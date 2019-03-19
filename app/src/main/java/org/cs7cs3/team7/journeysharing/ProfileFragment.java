@@ -1,20 +1,11 @@
 package org.cs7cs3.team7.journeysharing;
 
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,9 +15,17 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import org.cs7cs3.team7.wifidirect.INetworkManager;
 import org.cs7cs3.team7.wifidirect.Message;
-import org.cs7cs3.team7.wifidirect.NetworkManager;
+import org.cs7cs3.team7.wifidirect.NetworkManagerFactory;
 import org.cs7cs3.team7.wifidirect.Utility;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 
 public class ProfileFragment extends Fragment {
@@ -46,7 +45,7 @@ public class ProfileFragment extends Fragment {
     private Button start;
     private Button sendButton;
     private EditText msg;
-    private NetworkManager networkManager;
+    private INetworkManager networkManager;
 
     static ProfileFragment newInstance() {
         return new ProfileFragment();
@@ -143,7 +142,7 @@ public class ProfileFragment extends Fragment {
                 networkManager.sendMessage(message);
             }
         });
-        networkManager = new NetworkManager(this.getActivity());
+        networkManager = NetworkManagerFactory.getNetworkManager(this.getActivity());
 
         //local broadcast message receiver to listen to message sent from peers
         BroadcastReceiver messageReceiver = new BroadcastReceiver() {
