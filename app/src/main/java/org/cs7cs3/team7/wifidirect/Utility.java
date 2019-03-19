@@ -19,15 +19,11 @@ public class Utility {
     }
 
     public static String toJson(Message message){
-        Gson gson = new GsonBuilder().create();
-        String messageJson=gson.toJson(message, Message.class);
-        return messageJson;
+        return new Gson().toJson(message);
     }
 
     public static Message fromJson(String messageText){
-        Gson gson = new GsonBuilder().create();
-        Message message=gson.fromJson(messageText, Message.class);
-        return message;
+        return new Gson().fromJson(messageText, Message.class);
     }
 
     public static String extractIP(String subnetAddress){

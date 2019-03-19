@@ -1,5 +1,7 @@
 package org.cs7cs3.team7.wifidirect;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class UserInfo {
     // User Info
     private String name;

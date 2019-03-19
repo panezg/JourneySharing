@@ -134,6 +134,7 @@ public class OnDemandJourneyFragment extends Fragment {
             try {
                 waitingForMatchResult.acquire();
                 Log.d("JINCHI", "current num of semaphore: " + waitingForMatchResult.toString());
+                Log.d("JINCHI", "when sending -- message.toString(): " + message.toString());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

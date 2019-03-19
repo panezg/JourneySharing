@@ -66,8 +66,8 @@ public class Message {
                 ", fromIP='" + fromIP + '\'' +
                 ", timeStamp='" + timeStamp + '\'' +
                 ", messageText='" + messageText + '\'' +
-                "sender='" + sender.toString() + '\'' +
-                "list='" + list.toString() + '\'' +
+                "sender='" + (sender != null ? sender.toString() : "") + '\'' +
+                "list='" + (list != null ? list.toString() : "") + '\''+
                 '}';
     }
 }

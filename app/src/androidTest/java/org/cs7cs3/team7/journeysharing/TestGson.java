@@ -6,8 +6,10 @@ import org.cs7cs3.team7.wifidirect.Message;
 import org.cs7cs3.team7.wifidirect.UserInfo;
 
 import java.util.HashMap;
+import org.junit.Test;
 
 public class TestGson {
+    @Test
     public static void main(String[] args) {
         Message msg = new Message();
 
@@ -22,7 +24,7 @@ public class TestGson {
         list.put("Paras", new UserInfo("Paras", "123", "Dublin"));
 
         msg.setSender(me);
-        msg.setList(list);
+        //msg.setList(list);
 
         String jsonString = new Gson().toJson(msg);
         System.out.println(jsonString);
