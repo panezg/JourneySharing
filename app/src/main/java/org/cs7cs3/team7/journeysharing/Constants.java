@@ -8,8 +8,8 @@ public class Constants {
 
     public static String myMACAddress;
 
-    public static int NETWORK_MANAGER_MONITOR_WAITING_PERIOD=15000;//millisecond
+    public static int NETWORK_MANAGER_MONITOR_WAITING_PERIOD=10000;//millisecond
 
-    public static int THRESHOLD_TO_START_ROUTING=7;
+    public static int THRESHOLD_TO_START_ROUTING=6;
 
 }

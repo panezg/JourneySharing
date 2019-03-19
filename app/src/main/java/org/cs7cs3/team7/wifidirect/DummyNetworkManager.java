@@ -2,7 +2,7 @@ package org.cs7cs3.team7.wifidirect;
 
 public class DummyNetworkManager implements INetworkManager {
     @Override
-    public void sendMessage(Message message) {
+    public void sendMessage(Message message, boolean sendingTripDetails) {
 
     }
 

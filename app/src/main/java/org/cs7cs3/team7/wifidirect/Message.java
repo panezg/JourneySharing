@@ -1,16 +1,17 @@
 package org.cs7cs3.team7.wifidirect;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class Message {
     private String fromMAC;
     private String fromIP;
     private String timeStamp;
     private String messageText;
-
+    private String intent;
     // User Info
     private UserInfo sender;
-    private HashMap<String, UserInfo> list;
+    private Map<String, UserInfo> list;
 
     public UserInfo getSender() {
         return sender;
@@ -20,11 +21,11 @@ public class Message {
         this.sender = sender;
     }
 
-    public HashMap<String, UserInfo> getList() {
+    public Map<String, UserInfo> getList() {
         return list;
     }
 
-    public void setList(HashMap<String, UserInfo> list) {
+    public void setList(Map<String, UserInfo> list) {
         this.list = list;
     }
 
@@ -60,14 +61,24 @@ public class Message {
         this.messageText = messageText;
     }
 
+    public String getIntent() {
+        return intent;
+    }
+
+    public void setIntent(String intent) {
+        this.intent = intent;
+    }
+
+    @Override
     public String toString() {
         return "Message{" +
                 "fromMAC='" + fromMAC + '\'' +
                 ", fromIP='" + fromIP + '\'' +
                 ", timeStamp='" + timeStamp + '\'' +
                 ", messageText='" + messageText + '\'' +
-                "sender='" + (sender != null ? sender.toString() : "") + '\'' +
-                "list='" + (list != null ? list.toString() : "") + '\''+
+                ", intent='" + intent + '\'' +
+                ", sender=" + sender +
+                ", list=" + list +
                 '}';
     }
 }

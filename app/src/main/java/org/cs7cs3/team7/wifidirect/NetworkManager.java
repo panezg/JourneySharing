@@ -384,13 +384,13 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
                         Message message = Utility.fromJson(messageJson);
                         macToIpMapping.put(message.getFromMAC(), message.getFromIP());
                         //send it to all the peers
-                        sendMessage(message);
+                        sendMessage(message,false);
 
                         //record the message
                         routing.recordPeerMessage(message);
                     }
                 };
-                LocalBroadcastManager.getInstance(context).registerReceiver(messageReceiver, new IntentFilter("MESSAGE_RECEIVED"));
+                LocalBroadcastManager.getInstance(context).registerReceiver(messageReceiver, new IntentFilter("MESSAGE_RECEIVED_FOR_GROUP_OWNER"));
             }
         }
 
@@ -532,15 +532,21 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
         return false;
     }
 
-    public void sendMessage(Message message){
+    public void sendMessage(Message message, boolean sendingTripDetails){
         sendMessage=message;
+        Log.d("JINCHI", "In send message: message= "+message+", sendTripDetails= "+sendingTripDetails);
         if(connectedToGroup) {
             if(mIGroupOwner){
-                Log.d("JINCHI", "Broadcasting the message to all the peers as I am the group owner");
-                Log.e("JINCHI", Thread.currentThread().getName()+" "+ Thread.currentThread().getId());
-                for (Map.Entry<String, String> entry : macToIpMapping.entrySet()) {
-                    Log.d("JINCHI", "Broadcasting to "+entry.getValue());
-                    new Thread(new SendMessageTask(entry.getValue(),message)).start();
+                if(sendingTripDetails) {
+                    Log.d("JINCHI", "If you are group owner then don't send trip details to anyone. Just record them.");
+                    routing.recordPeerMessage(message);
+                }
+                else {
+                    Log.d("JINCHI", "Broadcasting the message to all the peers as I am the group owner");
+                    for (Map.Entry<String, String> entry : macToIpMapping.entrySet()) {
+                        Log.d("JINCHI", "Broadcasting to " + entry.getValue());
+                        new Thread(new SendMessageTask(entry.getValue(), message)).start();
+                    }
                 }
             }
             else{
@@ -559,13 +565,14 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
         if(mIGroupOwner){
             //if you are group owner, check if routing is done and if group is ready then broadcast the groups
             if(routing.isGroupsReady()){
-                //Message broadcastMessage=new Message();
-                //broadcastMessage.setList(null);
-                //sendMessage(broadcastMessage);
+                Log.d("JINCHI", "Groups are ready, so broadcast them to peers");
+                Message broadcastMessage=new Message();
+                broadcastMessage.setList(routing.getUserInfoList());
+                sendMessage(broadcastMessage,false);
             }
         }else{
             //broadcast your search regularly
-            //sendMessage(sendMessage);
+            sendMessage(sendMessage,true);
         }
     }
 
@@ -593,7 +600,7 @@ class NetworkManagerMonitor implements Runnable {
                 } else {
                     Log.d("MONITOR", "You are not connected to group");
                     notInGroupTime++;
-                    if(notInGroupTime>2){
+                    if(notInGroupTime>1){
                         Log.d("MONITOR", "You are not in a group for long time.");
                         Log.d("MONITOR", "Either there is no one else to connect to or some problem has occurred. Netwrok reset is required (TODO:)");
                         //it seems in some cases even if a device can see the other device and can form the group with it, that other device cannot see the grouped formed.

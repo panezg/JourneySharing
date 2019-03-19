@@ -37,11 +37,13 @@ public class Routing {
             Log.d("ROUTING", "Adding dummy data to simulate people around");
             letsFakeSomeData();
         }
+        Log.d("ROUTING", "Recording peer trip info");
         userInfoList.put(message.getSender()==null? "dummyName":message.getSender().getName(),message.getSender());
         if (userInfoList.size()> Constants.THRESHOLD_TO_START_ROUTING){
             Log.d("ROUTING", "Enough people to run routing logic. Calling find Matches");
             findMatches();
         }
+        Log.d("ROUTING", "No. Peers' request recorded "+userInfoList.size());
     }
 
     private void findMatches(){
@@ -51,6 +53,7 @@ public class Routing {
             UserInfo userInfo=userInfoList.get(key);
             userInfo.setGroupId( i++%2==0? 1: 2);
         }
+        Log.d("ROUTING", "Peple matching is finished and trips are ready!");
         groupsReady=true;
     }
 

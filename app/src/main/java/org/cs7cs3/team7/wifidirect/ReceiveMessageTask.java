@@ -64,20 +64,21 @@ public class ReceiveMessageTask implements Runnable {
 
         Log.d("DATA","Receiving Message peers starts");
     }
-    private void notifyReceiver(String messageJson){
+    private void notifyReceiver(String messageJson) {
         //locally broadcast the received message to local listeners
         Log.d("DATA", "broadcast the message");
-
-        //this local broadcast is for normal peers to receive message
-        Intent intent=new Intent("MESSAGE_RECEIVED");
-        intent.putExtra("message",messageJson);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-
-        //send local broadcast is for the group owner to broadcast it to all the other peers
-        Intent intentOwner=new Intent("MESSAGE_RECEIVED_FOR_GROUP_OWNER");
-        intentOwner.putExtra("message",messageJson);
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intentOwner);
-
+        if (messageJson.contains("SEND_TRIP_REQUEST")){
+            //send local broadcast is for the group owner to broadcast it to all the other peers
+            Intent intentOwner = new Intent("MESSAGE_RECEIVED_FOR_GROUP_OWNER");
+            intentOwner.putExtra("message", messageJson);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intentOwner);
+        }else
+        {
+            //this local broadcast is for normal peers to receive message
+            Intent intent = new Intent("MESSAGE_RECEIVED");
+            intent.putExtra("message", messageJson);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        }
     }
 
 }

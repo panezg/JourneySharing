@@ -7,6 +7,7 @@ import org.cs7cs3.team7.wifidirect.UserInfo;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 
 import androidx.lifecycle.LiveData;
@@ -28,7 +29,7 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<String> to;
     private MutableLiveData<Boolean> isDestination;
     private MutableLiveData<UserInfo> sender;
-    private MutableLiveData<HashMap<String, UserInfo>> membersList;
+    private MutableLiveData<Map<String, UserInfo>> membersList;
 
     public MutableLiveData<UserInfo> getSender() {
         return sender;
@@ -38,11 +39,11 @@ public class MainViewModel extends ViewModel {
         this.sender.setValue(sender);
     }
 
-    public MutableLiveData<HashMap<String, UserInfo>> getMembersList() {
+    public MutableLiveData<Map<String, UserInfo>> getMembersList() {
         return membersList;
     }
 
-    public void setMembersList(HashMap<String, UserInfo>membersList) {
+    public void setMembersList(Map<String, UserInfo>membersList) {
         this.membersList.setValue(membersList);
     }
 

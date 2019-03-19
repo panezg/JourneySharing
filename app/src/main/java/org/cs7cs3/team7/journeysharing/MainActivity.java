@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         //need some kind of global property
         Fragment profileFragment = ProfileFragment.newInstance();
         loadFragment(profileFragment);
-        NetworkManagerFactory.setSimulatorModeOn(true);
+        //NetworkManagerFactory.setSimulatorModeOn(true);
         //TODO: don't allow navigation
         //else
         //Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();

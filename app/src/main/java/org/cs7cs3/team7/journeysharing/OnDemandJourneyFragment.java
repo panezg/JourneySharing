@@ -19,6 +19,7 @@ import com.dyhdyh.widget.loadingbar.LoadingBar;
 import org.cs7cs3.team7.wifidirect.INetworkManager;
 import org.cs7cs3.team7.wifidirect.Message;
 import org.cs7cs3.team7.wifidirect.NetworkManagerFactory;
+import org.cs7cs3.team7.wifidirect.UserInfo;
 import org.cs7cs3.team7.wifidirect.Utility;
 
 import java.util.concurrent.Semaphore;
@@ -126,7 +127,10 @@ public class OnDemandJourneyFragment extends Fragment {
             Message message = new Message();
             // TODO: Need to test the format of UserInfo got via getSender().getValue()
             // Sent the user's info to the server, including @param name, @param phoneNum and @param destination
+            Log.d("JINCHI", "Viewmodel: ");
+            mViewModel.setSender(new UserInfo(mViewModel.getNames().getValue(),mViewModel.getPhone().getValue(), mViewModel.getTo().getValue()));
             message.setSender(mViewModel.getSender().getValue());
+            message.setIntent("SEND_TRIP_REQUEST");
             try {
                 waitingForMatchResult.acquire();
                 Log.d("JINCHI", "current num of semaphore: " + waitingForMatchResult.toString());
@@ -134,7 +138,7 @@ public class OnDemandJourneyFragment extends Fragment {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            networkManager.sendMessage(message);
+            networkManager.sendMessage(message,true);
             Toast.makeText(this.getActivity(), "Request Sent! Waiting for matching...", Toast.LENGTH_SHORT).show();
 
             // Register the messageReceiver
@@ -147,7 +151,7 @@ public class OnDemandJourneyFragment extends Fragment {
         });
 
         // Faking a Semaphore to testing the 'waitingForMatch->skip to ViewMatchModel Fragment' logic.
-        new Thread(new Runnable() {
+        /*new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
@@ -157,7 +161,7 @@ public class OnDemandJourneyFragment extends Fragment {
                 }
                 waitingForMatchResult.release();
             }
-        }).start();
+        }).start();*/
     }
 
     @Override
@@ -206,5 +210,37 @@ public class OnDemandJourneyFragment extends Fragment {
             }
         });
         td.start();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("JINCHI", "in onResume() of MainActivity");
+        Log.d("JINCHI", "WiFi Direct Broadcast receiver registered with intent filter");
+        networkManager.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d("JINCHI", "in onPause() of MainActivity");
+        networkManager.onPause();
+    }
+
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d("JINCHI", "in onStop() of MainActivity");
+        networkManager.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        //TODO: Need to review this
+        super.onDestroy();
+        Log.d("JINCHI", "in onDestroy() of MainActivity");
+        networkManager.onDestroy();
+        Log.d("JINCHI", "in onDestroy() of MainActivity");
     }
 }

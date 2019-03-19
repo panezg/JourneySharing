@@ -50,11 +50,7 @@ public class UserInfo {
 
     @Override
     public String toString() {
-        return "UserInfo{" +
-                "name='" + name + '\'' +
-                ", phoneNum='" + phoneNum + '\'' +
-                ", destination='" + destination + '\'' +
-                '}';
+        return "name= " + name + "\nphoneNum= " + phoneNum + "\ndestination= " + destination;
     }
 
 }

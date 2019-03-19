@@ -124,28 +124,28 @@ public class ProfileFragment extends Fragment {
 
         msg = (EditText)getView().findViewById(R.id.msgTv);
         start = getView().findViewById(R.id.start);
-        start.setOnClickListener(new View.OnClickListener() {
+        /*start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("JINCHI","in onClick button handler");
                 networkManager.initiateNetworkActivity();
             }
-        });
+        });*/
 
         sendButton = getView().findViewById(R.id.sendButton);
-        sendButton.setOnClickListener(new View.OnClickListener() {
+        /*sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d("JINCHI", "in onClick sendButton handler");
                 Message message = new Message();
                 message.setMessageText(msg.getText().toString());
-                networkManager.sendMessage(message);
+                networkManager.sendMessage(message,false);
             }
         });
-        networkManager = NetworkManagerFactory.getNetworkManager(this.getActivity());
+        networkManager = NetworkManagerFactory.getNetworkManager(this.getActivity());*/
 
         //local broadcast message receiver to listen to message sent from peers
-        BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+        /*BroadcastReceiver messageReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 Message message = Utility.fromJson(intent.getStringExtra("message"));
@@ -153,7 +153,7 @@ public class ProfileFragment extends Fragment {
                 Log.d("JINCHI", "Local broadcast received in general receiver1: " + message);
             }
         };
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(messageReceiver, new IntentFilter("MESSAGE_RECEIVED"));
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(messageReceiver, new IntentFilter("MESSAGE_RECEIVED"));*/
     }
 
     // Load data from the shared preferences file in local.
@@ -198,7 +198,7 @@ public class ProfileFragment extends Fragment {
         Toast.makeText(this.getActivity(), "Profile Saved!", Toast.LENGTH_SHORT).show();
     }
 
-    @Override
+    /*@Override
     public void onResume() {
         super.onResume();
         Log.d("JINCHI", "in onResume() of MainActivity");
@@ -228,5 +228,5 @@ public class ProfileFragment extends Fragment {
         Log.d("JINCHI", "in onDestroy() of MainActivity");
         networkManager.onDestroy();
         Log.d("JINCHI", "in onDestroy() of MainActivity");
-    }
+    }*/
 }

@@ -18,6 +18,7 @@ import org.cs7cs3.team7.wifidirect.UserInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class ViewMatchFragment extends Fragment {
 
@@ -74,7 +75,7 @@ public class ViewMatchFragment extends Fragment {
 
     private void initData() {
         listData = new ArrayList<String>();
-        HashMap<String, UserInfo> membersList = mViewModel.getMembersList().getValue();
+        Map<String, UserInfo> membersList = mViewModel.getMembersList().getValue();
         for(UserInfo user : membersList.values()) {
             // TODO: What format should the members info be displayed into??
             listData.add(user.toString());
@@ -87,8 +88,8 @@ public class ViewMatchFragment extends Fragment {
             public View getView(int position, View convertView, ViewGroup parent) {
                 TextView textView = (TextView) super.getView(position, convertView, parent);
                 //TODO: Could set the color and the text format here.
-                textView.setTextColor(Color.BLUE);
-                textView.setTextSize(36);
+                textView.setTextColor(Color.GREEN);
+                textView.setTextSize(25);
                 return textView;
             }
         });
