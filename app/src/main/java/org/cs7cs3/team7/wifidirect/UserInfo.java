@@ -6,7 +6,7 @@ public class UserInfo {
     private String phoneNum;
     // TODO: Need to wait @JInchi finished the new Fragment, and then just read the @param destination info from the mainViewModel.
     private final String destination = "fakeDestination";
-
+    private int groupId;
     public UserInfo(String name, String phone, String des) {
         this.name = name;
         phoneNum = phone;
@@ -36,6 +36,14 @@ public class UserInfo {
     public void setDestination(String destination) {
         // TODO
         //this.destination = destination;
+    }
+
+    public int getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(int groupId) {
+        this.groupId = groupId;
     }
 
     @Override

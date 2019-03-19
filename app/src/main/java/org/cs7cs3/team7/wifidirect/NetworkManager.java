@@ -39,11 +39,12 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
     private boolean mIGroupOwner=false;
     private String groupOwnerAddress;
     public String deviceName;
-
+    private Routing routing;
     private Map<String,String> macToIpMapping=new HashMap<>();
     private Context context;
     private NetworkManagerMonitor networkManagerMonitor;
     private Thread networkManagerMonitorThread;
+    private Message sendMessage;
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
         this.isWifiP2pEnabled = isWifiP2pEnabled;
     }
@@ -182,13 +183,21 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
     }
 
     public void initiateNetworkActivity(){
+        //reset network variables
+        connectedToGroup=false;
+        mIGroupOwner=false;
+        routing=new Routing();
+
         findPeers();
 
-        //This thread is to monitor network conditions in timely manner and take proper actions(eg. reset network, log group owner)
-        networkManagerMonitor=new NetworkManagerMonitor(this);
-        networkManagerMonitorThread=new Thread(networkManagerMonitor);
-        Log.d("JINCHI", "starting network manager monitor thread");
-        networkManagerMonitorThread.start();
+        if(networkManagerMonitorThread==null || networkManagerMonitorThread.isAlive()==false) {
+            //This thread is to monitor network conditions in timely manner and take proper actions(eg. reset network, log group owner)
+            networkManagerMonitor=new NetworkManagerMonitor(this);
+
+            networkManagerMonitorThread = new Thread(networkManagerMonitor);
+            Log.d("JINCHI", "starting network manager monitor thread");
+            networkManagerMonitorThread.start();
+        }
     }
 
     //TODO: Why Fire Tablet has different logged messages than Xiomi?
@@ -376,6 +385,9 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
                         macToIpMapping.put(message.getFromMAC(), message.getFromIP());
                         //send it to all the peers
                         sendMessage(message);
+
+                        //record the message
+                        routing.recordPeerMessage(message);
                     }
                 };
                 LocalBroadcastManager.getInstance(context).registerReceiver(messageReceiver, new IntentFilter("MESSAGE_RECEIVED"));
@@ -505,7 +517,7 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
     void resetNetwork(){
         //currently only calling findPeers
         //TODO: in future other parameters' reset may be required
-        findPeers();
+        initiateNetworkActivity();
     }
 
 
@@ -521,6 +533,7 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
     }
 
     public void sendMessage(Message message){
+        sendMessage=message;
         if(connectedToGroup) {
             if(mIGroupOwner){
                 Log.d("JINCHI", "Broadcasting the message to all the peers as I am the group owner");
@@ -531,92 +544,30 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
                 }
             }
             else{
-                Log.d("JINCHI", "Sending the message to the group owner. The owner shall broadcast it to other peers");
+                Log.d("JINCHI", "Sending the message to the group owner.");
                 new Thread(new SendMessageTask(groupOwnerAddress,message)).start();
                 //new SendMessageTask().execute(groupOwnerAddress, messageText);
             }
         }
         else{
-            Log.d("JINCHI", "Can't send the message over network as you are not in a group");
+            Log.d("JINCHI", "You are not in the network. reset netwrok initiated");
+            resetNetwork();
         }
     }
 
-    /*private void startRegistration() {
-        //  Create a string map containing information about your service.
-        Map record = new HashMap();
-        record.put("listenport", String.valueOf(8989));
-        record.put("buddyname", "John Doe" + (int) (Math.random() * 1000));
-        record.put("available", "visible");
-
-        // Service information.  Pass it an instance name, service type
-        // _protocol._transportlayer , and the map containing
-        // information other devices will want once they connect to this one.
-        WifiP2pDnsSdServiceInfo serviceInfo =
-                WifiP2pDnsSdServiceInfo.newInstance("_test", "_presence._tcp", record);
-
-        // Add the local service, sending the service info, network channel,
-        // and listener that will be used to indicate success or failure of
-        // the request.
-        wifiP2pManager.addLocalService(wifiP2pChannel, serviceInfo, new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                Log.d("JINCHI", "Invocation of WiFiP2pManager.addLocalService() successful ");
+     void doRepeatedTasks(){
+        if(mIGroupOwner){
+            //if you are group owner, check if routing is done and if group is ready then broadcast the groups
+            if(routing.isGroupsReady()){
+                //Message broadcastMessage=new Message();
+                //broadcastMessage.setList(null);
+                //sendMessage(broadcastMessage);
             }
-
-            @Override
-            public void onFailure(int arg0) {
-                Log.d("JINCHI", "Failed to invoke WiFiP2pManager.addLocalService() ");
-            }
-        });
+        }else{
+            //broadcast your search regularly
+            //sendMessage(sendMessage);
+        }
     }
-
-    final HashMap<String, Object> buddies = new HashMap<String, Object>();
-
-        private void discoverService() {
-
-
-            WifiP2pManager.DnsSdTxtRecordListener txtListener = new WifiP2pManager.DnsSdTxtRecordListener() {
-                @Override
-                *//* Callback includes:
-                 * fullDomain: full domain name: e.g "printer._ipp._tcp.local."
-                 * record: TXT record dta as a map of key/value pairs.
-                 * device: The device running the advertised service.
-                 *//*
-
-                public void onDnsSdTxtRecordAvailable(
-                        String fullDomain, Map record, WifiP2pDevice device) {
-                    Log.d("JINCHI", "DnsSdTxtRecord available -" + record.toString());
-                    Log.d("JINCHI",device.deviceAddress+" : "+record.get("buddyname"));
-                    buddies.put(device.deviceAddress, record.get("buddyname"));
-                }
-            };
-
-            WifiP2pManager.DnsSdServiceResponseListener servListener = new WifiP2pManager.DnsSdServiceResponseListener() {
-                @Override
-                public void onDnsSdServiceAvailable(String instanceName, String registrationType,
-                                                    WifiP2pDevice resourceType) {
-
-                    // Update the device name with the human-friendly version from
-                    // the DnsTxtRecord, assuming one arrived.
-                    Object o = buddies
-                            .containsKey(resourceType.deviceAddress) ? buddies
-                            .get(resourceType.deviceAddress) : resourceType.deviceName;
-                    resourceType.deviceName=(String) o;
-                    // Add to the custom adapter defined specifically for showing
-                    // wifi devices.
-                    Log.d("JINCHI", "3 params " + instanceName);
-                    Log.d("JINCHI", "3 params " + registrationType);
-                    Log.d("JINCHI", "3 params " + resourceType);
-
-                }
-            };
-
-            wifiP2pManager.setDnsSdResponseListeners(wifiP2pChannel, servListener, txtListener);
-
-
-        }*/
-
-
 
 }
 
@@ -638,6 +589,7 @@ class NetworkManagerMonitor implements Runnable {
                     Log.d("MONITOR", "You are Connected to group");
                     notInGroupTime=0;
                     netwrokManager.wifiP2pManager.requestGroupInfo(netwrokManager.wifiP2pChannel, netwrokManager);
+                    netwrokManager.doRepeatedTasks();
                 } else {
                     Log.d("MONITOR", "You are not connected to group");
                     notInGroupTime++;

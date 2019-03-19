@@ -151,7 +151,7 @@ public class ProfileFragment extends Fragment {
             public void onReceive(Context context, Intent intent) {
                 Message message = Utility.fromJson(intent.getStringExtra("message"));
                 Utility.toast(message.getMessageText(),getContext());
-                Log.d("JINCHI", "Local broadcast received in general receiver: " + message);
+                Log.d("JINCHI", "Local broadcast received in general receiver1: " + message);
             }
         };
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(messageReceiver, new IntentFilter("MESSAGE_RECEIVED"));
