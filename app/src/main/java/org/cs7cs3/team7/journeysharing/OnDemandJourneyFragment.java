@@ -1,20 +1,10 @@
 package org.cs7cs3.team7.journeysharing;
 
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,14 +16,20 @@ import android.widget.Toast;
 
 import com.dyhdyh.widget.loadingbar.LoadingBar;
 
+import org.cs7cs3.team7.wifidirect.INetworkManager;
 import org.cs7cs3.team7.wifidirect.Message;
-import org.cs7cs3.team7.wifidirect.NetworkManager;
+import org.cs7cs3.team7.wifidirect.NetworkManagerFactory;
 import org.cs7cs3.team7.wifidirect.Utility;
 
-import java.util.ArrayList;
 import java.util.concurrent.Semaphore;
 
-import javax.security.auth.callback.Callback;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class OnDemandJourneyFragment extends Fragment {
     
@@ -42,7 +38,7 @@ public class OnDemandJourneyFragment extends Fragment {
     private TextView toAddress;
     private Button fromButton;
     private Button toButton;
-    private NetworkManager networkManager;
+    private INetworkManager networkManager;
 
     private View mParent;
     private Button searchButton;
@@ -122,7 +118,7 @@ public class OnDemandJourneyFragment extends Fragment {
         mParent = layout.findViewById(R.id.content);
         //getView().findViewById(R.layout.on_demand_journey_fragment).findViewById();
 
-        networkManager = new NetworkManager(this.getActivity());
+        networkManager = NetworkManagerFactory.getNetworkManager(this.getActivity());
         searchButton = (Button) layout.getChildAt(5);
         searchButton.setOnClickListener(view -> {
             Log.d("JINCHI", "in onClick sendButton handler");

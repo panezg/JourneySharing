@@ -26,7 +26,7 @@ import java.util.Map;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pManager.ConnectionInfoListener, WifiP2pManager.GroupInfoListener {
+public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pManager.ConnectionInfoListener, WifiP2pManager.GroupInfoListener, INetworkManager {
     WifiManager wifiManager;
     WifiP2pManager wifiP2pManager;
     WifiP2pManager.Channel wifiP2pChannel;
