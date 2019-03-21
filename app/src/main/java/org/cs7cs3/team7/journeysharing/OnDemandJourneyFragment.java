@@ -15,9 +15,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -57,7 +61,7 @@ public class OnDemandJourneyFragment extends Fragment {
     private TextView toAddress;
     private Button fromButton;
     private Button toButton;
-
+    private Spinner spinner;
     private INetworkManager networkManager;
 
 
@@ -69,7 +73,6 @@ public class OnDemandJourneyFragment extends Fragment {
     private View mParent;
     private Button searchButton;
     private final Semaphore waitingForMatchResult = new Semaphore(1);
-
     private String TAG = "myTag";
 
     static OnDemandJourneyFragment newInstance() {
@@ -98,17 +101,42 @@ public class OnDemandJourneyFragment extends Fragment {
         //TODO: Exception here should be handled.
         // Inti the ViewModel.
         mViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
-
+        LinearLayout layout = getView().findViewById(R.id.linear_layout);
         // Inti the 'fromAddress' TextView and automatically update the View content.
+        spinner=layout.findViewById(R.id.spinner);
+        spinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener(){
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String content=parent.getSelectedItem().toString();
+//                Toast.makeText(getContext(),content,Toast.LENGTH_SHORT).show();
+                if(content.equals("Real Time")){
+                    fromButton.setEnabled(false);
+                    Toast.makeText(getContext(),content,Toast.LENGTH_SHORT).show();
+                }else{
+                    fromButton.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                Toast.makeText(getContext(),"asd",Toast.LENGTH_SHORT).show();
+            }
+        });
         fromAddress = addressLayout.findViewById(R.id.from_text);
         mViewModel.getFrom().observe(this, new Observer<String>() {
             @Override
             public void onChanged(@Nullable String msg) {
                 fromAddress.setText(msg);
             }
+
         });
 
-        // Inti the 'toAddress' TextView and automatically update the View content.
+
+
+
+
+            // Inti the 'toAddress' TextView and automatically update the View content.
         toAddress = addressLayout.findViewById((R.id.to_text));
         ViewModelProviders.of(getActivity()).get(MainViewModel.class).getTo().observe(this, new Observer<String>() {
             @Override
@@ -195,7 +223,6 @@ public class OnDemandJourneyFragment extends Fragment {
             }
         });
 
-        LinearLayout layout = getView().findViewById(R.id.linear_layout);
         mParent = layout.findViewById(R.id.content);
         //getView().findViewById(R.layout.on_demand_journey_fragment).findViewById();
 
@@ -323,4 +350,6 @@ public class OnDemandJourneyFragment extends Fragment {
         networkManager.onDestroy();
         Log.d("JINCHI", "in onDestroy() of MainActivity");
     }
+
+
 }
