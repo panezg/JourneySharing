@@ -12,4 +12,6 @@ public class Constants {
 
     public static int THRESHOLD_TO_START_ROUTING=6;
 
+    public static String HOST="http://35.196.131.139:8080/JSBackend-1.0/";
+
 }

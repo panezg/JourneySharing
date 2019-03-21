@@ -15,8 +15,11 @@ public interface HTTPService {
     @GET("/")
     Call<ResponseBody> test();
 
-    @POST("/user/add")
-    Call<User> save(@Body User user);
+    @POST("user/add")
+    Call<String> save(@Body User user);
+
+    @GET("controller/hello")
+    Call<String> hello();
 
 
 
