@@ -42,7 +42,7 @@
 
     <TableRow
         android:layout_width="match_parent"
-        android:layout_height="100dp" />
+        android:layout_height="1dp" />
 
     <Button
         android:id="@+id/search_button"
