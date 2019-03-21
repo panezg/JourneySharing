@@ -130,11 +130,7 @@ public class OnDemandJourneyFragment extends Fragment {
 
         });
 
-
-
-
-
-            // Inti the 'toAddress' TextView and automatically update the View content.
+        // Inti the 'toAddress' TextView and automatically update the View content.
         toAddress = addressLayout.findViewById((R.id.to_text));
         ViewModelProviders.of(getActivity()).get(MainViewModel.class).getTo().observe(this, new Observer<String>() {
             @Override
@@ -241,7 +237,6 @@ public class OnDemandJourneyFragment extends Fragment {
             }
         });
 
-        LinearLayout layout = getView().findViewById(R.id.linear_layout);
         mParent = layout.findViewById(R.id.content);
         //getView().findViewById(R.layout.on_demand_journey_fragment).findViewById();
 

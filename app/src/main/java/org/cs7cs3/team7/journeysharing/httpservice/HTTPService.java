@@ -1,6 +1,5 @@
 package org.cs7cs3.team7.journeysharing.httpservice;
 
-import org.cs7cs3.team7.journeysharing.Models.User;
 import org.cs7cs3.team7.journeysharing.Models.UserInfo;
 
 import okhttp3.ResponseBody;
