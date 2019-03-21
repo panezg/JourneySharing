@@ -2,11 +2,10 @@ package org.cs7cs3.team7.journeysharing;
 
 import android.util.Log;
 
+import org.cs7cs3.team7.journeysharing.Models.UserInfo;
 import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
-import org.cs7cs3.team7.wifidirect.UserInfo;
 
 import java.io.IOException;
-import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,12 +28,17 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<String> from;
     private MutableLiveData<String> to;
     private MutableLiveData<Boolean> isDestination;
+
     private MutableLiveData<UserInfo> sender;
-    private MutableLiveData<Map<String, UserInfo>> membersList;
-//    private MutableLiveData<HashMap<String, UserInfo>> membersList;
     private MutableLiveData<String> Time;
     private MutableLiveData<String> Date;
+    private MutableLiveData<Map<String, UserInfo>> membersList;
 
+    // Preferences
+    private MutableLiveData<String> genderPreference;
+    private MutableLiveData<Integer> preGenderItemIndexSelected;
+    private MutableLiveData<Integer> preMethodItemIndexSelected;
+    private MutableLiveData<String> methodPreference;
 
     public MutableLiveData<UserInfo> getSender() {
         return sender;
@@ -93,6 +97,43 @@ public class MainViewModel extends ViewModel {
         Date.setValue(date);
     }
 
+    public MutableLiveData<String> getGenderPreference() {
+        return genderPreference;
+    }
+
+    public void setGenderPreference(String genderPreference) {
+        this.genderPreference.setValue(genderPreference);
+    }
+
+    public MutableLiveData<String> getMethodPreference() {
+        return methodPreference;
+    }
+
+    public void setMethodPreference(String methodPreference) {
+        this.methodPreference.setValue(methodPreference);
+    }
+
+    public MutableLiveData<Integer> getPreGenderItemIndexSelected() {
+        return preGenderItemIndexSelected;
+    }
+
+    public void setPreGenderItemIndexSelected(int preGenderItemIndexSelected) {
+        this.genderItemIndexSelected.setValue(preGenderItemIndexSelected);
+    }
+
+    public MutableLiveData<Integer> getPreMethodItemIndexSelected() {
+        return preMethodItemIndexSelected;
+    }
+
+    public void setPreMethodItemIndexSelected(Integer preMethodItemIndexSelected) {
+        this.preMethodItemIndexSelected.setValue(preMethodItemIndexSelected);
+    }
+
+    /*
+    ------------------------------------ ViewModel For ScheduledJourney Fragment-----------------------------------
+     */
+    // TODO:
+
     /*
     ------------------------------------ ViewModel For ProfileFragment -----------------------------------
      */
@@ -101,6 +142,10 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<String> names;
     private MutableLiveData<String> phone;
     private MutableLiveData<Integer> genderItemIndexSelected;
+    private MutableLiveData<String> gender;
+
+    // For sending Http request
+    private MutableLiveData<Integer> uniqueID;
 
     //Getter and Setter of ProfileFragment.
     public MutableLiveData<String> getNames() {
@@ -127,6 +172,21 @@ public class MainViewModel extends ViewModel {
         this.genderItemIndexSelected.setValue(genderItemIndexSelected);
     }
 
+    public MutableLiveData<Integer> getUniqueID() {
+        return uniqueID;
+    }
+
+    public void setUniqueID(Integer uniqueID) {
+        this.uniqueID.setValue(uniqueID);
+    }
+
+    public MutableLiveData<String> getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender.setValue(gender);
+    }
 
     /*
     ------------------------------------ Initialization -----------------------------------
@@ -141,21 +201,22 @@ public class MainViewModel extends ViewModel {
         to.setValue("Default");
         isDestination = new MutableLiveData<>();
         isDestination.setValue(false);
-        Time=new MutableLiveData<>();
+        Time = new MutableLiveData<>();
         Time.setValue("Date");
-        Date=new MutableLiveData<>();
+        Date = new MutableLiveData<>();
         Date.setValue("Time");
 
         // Initialization of data in ProfileFragment.
-        names = new MutableLiveData<String>();
+        names = new MutableLiveData<>();
         names.setValue("");
-        genderItemIndexSelected = new MutableLiveData<Integer>();
+        genderItemIndexSelected = new MutableLiveData<>();
         genderItemIndexSelected.setValue(0);
-        phone = new MutableLiveData<String>();
+        phone = new MutableLiveData<>();
         phone.setValue("");
 
         sender = new MutableLiveData<>();
-        sender.setValue(new UserInfo(names.getValue(), phone.getValue(), to.getValue(),Time.getValue(),Date.getValue()));
+        // TODO: Need to check if 0 represents Male.
+        sender.setValue(new UserInfo(names.getValue(), phone.getValue(), genderItemIndexSelected.getValue() == 0 ? "Male" : "Female"));
         membersList = new MutableLiveData<>();
         membersList.setValue(new HashMap<>());
     }

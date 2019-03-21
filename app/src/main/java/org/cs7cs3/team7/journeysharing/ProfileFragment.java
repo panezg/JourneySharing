@@ -34,6 +34,7 @@ public class ProfileFragment extends Fragment {
     private static final String PHONE = "phone";
     private static final String GENDER_POSITION = "SelectedPosition";
     private static final String PROFILE = "profile shared preferences";
+    private static final String UNIQUE_ID = "id for sending http request";
 
     // All the components.
     private MainViewModel mViewModel;

@@ -14,10 +14,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.cs7cs3.team7.wifidirect.UserInfo;
+import org.cs7cs3.team7.journeysharing.Models.UserInfo;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 public class ViewMatchFragment extends Fragment {
