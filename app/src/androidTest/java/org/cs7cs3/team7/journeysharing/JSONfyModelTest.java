@@ -2,9 +2,6 @@ package org.cs7cs3.team7.journeysharing;
 
 import com.google.gson.Gson;
 
-import org.cs7cs3.team7.journeysharing.Models.Schedule;
-import org.junit.Test;
-
 import java.util.Date;
 
 public class JSONfyModelTest {

@@ -1,6 +1,9 @@
 package org.cs7cs3.team7.wifidirect;
 
-import java.util.HashMap;
+import org.cs7cs3.team7.journeysharing.Models.MatchingResultInfo;
+import org.cs7cs3.team7.journeysharing.Models.ScheduledJourneyInfo;
+import org.cs7cs3.team7.journeysharing.Models.UserInfo;
+
 import java.util.Map;
 
 public class Message {
@@ -9,9 +12,10 @@ public class Message {
     private String timeStamp;
     private String messageText;
     private String intent;
-    // User Info
+
     private UserInfo sender;
-    private Map<String, UserInfo> list;
+    private MatchingResultInfo matchingResultInfo;
+    private ScheduledJourneyInfo scheduledJourneyInfo;
 
     public UserInfo getSender() {
         return sender;
@@ -21,12 +25,20 @@ public class Message {
         this.sender = sender;
     }
 
-    public Map<String, UserInfo> getList() {
-        return list;
+    public MatchingResultInfo getMatchingResultInfo() {
+        return matchingResultInfo;
     }
 
-    public void setList(Map<String, UserInfo> list) {
-        this.list = list;
+    public void setMatchingResultInfo(MatchingResultInfo matchingResultInfo) {
+        this.matchingResultInfo = matchingResultInfo;
+    }
+
+    public ScheduledJourneyInfo getScheduledJourneyInfo() {
+        return scheduledJourneyInfo;
+    }
+
+    public void setScheduledJourneyInfo(ScheduledJourneyInfo scheduledJourneyInfo) {
+        this.scheduledJourneyInfo = scheduledJourneyInfo;
     }
 
     public String getFromMAC() {
@@ -77,8 +89,6 @@ public class Message {
                 ", timeStamp='" + timeStamp + '\'' +
                 ", messageText='" + messageText + '\'' +
                 ", intent='" + intent + '\'' +
-                ", sender=" + sender +
-                ", list=" + list +
                 '}';
     }
 }

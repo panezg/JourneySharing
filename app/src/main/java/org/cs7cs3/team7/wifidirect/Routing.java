@@ -3,11 +3,10 @@ package org.cs7cs3.team7.wifidirect;
 import android.util.Log;
 
 import org.cs7cs3.team7.journeysharing.Constants;
+import org.cs7cs3.team7.journeysharing.Models.UserInfo;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 public class Routing {

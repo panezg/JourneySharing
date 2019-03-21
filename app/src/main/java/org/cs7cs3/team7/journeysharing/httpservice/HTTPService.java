@@ -1,6 +1,7 @@
 package org.cs7cs3.team7.journeysharing.httpservice;
 
 import org.cs7cs3.team7.journeysharing.Models.User;
+import org.cs7cs3.team7.journeysharing.Models.UserInfo;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -15,8 +16,11 @@ public interface HTTPService {
     @GET("/")
     Call<ResponseBody> test();
 
+    @GET("controller/hello")
+    Call<String> hello();
+
     @POST("/user/add")
-    Call<User> save(@Body User user);
+    Call<UserInfo> save(@Body UserInfo user);
 
 
 

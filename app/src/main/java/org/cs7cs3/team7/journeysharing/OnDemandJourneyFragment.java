@@ -28,20 +28,18 @@ import android.widget.Toast;
 
 import com.dyhdyh.widget.loadingbar.LoadingBar;
 
+import org.cs7cs3.team7.journeysharing.Models.MatchingResultInfo;
+import org.cs7cs3.team7.journeysharing.Models.ScheduledJourneyInfo;
+import org.cs7cs3.team7.journeysharing.Models.ScheduledJourneyType;
+import org.cs7cs3.team7.journeysharing.Models.UserInfo;
 import org.cs7cs3.team7.wifidirect.INetworkManager;
 import org.cs7cs3.team7.wifidirect.Message;
 
 import org.cs7cs3.team7.wifidirect.NetworkManagerFactory;
-import org.cs7cs3.team7.wifidirect.UserInfo;
-import org.cs7cs3.team7.wifidirect.Utility;
-
-import org.cs7cs3.team7.wifidirect.NetworkManager;
-import org.cs7cs3.team7.wifidirect.UserInfo;
 import org.cs7cs3.team7.wifidirect.Utility;
 
 
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 import java.util.concurrent.Semaphore;
@@ -49,9 +47,6 @@ import java.util.concurrent.Semaphore;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class OnDemandJourneyFragment extends Fragment {
@@ -64,14 +59,16 @@ public class OnDemandJourneyFragment extends Fragment {
     private Spinner spinner;
     private INetworkManager networkManager;
 
-
-    private Button setDate,timeSet;
+    private Button setDate, timeSet;
 //    private NetworkManager networkManager;
     private TextView showDate,showTime;
     private UserInfo userInfo;
 
     private View mParent;
     private Button searchButton;
+    private Spinner genderSpinner;
+    private Spinner methodSpinner;
+
     private final Semaphore waitingForMatchResult = new Semaphore(1);
     private String TAG = "myTag";
 
@@ -97,6 +94,7 @@ public class OnDemandJourneyFragment extends Fragment {
         // Init the layout.
         //TODO: Exception here should be handled.
         View addressLayout = getView().findViewById(R.id.address_include);
+        View preferencesLayout = getView().findViewById(R.id.preferences_include);
 
         //TODO: Exception here should be handled.
         // Inti the ViewModel.
@@ -169,11 +167,11 @@ public class OnDemandJourneyFragment extends Fragment {
         });
 
         //SetTime button in the addressLayout
-        setDate=addressLayout.findViewById(R.id.SetDateButton);
-        showDate=addressLayout.findViewById(R.id.ShowDate);
-        showTime=addressLayout.findViewById(R.id.ShowTime);
+        setDate = addressLayout.findViewById(R.id.SetDateButton);
+        showDate = addressLayout.findViewById(R.id.ShowDate);
+        showTime = addressLayout.findViewById(R.id.ShowTime);
         Calendar calendar = Calendar.getInstance();
-        DateFormat dateFormat=DateFormat.getDateInstance();
+        DateFormat dateFormat = DateFormat.getDateInstance();
         setDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -198,17 +196,17 @@ public class OnDemandJourneyFragment extends Fragment {
             }
         });
 
-        timeSet=addressLayout.findViewById(R.id.SetTimeButton);
-        DateFormat timeFormate=DateFormat.getTimeInstance();
+        timeSet = addressLayout.findViewById(R.id.SetTimeButton);
+        DateFormat timeFormat = DateFormat.getTimeInstance();
         timeSet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TimePickerDialog timePickerDialog=new TimePickerDialog(getContext(), new TimePickerDialog.OnTimeSetListener() {
+                TimePickerDialog timePickerDialog = new TimePickerDialog(getContext(), new TimePickerDialog.OnTimeSetListener() {
                     @Override
                     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
                         calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
                         calendar.set(Calendar.MINUTE, minute);
-                        String time=timeFormate.format(calendar.getTime());
+                        String time=timeFormat.format(calendar.getTime());
                         showTime.setText(time);
                         mViewModel.setTime(time);
                     }
@@ -223,6 +221,27 @@ public class OnDemandJourneyFragment extends Fragment {
             }
         });
 
+        genderSpinner = preferencesLayout.findViewById(R.id.gender_spinner);
+        mViewModel.getPreGenderItemIndexSelected().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(@Nullable Integer msg) {
+                genderSpinner.setSelection(msg);
+                mViewModel.setGenderPreference(msg == 0 ? "Male" : "Female");
+                Log.d("myTag", "Gender in MainView Model saved: " + mViewModel.getGenderItemIndexSelected().getValue());
+            }
+        });
+
+        methodSpinner = preferencesLayout.findViewById(R.id.method_spinner);
+        mViewModel.getPreMethodItemIndexSelected().observe(this, new Observer<Integer>() {
+            @Override
+            public void onChanged(@Nullable Integer msg) {
+                methodSpinner.setSelection(msg);
+                mViewModel.setMethodPreference(msg == 0 ? "Walking" : "Taxi");
+                Log.d("myTag", "Gender in MainView Model saved: " + mViewModel.getGenderItemIndexSelected().getValue());
+            }
+        });
+
+        LinearLayout layout = getView().findViewById(R.id.linear_layout);
         mParent = layout.findViewById(R.id.content);
         //getView().findViewById(R.layout.on_demand_journey_fragment).findViewById();
 
@@ -233,10 +252,10 @@ public class OnDemandJourneyFragment extends Fragment {
             // Sent the user's info to the server.
             Message message = new Message();
             // TODO: Need to test the format of UserInfo got via getSender().getValue()
-            // Sent the user's info to the server, including @param name, @param phoneNum and @param destination
             Log.d("JINCHI", "Viewmodel: ");
-            mViewModel.setSender(new UserInfo(mViewModel.getNames().getValue(),mViewModel.getPhone().getValue(), mViewModel.getTo().getValue(),mViewModel.getDate().getValue(),mViewModel.getTime().getValue()));
-            message.setSender(mViewModel.getSender().getValue());
+
+            initializeMsg(message);
+
             message.setIntent("SEND_TRIP_REQUEST");
             try {
                 waitingForMatchResult.acquire();
@@ -294,7 +313,7 @@ public class OnDemandJourneyFragment extends Fragment {
                 Utility.toast(message.getMessageText(),getContext());
                 Log.d("JINCHI", "Local broadcast received in general receiver: " + message);
                 // TODO: Need to check the membersList<UserInfo> from the message.
-                mViewModel.setMembersList(message.getList());
+                mViewModel.setMembersList(message.getMatchingResultInfo().getGroupMembers());
                 waitingForMatchResult.release();
             }
         };
@@ -317,6 +336,27 @@ public class OnDemandJourneyFragment extends Fragment {
             }
         });
         td.start();
+    }
+
+    private void initializeMsg(Message message) {
+        UserInfo sender = new UserInfo();
+        sender.setName(mViewModel.getNames().getValue());
+        sender.setPhoneNum(mViewModel.getPhone().getValue());
+        sender.setGender(mViewModel.getGender().getValue());
+        sender.setUniqueID(mViewModel.getUniqueID().getValue());
+
+        ScheduledJourneyInfo scheduledJourneyInfo = new ScheduledJourneyInfo();
+        scheduledJourneyInfo.setState(ScheduledJourneyType.SCHEDULED);
+        scheduledJourneyInfo.setDate(mViewModel.getDate().getValue());
+        scheduledJourneyInfo.setTime(mViewModel.getTime().getValue());
+        scheduledJourneyInfo.setDestination(mViewModel.getTo().getValue());
+        scheduledJourneyInfo.setStartPoint(mViewModel.getFrom().getValue());
+        scheduledJourneyInfo.setGender(mViewModel.getGenderPreference().getValue());
+        scheduledJourneyInfo.setMethod(mViewModel.getMethodPreference().getValue());
+
+        message.setMatchingResultInfo(new MatchingResultInfo());
+        message.setSender(sender);
+        message.setScheduledJourneyInfo(scheduledJourneyInfo);
     }
 
     @Override
