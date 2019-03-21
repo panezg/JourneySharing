@@ -1,5 +1,11 @@
 package org.cs7cs3.team7.journeysharing;
 
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
+
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,17 +16,29 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.dyhdyh.widget.loadingbar.LoadingBar;
 
 import org.cs7cs3.team7.wifidirect.INetworkManager;
 import org.cs7cs3.team7.wifidirect.Message;
+
 import org.cs7cs3.team7.wifidirect.NetworkManagerFactory;
 import org.cs7cs3.team7.wifidirect.UserInfo;
 import org.cs7cs3.team7.wifidirect.Utility;
+
+import org.cs7cs3.team7.wifidirect.NetworkManager;
+import org.cs7cs3.team7.wifidirect.UserInfo;
+import org.cs7cs3.team7.wifidirect.Utility;
+
+
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
 
 import java.util.concurrent.Semaphore;
 
@@ -39,7 +57,14 @@ public class OnDemandJourneyFragment extends Fragment {
     private TextView toAddress;
     private Button fromButton;
     private Button toButton;
+
     private INetworkManager networkManager;
+
+
+    private Button setDate,timeSet;
+//    private NetworkManager networkManager;
+    private TextView showDate,showTime;
+    private UserInfo userInfo;
 
     private View mParent;
     private Button searchButton;
@@ -115,6 +140,61 @@ public class OnDemandJourneyFragment extends Fragment {
             }
         });
 
+        //SetTime button in the addressLayout
+        setDate=addressLayout.findViewById(R.id.SetDateButton);
+        showDate=addressLayout.findViewById(R.id.ShowDate);
+        showTime=addressLayout.findViewById(R.id.ShowTime);
+        Calendar calendar = Calendar.getInstance();
+        DateFormat dateFormat=DateFormat.getDateInstance();
+        setDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DatePickerDialog datePickerDialog=new DatePickerDialog(getContext(), new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                        calendar.set(Calendar.YEAR,year);
+                        calendar.set(Calendar.MONTH,month);
+                        calendar.set(Calendar.DAY_OF_MONTH,dayOfMonth);
+                        String date=dateFormat.format(calendar.getTime());
+                        showDate.setText(date);
+                        Toast.makeText(getContext(), date.getClass().getName(), Toast.LENGTH_SHORT).show();
+                        mViewModel.setDate(date);
+                    }
+                },
+                        calendar.get(Calendar.YEAR),
+                        calendar.get(Calendar.MONTH),
+                        calendar.get(Calendar.DAY_OF_MONTH)
+                );
+                datePickerDialog.show();
+//                String dateInfor=new String(new StringBuilder().append(calendar.get(Calendar.YEAR)).append("/").append(calendar.get(Calendar.MONTH)+1).append("/").append(calendar.get(Calendar.DAY_OF_MONTH)));
+            }
+        });
+
+        timeSet=addressLayout.findViewById(R.id.SetTimeButton);
+        DateFormat timeFormate=DateFormat.getTimeInstance();
+        timeSet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TimePickerDialog timePickerDialog=new TimePickerDialog(getContext(), new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+                        calendar.set(Calendar.MINUTE, minute);
+                        String time=timeFormate.format(calendar.getTime());
+                        showTime.setText(time);
+                        mViewModel.setTime(time);
+                    }
+                },
+                        calendar.get(Calendar.HOUR_OF_DAY),
+                        calendar.get(Calendar.MINUTE),
+                        true
+                );
+                timePickerDialog.show();
+//                String timeInfo=new String(new StringBuilder().append(calendar.get(Calendar.HOUR_OF_DAY)).append(":").append(calendar.get(Calendar.MINUTE)));
+
+            }
+        });
+
         LinearLayout layout = getView().findViewById(R.id.linear_layout);
         mParent = layout.findViewById(R.id.content);
         //getView().findViewById(R.layout.on_demand_journey_fragment).findViewById();
@@ -128,7 +208,7 @@ public class OnDemandJourneyFragment extends Fragment {
             // TODO: Need to test the format of UserInfo got via getSender().getValue()
             // Sent the user's info to the server, including @param name, @param phoneNum and @param destination
             Log.d("JINCHI", "Viewmodel: ");
-            mViewModel.setSender(new UserInfo(mViewModel.getNames().getValue(),mViewModel.getPhone().getValue(), mViewModel.getTo().getValue()));
+            mViewModel.setSender(new UserInfo(mViewModel.getNames().getValue(),mViewModel.getPhone().getValue(), mViewModel.getTo().getValue(),mViewModel.getDate().getValue(),mViewModel.getTime().getValue()));
             message.setSender(mViewModel.getSender().getValue());
             message.setIntent("SEND_TRIP_REQUEST");
             try {

@@ -35,7 +35,7 @@ public class Routing {
         //as we dont have many devices, let's make some data
         if(userInfoList.size()==0){
             Log.d("ROUTING", "Adding dummy data to simulate people around");
-            letsFakeSomeData();
+//            letsFakeSomeData();
         }
         Log.d("ROUTING", "Recording peer trip info");
         userInfoList.put(message.getSender()==null? "dummyName":message.getSender().getName(),message.getSender());
@@ -57,20 +57,20 @@ public class Routing {
         groupsReady=true;
     }
 
-    private void letsFakeSomeData() {
-        UserInfo pankaj=new UserInfo("pankaj","8982300456","dublin city center");
-        userInfoList.put("pankaj",pankaj);
-
-        UserInfo shashank=new UserInfo("shashank","8982210466","dublin city center");
-        userInfoList.put("shashank",shashank);
-
-        UserInfo vishal=new UserInfo("vishal","8982210173","dublin castle");
-        userInfoList.put("vishal",vishal);
-
-        UserInfo gunjan=new UserInfo("gunjan","8982210581","dublin castle");
-        userInfoList.put("gunjan",gunjan);
-
-        UserInfo swara=new UserInfo("swara","8982167149","dublin city center");
-        userInfoList.put("swara",swara);
-    }
+//    private void letsFakeSomeData() {
+//        UserInfo pankaj=new UserInfo("pankaj","8982300456","dublin city center");
+//        userInfoList.put("pankaj",pankaj);
+//
+//        UserInfo shashank=new UserInfo("shashank","8982210466","dublin city center");
+//        userInfoList.put("shashank",shashank);
+//
+//        UserInfo vishal=new UserInfo("vishal","8982210173","dublin castle");
+//        userInfoList.put("vishal",vishal);
+//
+//        UserInfo gunjan=new UserInfo("gunjan","8982210581","dublin castle");
+//        userInfoList.put("gunjan",gunjan);
+//
+//        UserInfo swara=new UserInfo("swara","8982167149","dublin city center");
+//        userInfoList.put("swara",swara);
+//    }
 }

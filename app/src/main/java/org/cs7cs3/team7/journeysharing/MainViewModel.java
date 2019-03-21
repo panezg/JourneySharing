@@ -6,6 +6,7 @@ import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
 import org.cs7cs3.team7.wifidirect.UserInfo;
 
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,6 +31,10 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<Boolean> isDestination;
     private MutableLiveData<UserInfo> sender;
     private MutableLiveData<Map<String, UserInfo>> membersList;
+//    private MutableLiveData<HashMap<String, UserInfo>> membersList;
+    private MutableLiveData<String> Time;
+    private MutableLiveData<String> Date;
+
 
     public MutableLiveData<UserInfo> getSender() {
         return sender;
@@ -70,6 +75,22 @@ public class MainViewModel extends ViewModel {
 
     public void setIsDestination(boolean isDestination) {
         this.isDestination.setValue(isDestination);
+    }
+
+    public MutableLiveData<String> getTime() {
+        return Time;
+    }
+
+    public void setTime(String time) {
+        Time.setValue(time);
+    }
+
+    public MutableLiveData<String> getDate() {
+        return Date;
+    }
+
+    public void setDate(String date) {
+        Date.setValue(date);
     }
 
     /*
@@ -120,6 +141,10 @@ public class MainViewModel extends ViewModel {
         to.setValue("Default");
         isDestination = new MutableLiveData<>();
         isDestination.setValue(false);
+        Time=new MutableLiveData<>();
+        Time.setValue("Date");
+        Date=new MutableLiveData<>();
+        Date.setValue("Time");
 
         // Initialization of data in ProfileFragment.
         names = new MutableLiveData<String>();
@@ -130,7 +155,7 @@ public class MainViewModel extends ViewModel {
         phone.setValue("");
 
         sender = new MutableLiveData<>();
-        sender.setValue(new UserInfo(names.getValue(), phone.getValue(), to.getValue()));
+        sender.setValue(new UserInfo(names.getValue(), phone.getValue(), to.getValue(),Time.getValue(),Date.getValue()));
         membersList = new MutableLiveData<>();
         membersList.setValue(new HashMap<>());
     }
