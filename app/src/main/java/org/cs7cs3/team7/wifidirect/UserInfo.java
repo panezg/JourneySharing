@@ -4,12 +4,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class UserInfo {
     // User Info
+    private String id;
     private String name;
     private String phoneNum;
     // TODO: Need to wait @JInchi finished the new Fragment, and then just read the @param destination info from the mainViewModel.
     private final String destination = "fakeDestination";
     private int groupId;
-    public UserInfo(String name, String phone, String des) {
+    public UserInfo(String id, String name, String phone, String des) {
+        this.id = id;
         this.name = name;
         phoneNum = phone;
         //destination = des;
@@ -50,7 +52,16 @@ public class UserInfo {
 
     @Override
     public String toString() {
-        return "name= " + name + "\nphoneNum= " + phoneNum + "\ndestination= " + destination;
+        return "UserInfo{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", phoneNum='" + phoneNum + '\'' +
+                ", destination='" + destination + '\'' +
+                ", groupId=" + groupId +
+                '}';
     }
 
+    public String getId() {
+        return id;
+    }
 }

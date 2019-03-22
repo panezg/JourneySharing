@@ -130,7 +130,7 @@ public class MainViewModel extends ViewModel {
         phone.setValue("");
 
         sender = new MutableLiveData<>();
-        sender.setValue(new UserInfo(names.getValue(), phone.getValue(), to.getValue()));
+        sender.setValue(new UserInfo("", names.getValue(), phone.getValue(), to.getValue()));
         membersList = new MutableLiveData<>();
         membersList.setValue(new HashMap<>());
     }

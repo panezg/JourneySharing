@@ -128,7 +128,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Log.d("JINCHI","in onClick button handler");
-                networkManager.initiateNetworkActivity();
+                networkManager.initiateWiFiP2PGroupFormation();
             }
         });*/
 

@@ -1,19 +1,13 @@
 package org.cs7cs3.team7.wifidirect;
 
-public class DummyNetworkManager implements INetworkManager {
+public class DummyCommsManager implements ICommsManager {
     @Override
-    public void initiateWiFiP2PGroupFormation() {
-
+    public void requestJourneyMatch(UserInfo userInfo) {
     }
 
     @Override
-    public boolean isThisDevicePartOfGroup() {
-        return false;
-    }
-
-    @Override
-    public boolean isThisDeviceGroupOwner() {
-        return false;
+    public String getMACAddress() {
+        return null;
     }
 
     @Override
@@ -35,5 +29,4 @@ public class DummyNetworkManager implements INetworkManager {
     public void onDestroy() {
 
     }
-
 }

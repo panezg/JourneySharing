@@ -1,84 +1,73 @@
 package org.cs7cs3.team7.wifidirect;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 
 public class Message {
-    private String fromMAC;
-    private String fromIP;
-    private String timeStamp;
-    private String messageText;
-    private String intent;
-    // User Info
-    private UserInfo sender;
-    private Map<String, UserInfo> list;
+    private String destinationIP;
+    private String originIP;
+    private ICommsManager.MESSAGE_TYPES messageType;
+    private Object payload;
+    private String payloadClass;
 
-    public UserInfo getSender() {
-        return sender;
+    public Message(String destinationIP, ICommsManager.MESSAGE_TYPES messageType) {
+        this.destinationIP = destinationIP;
+        this.messageType = messageType;
+        if (messageType == ICommsManager.MESSAGE_TYPES.JOURNEY_MATCH_REQUEST) {
+            this.payloadClass = UserInfo.class.toString();
+        }
     }
 
-    public void setSender(UserInfo sender) {
-        this.sender = sender;
+    public String getDestinationIP() {
+        return destinationIP;
     }
 
-    public Map<String, UserInfo> getList() {
-        return list;
+    public void setDestinationIP(String destinationIP) {
+        this.destinationIP = destinationIP;
     }
 
-    public void setList(Map<String, UserInfo> list) {
-        this.list = list;
+    public void setOriginIP(String originIP) {
+        this.originIP = originIP;
     }
 
-    public String getFromMAC() {
-        return fromMAC;
+    public String getOriginIP() {
+        return originIP;
     }
 
-    public void setFromMAC(String fromMAC) {
-        this.fromMAC = fromMAC;
+    public ICommsManager.MESSAGE_TYPES getMessageType() {
+        return messageType;
     }
 
-    public String getFromIP() {
-        return fromIP;
+    public Object getPayload() {
+        return payload;
     }
 
-    public void setFromIP(String fromIP) {
-        this.fromIP = fromIP;
+    public void setPayload(Object payload) {
+        this.payload = payload;
     }
 
-    public String getTimeStamp() {
-        return timeStamp;
+    public String toJSON() {
+        return new Gson().toJson(this);
     }
 
-    public void setTimeStamp(String timeStamp) {
-        this.timeStamp = timeStamp;
-    }
-
-    public String getMessageText() {
-        return messageText;
-    }
-
-    public void setMessageText(String messageText) {
-        this.messageText = messageText;
-    }
-
-    public String getIntent() {
-        return intent;
-    }
-
-    public void setIntent(String intent) {
-        this.intent = intent;
+    public static Message fromJSON(String JSON) {
+        Message message = new Gson().fromJson(JSON, Message.class);
+        if (message.messageType == ICommsManager.MESSAGE_TYPES.JOURNEY_MATCH_REQUEST) {
+            String tempJSON = new Gson().toJson(message.getPayload(), LinkedTreeMap.class);
+            UserInfo userInfo = new Gson().fromJson(tempJSON, UserInfo.class);
+            message.setPayload(userInfo);
+        }
+        return message;
     }
 
     @Override
     public String toString() {
         return "Message{" +
-                "fromMAC='" + fromMAC + '\'' +
-                ", fromIP='" + fromIP + '\'' +
-                ", timeStamp='" + timeStamp + '\'' +
-                ", messageText='" + messageText + '\'' +
-                ", intent='" + intent + '\'' +
-                ", sender=" + sender +
-                ", list=" + list +
+                "destinationIP='" + destinationIP + '\'' +
+                ", originIP='" + originIP + '\'' +
+                ", messageType=" + messageType +
+                ", payload=" + payload +
+                ", payloadClass='" + payloadClass + '\'' +
                 '}';
     }
 }
