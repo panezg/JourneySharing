@@ -215,6 +215,7 @@ public class MainViewModel extends ViewModel {
         phone.setValue("");
 
         sender = new MutableLiveData<>();
+        sender.setValue(new UserInfo("", names.getValue(), phone.getValue(), to.getValue()));
         // TODO: Need to check if 0 represents Male.
         sender.setValue(new UserInfo());
         membersList = new MutableLiveData<>();

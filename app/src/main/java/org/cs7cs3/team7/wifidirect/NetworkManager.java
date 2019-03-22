@@ -1,12 +1,10 @@
 package org.cs7cs3.team7.wifidirect;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WpsInfo;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
@@ -18,600 +16,526 @@ import android.util.Log;
 
 import org.cs7cs3.team7.journeysharing.Constants;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pManager.ConnectionInfoListener, WifiP2pManager.GroupInfoListener, INetworkManager {
-    WifiManager wifiManager;
-    WifiP2pManager wifiP2pManager;
-    WifiP2pManager.Channel wifiP2pChannel;
-    WiFiDirectBroadcastReceiver wifiDirectBroadcastReceiver;
-    IntentFilter intentFilter;
-    private boolean isWDConnected = false;
-    private boolean isWifiP2pEnabled = false;
-    boolean connectedToGroup=false;
-    boolean tryingToMakeConnection=false;
-    private boolean mIGroupOwner=false;
-    private String groupOwnerAddress;
-    public String deviceName;
-    private Routing routing;
-    private Map<String,String> macToIpMapping=new HashMap<>();
-    private Context context;
-    private NetworkManagerMonitor networkManagerMonitor;
-    private Thread networkManagerMonitorThread;
-    private Message sendMessage;
-    public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
-        this.isWifiP2pEnabled = isWifiP2pEnabled;
-    }
+    private static String WIFI_P2P_DEBUG_LABEL = "JINCHI";
 
-    public NetworkManager(Context context){
-        this.context=context;
-        //Requires change from min API 22 to 23
-        //wifiManager = (WifiManager) context.getSystemService(WifiManager.class);
+    private WifiManager wifiManager;
+    protected WifiP2pManager wifiP2pManager;
+    protected WifiP2pManager.Channel wifiP2pChannel;
+    private WiFiDirectBroadcastReceiver wifiDirectBroadcastReceiver;
+    private IntentFilter intentFilter;
+    private Context context;
+    private P2PCommsManager commsManager;
+    private String thisDeviceMACAddress;
+
+    //WiFi P2P group state variables
+    private boolean isWifiP2pEnabled = false;
+    private boolean isThisDevicePartOfGroup = false;
+    private boolean isThisDeviceAttemptingToJoinGroup = false;
+    private boolean isThisDeviceGroupOwner = false;
+
+
+    public NetworkManager(Context context, P2PCommsManager commsManager) {
+        this.context = context;
+        this.commsManager = commsManager;
+        //Enabling and resetting WiFi
         wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        wifiManager.setWifiEnabled(true);
+        //wifiManager.setWifiEnabled(true);
         wifiManager.setWifiEnabled(false);
         wifiManager.setWifiEnabled(true);
+        WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        this.thisDeviceMACAddress = wifiInfo.getMacAddress();
 
-        Log.d("JINCHI", "Calling WiFiManager.getConnectionInfo()");
-        WifiInfo info = wifiManager.getConnectionInfo();
-        Log.d("JINCHI", "Calling WiFiManager.getWifiState() returns: " + wifiManager.getWifiState());
-        Log.d("JINCHI", "Calling WiFiManager.disconnect()");
-
+        //Calls to wifiManager.getConnectionInfo() and wifiManager.getWifiState() are not useful
         wifiP2pManager = (WifiP2pManager) context.getSystemService(Context.WIFI_P2P_SERVICE);
 
-
-        //Requires change from min API 22 to 23
-        //wifiP2pManager = (WifiP2pManager) getSystemService(WifiP2pManager.class);
-        //Strin s=Build.MODEL;
-        Log.d("JINCHI", "Calling WiFiP2pManager.initialize()");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "Calling WiFiP2pManager.initialize()");
         wifiP2pChannel = wifiP2pManager.initialize(context, Looper.getMainLooper(), new WifiP2pManager.ChannelListener() {
             @Override
             public void onChannelDisconnected() {
-                Log.d("JINCHI", "The channel to the framework has been disconnected. Application could try re-initializing using initialize()");
+                Log.d(WIFI_P2P_DEBUG_LABEL, "The channel to the framework has been disconnected. Application could try re-initializing using initialize()");
             }
         });
 
+        Log.d(WIFI_P2P_DEBUG_LABEL, "Creating WiFiDirectBroadcastReceiver");
         wifiDirectBroadcastReceiver = new WiFiDirectBroadcastReceiver(wifiP2pManager, wifiP2pChannel, this);
-
+        Log.d(WIFI_P2P_DEBUG_LABEL, "Creating intent filter for WiFi P2P events");
         intentFilter = new IntentFilter();
-        //No at use yet
+        //To capture events related to WiFi P2P service
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-        //Indicates a new WiFi devices is located
+        //To capture events related to peers being available nearby
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-        //Indicates that a WiFi connection to a device changed (success, or failure)
+        //To capture events related to connecting to a group or peer
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        //No at use yet
+        //To capture events related to status changes of this device
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-
     }
 
 
     public void onResume() {
-        //super.onResume();
-        Log.d("JINCHI", "in onResume() of NetworkManager");
-
-        //system call
-        Log.d("JINCHI", "WiFi Direct Broadcast receiver registered with intent filter");
-        context.registerReceiver (wifiDirectBroadcastReceiver, intentFilter);
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onResume() of NetworkManager");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "Registering WiFi Direct Broadcast Receiver with the intent filter");
+        context.registerReceiver(wifiDirectBroadcastReceiver, intentFilter);
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END onResume() of NetworkManager");
     }
 
     public void onPause() {
-        //super.onPause();
-        Log.d("JINCHI", "in onPause() of NetworkManager");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onPause() of NetworkManager");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "Unregistering WiFi Direct Broadcast Receiver");
         context.unregisterReceiver(wifiDirectBroadcastReceiver);
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END onPause() of NetworkManager");
     }
 
 
     public void onStop() {
-        //super.onStop();
-        Log.d("JINCHI", "in onStop() of NetworkManager");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onStop() of NetworkManager");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END onStop() of NetworkManager");
     }
 
     public void onDestroy() {
-        //TODO: Need to review this
-        //super.onDestroy();
-        Log.d("JINCHI", "in onDestroy() of NetworkManager");
-        Log.d("JINCHI", "calling WiFiP2pManager.removeGroup() of NetworkManager");
-        Log.d("JINCHI", "in theory this is for disconnect");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onDestroy() of NetworkManager");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "Calling WiFiP2pManager.removeGroup(), which could help handle disconnection scenarios");
         wifiP2pManager.removeGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                Log.d("JINCHI", "Invocation of WiFiP2pManager.removeGroup() successful");
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Invocation of WiFiP2pManager.removeGroup() successful");
             }
+
             @Override
-            public void onFailure(int i) {
-                Log.d("JINCHI", "Invocation of WiFiP2pManager.removeGroup() failed. Error: " + i);
+            public void onFailure(int reason) {
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Invocation of WiFiP2pManager.removeGroup() failed. Reason: " + reason);
             }
         });
 
-        //killing the netwrok manager monitor thread
-        if(networkManagerMonitorThread!=null && networkManagerMonitorThread.isAlive()){
-            Log.d("JINCHI", "stopping network manager monitor thread");
+        //Cleaning up the Network Manager Monitor Thread
+        /*
+        if (networkManagerMonitorThread != null && networkManagerMonitorThread.isAlive()) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Stopping Network Manager Monitor Thread");
+            //stop() on Thread probably won't work
             networkManagerMonitorThread.stop();
         }
-        Log.d("JINCHI", "in onDestroy() of NetworkManager");
+        */
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END onDestroy() of NetworkManager");
     }
 
-    public void changeDeviceName(int flag){
-        Log.e("JINCHI", "changing device name");
-        if(flag==0){
-            setDeviceName(this.deviceName+"-on");
-        }
-        else if(flag==1){
-            setDeviceName(this.deviceName+"-off");
-        }
-    }
+    public void initiateWiFiP2PGroupFormation() {
+        isThisDevicePartOfGroup = false;
+        isThisDeviceGroupOwner = false;
 
-    private void setDeviceName(String deviceName){
-        try {
-            Log.e("JINCHI", "1");
-            Class[] paramTypes = new Class[3];
-            paramTypes[0] = WifiP2pManager.Channel.class;
-            paramTypes[1] = String.class;
-            paramTypes[2] = WifiP2pManager.ActionListener.class;
-            Method setDeviceName = wifiP2pManager.getClass().getMethod(
-                    "setDeviceName", paramTypes);
-            setDeviceName.setAccessible(true);
-            Log.e("JINCHI", "2");
-            Object arglist[] = new Object[3];
-            arglist[0] = wifiP2pChannel;
-            arglist[1] = deviceName;
-            arglist[2] = new WifiP2pManager.ActionListener() {
+        //routing = new Routing();
 
-                @Override
-                public void onSuccess() {
-                    Log.d("setDeviceName succeeded", "true");
-                }
-
-                @Override
-                public void onFailure(int reason) {
-                    Log.d("setDeviceName failed", "true");
-                }
-            };
-            setDeviceName.invoke(wifiP2pManager, arglist);
-            Log.e("JINCHI", "3");
-        } catch (Exception e) {
-
-            e.printStackTrace();
-        }
-    }
-
-    public void initiateNetworkActivity(){
-        //reset network variables
-        connectedToGroup=false;
-        mIGroupOwner=false;
-        routing=new Routing();
+        //shouldn't find peers always be executed by the NetworkManagerMonitorThread?
+        //create a thread that tries to find peers if it is not connected to a GO/
 
         findPeers();
-
-        if(networkManagerMonitorThread==null || networkManagerMonitorThread.isAlive()==false) {
-            //This thread is to monitor network conditions in timely manner and take proper actions(eg. reset network, log group owner)
-            networkManagerMonitor=new NetworkManagerMonitor(this);
-
-            networkManagerMonitorThread = new Thread(networkManagerMonitor);
-            Log.d("JINCHI", "starting network manager monitor thread");
-            networkManagerMonitorThread.start();
-        }
     }
 
-    //TODO: Why Fire Tablet has different logged messages than Xiomi?
     private void findPeers() {
-        Log.d("JINCHI", "onside find peers");
-        //At the moment, isWDConnected is always false, so !isWDConnected is always true
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN findPeers()");
 
         if (!isWifiP2pEnabled) {
-            Log.d("JINCHI", "Enable P2P from action bar button above or system settings");
-            Utility.toast("Enable P2P from action bar button above or system settings",context);
+            Log.d(WIFI_P2P_DEBUG_LABEL, "isWifiP2pEnabled is false");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "So, either the WIFI_P2P_STATE_CHANGED_ACTION on event has not been captured yet or " +
+                    "probably the WiFiManager on and off didn't work");
+            //TODO: How to handle when the off event comes later than the click on the 'Search' button
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Cycle enable/disable WiFi/P2P via OS");
+            Utility.toast("Cycle enable/disable WiFi/P2P via OS", context);
             return;
         }
 
-        if (!isWDConnected) {
-            Log.d("JINCHI", "Initiate peer discovery");
-            //will trigger a WIFI_P2P_PEERS_CHANGED_ACTION event captured by WiFiDirectBroadcastReceiver
-            //A discovery process involves scanning for available Wi-Fi peers for the purpose of establishing a connection.
-            //Async call that immediately returns, and handles cases through callbacks
-            //The discovery remains active until a connection is initiated or a p2p group is formed.
-            //It seems the call blocks
-            wifiP2pManager.discoverPeers(wifiP2pChannel, new WifiP2pManager.ActionListener() {
-                //Useless callbacks, don't provide info
-                @Override
-                public void onSuccess() {
-                    Log.d("JINCHI", "Invocation of WiFiP2pManager.discoverPeers() successful");
-                }
+        Log.d(WIFI_P2P_DEBUG_LABEL, "Calling wifiP2pManager.discoverPeers()");
+        //The discovery process involves scanning for available Wi-Fi P2P peers for the purpose of establishing a connection or forming a group
+        //This is an async call that returns after passing orders to thee lower level WiFi P2P framework
+        //This call should eventually result on a WIFI_P2P_PEERS_CHANGED_ACTION event captured by WiFiDirectBroadcastReceiver in an asynchronous fashion
+        //How long the discovery process runs, and when it times out is not clear. It appears part of the behavior varies per API level or device manufacturer
+        //Sometimes the discovery process remains active until a connection is initiated or a P2P group is formed
+        //Issuing the same call in a short period of time tends to fail, but multiple calls in a period of tens of seconds seem to be safe
+        wifiP2pManager.discoverPeers(wifiP2pChannel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Invocation of WiFiP2pManager.discoverPeers() successful");
+            }
 
-                @Override
-                public void onFailure(int reasonCode) {
-                    Utility.toast("Failed to invoke WiFiP2pManager.discoverPeers(). Error code: " + reasonCode, context);
-                    Log.d("JINCHI", "Failed to invoke WiFiP2pManager.discoverPeers(). Error code: " + reasonCode);
-                }
-            });
-        }
+            @Override
+            public void onFailure(int reason) {
+                Utility.toast("Failed to invoke WiFiP2pManager.discoverPeers(). Reason: " + reason, context);
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Failed to invoke WiFiP2pManager.discoverPeers(). Reason: " + reason);
+            }
+        });
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END findPeers()");
     }
 
     @Override
+    /***
+     * Implementing PeersListListener interface method to process the list of available devices nearby
+     */
     public void onPeersAvailable(WifiP2pDeviceList list) {
-
-        //Execution resumes via callback due to manager.requestPeers() from WIFI_P2P_PEERS_CHANGED_ACTION handler on WiFiDirectBroadcastReceiver
-        Log.d("JINCHI", "onPeersAvailable()");
-
-        if(tryingToMakeConnection) {
-            Log.d("JINCHI", "Already trying to make connection to some other peer. So, skipping further method until flag is unset.");
+        //This method is not directly called by application code. Instead, this method acts as a callback and
+        //is called by the framework eventually as a result of a call to WiFiP2pManager.requestPeers() from
+        //the WIFI_P2P_PEERS_CHANGED_ACTION handler on WiFiDirectBroadcastReceiver
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onPeersAvailable()");
+        if (isThisDeviceAttemptingToJoinGroup) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "This device is already trying to join a WiFi P2P group. So, returning early from method.");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "END onPeersAvailable()");
             return;
         }
-        if(connectedToGroup) {
-            Log.d("JINCHI", "skipping the method as you are already connected to the group");
+        if (isThisDevicePartOfGroup) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "This device is already part of a WiFi P2P group. So, returning early from method.");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "END onPeersAvailable()");
             return;
         }
-        Log.d("JINCHI", "Peer list size : " + list.getDeviceList().size());
-        if(list.getDeviceList().size() == 0) {
+
+        Log.d(WIFI_P2P_DEBUG_LABEL, "Peer list size : " + list.getDeviceList().size());
+        if (list.getDeviceList().size() == 0) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "This peer list size is empty. So, returning early from method.");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "END onPeersAvailable()");
             return;
         }
         //as reported by Android
         ArrayList<WifiP2pDevice> peerList = new ArrayList<WifiP2pDevice>(list.getDeviceList());
 
-        boolean isThereAtLeastOnePhoneDevice=false;
+        boolean isThereAtLeastOnePhoneDevice = false;
         boolean doesGOExist = false;
-        WifiP2pDevice peerGO = null;
-        DeviceDTO deviceGO = new DeviceDTO();
-        DeviceDTO deviceLargestMAC = new DeviceDTO();
-        deviceLargestMAC.setDeviceAddress(Constants.myMACAddress);
+        WifiP2pDevice wifiP2PGO = null;
+        WifiP2pDevice wifiP2PWithGreatestMAC = null;
+        String greatestMACAddress = Constants.THIS_DEVICE_MAC_ADDRESS;
 
-        //election by MAC address should be only among availables
-
-        for (WifiP2pDevice peer : peerList){
-            DeviceDTO device = new DeviceDTO();
-            device.setDeviceAddress(peer.deviceAddress);
-            device.setDeviceName(peer.deviceName);
-            device.status = peer.status;
-
-            Log.d("JINCHI", "Device Found in onPeersAvailable "+device.getDeviceAddress()+" "+device.getDeviceName());
-            Log.d("JINCHI", "is Peer Group Owner? = " + peer.isGroupOwner());
-            Log.d("JINCHI", "deviceStatus interpretation: CONNECTED = 0, INVITED = 1, FAILED = 2, AVAILABLE = 3, UNAVAILABLE = 4");
-            Log.d("JINCHI", "What is the status of the peer discovered? = " + peer.status);
-            Log.d("JINCHI", "device primary device type: " + peer.primaryDeviceType);
-            Log.d("JINCHI", "device secondary device type: " + peer.secondaryDeviceType);
-            if(isNonPhoneDevice(peer)){
-                Log.d("JINCHI", "skipping non-phone device");
+        //process the list and look for a group owner or the phone device with largest MAC
+        for (WifiP2pDevice peer : peerList) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Device Found in onPeersAvailable " + peer.deviceAddress + " " + peer.deviceName);
+            Log.d(WIFI_P2P_DEBUG_LABEL, "is Peer Group Owner? = " + peer.isGroupOwner());
+            Log.d(WIFI_P2P_DEBUG_LABEL, "deviceStatus interpretation: CONNECTED = 0, INVITED = 1, FAILED = 2, AVAILABLE = 3, UNAVAILABLE = 4");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "What is the status of the peer discovered? = " + peer.status);
+            Log.d(WIFI_P2P_DEBUG_LABEL, "device primary device type: " + peer.primaryDeviceType);
+            Log.d(WIFI_P2P_DEBUG_LABEL, "device secondary device type: " + peer.secondaryDeviceType);
+            if (!isDeviceAPhone(peer)) {
+                Log.d(WIFI_P2P_DEBUG_LABEL, "skipping non-phone device");
                 continue;
             }
-            isThereAtLeastOnePhoneDevice=true;
+            isThereAtLeastOnePhoneDevice = true;
             //if (peer.status == WifiP2pDevice.AVAILABLE) {
             if (peer.isGroupOwner()) {
-                peerGO = peer;
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Group owner found among list of available devices nearby");
+                wifiP2PGO = peer;
                 doesGOExist = true;
-                deviceGO.setDeviceAddress(peer.deviceAddress);
-                deviceGO.setDeviceName(peer.deviceName);
                 break;
             }
-            deviceLargestMAC = compareMACAddress(deviceLargestMAC, device);
-            //}
+
+            if (wifiP2PWithGreatestMAC == null) {
+                wifiP2PWithGreatestMAC = peer;
+            } else {
+                wifiP2PWithGreatestMAC = maxByMAC(wifiP2PWithGreatestMAC, peer);
+            }
         }
 
-        if(! isThereAtLeastOnePhoneDevice) {
-            Log.d("JINCHI", "It seems there are only non-phone device(s) available; skipping the next steps in onPeersAvailable");
+        if (!isThereAtLeastOnePhoneDevice) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "It seems there are only non-phone device(s) available; skipping the next steps of onPeersAvailable()");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "END onPeersAvailable()");
             return;
         }
 
         if (doesGOExist) {
-            if (peerGO.status == WifiP2pDevice.AVAILABLE){
-                Log.d("JINCHI", "This device should try connecting to Group Owner who is available");
-                this.connect(deviceGO);
-            }
-            else if (peerGO.status == WifiP2pDevice.CONNECTED) {
-                Log.d("JINCHI", "Skip more analysis since you are already connected");
+            if (wifiP2PGO.status == WifiP2pDevice.AVAILABLE) {
+                Log.d(WIFI_P2P_DEBUG_LABEL, "This device should try connecting to Group Owner that is available");
+                //Connect directly to the group owner. Our tests have shown that calling WiFiP2pManager
+                //to connect to the group owner doesn't break the current group or changes which
+                //device acts as group owner
+                this.connect(new DeviceDTO(wifiP2PGO.deviceAddress, wifiP2PGO.deviceName, wifiP2PGO.status));
+            } else if (wifiP2PGO.status == WifiP2pDevice.CONNECTED) {
+                //This means that from the POV of this device, the status of the group owner is connected
+                //which means this device is part of a group managed by the group owner
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Skip more analysis since you are already part of a group, and connected to the group owner");
             }
         } else {
-            if (!deviceLargestMAC.getDeviceAddress().equals(Constants.myMACAddress) && deviceLargestMAC.status == WifiP2pDevice.AVAILABLE) {
-                Log.d("JINCHI", "This device should wait for group formation");
+            //If the device with the greatest MAC address is not this device, but one in the peer list, and
+            //if such device's status is available, then wait for such device to create the group
+            if (wifiP2PWithGreatestMAC.deviceAddress.compareTo(Constants.THIS_DEVICE_MAC_ADDRESS) > 0 &&
+                    wifiP2PWithGreatestMAC.status == WifiP2pDevice.AVAILABLE) {
+                Log.d(WIFI_P2P_DEBUG_LABEL, "This device should wait for the device with largest MAC to form the group");
             }
+            //If this device is the one with the greatest MAC address or if the device with the greatest
+            //MAC address is not available, then proceed to form a group
             else {
-                //Log.d("JINCHI", "Either you are the one with highest MAC, or nobody else is AVAILABLE");
-                Log.d("JINCHI", "This device should form a group");
-                this.createGroup(deviceLargestMAC);
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Either this devices is the one with greatest MAC, or the peer with the greatest MAC is NOT AVAILABLE");
+                Log.d(WIFI_P2P_DEBUG_LABEL, "So, this device will proceed to form a group");
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Calling NetworkManager.createGroup()");
+                this.createGroup();
             }
-
         }
-
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END onPeersAvailable()");
     }
 
+    /***
+     * Returns the device with greatest MAC address from a pair of devices
+     */
+    private WifiP2pDevice maxByMAC(WifiP2pDevice device1, WifiP2pDevice device2) {
+        int result = device1.deviceAddress.compareTo(device2.deviceAddress);
 
-    //Return the device with greatest MAC of both
-    private DeviceDTO compareMACAddress(DeviceDTO device1, DeviceDTO device2) {
-        int result = device1.getDeviceAddress().compareTo(device2.getDeviceAddress());
-
-        if (result < 0) {
+        if (result > 0) {
             return device1;
-        }
-        else if (result == 0) {
+        } else if (result == 0) {
             return device1;
-        }
-        else {
+        } else {
             return device2;
         }
     }
 
-    private boolean shouldConnectToDevice(DeviceDTO deviceDTO){
-        if(deviceDTO.getDeviceAddress().compareTo(Constants.myMACAddress) <0)
-            return true;
-        return false;
-    }
-
     @Override
+    /***
+     * Allows the application to extract information about whether the group was formed,
+     * if this device is the group owner, and the IP of the group owner
+     * This method is called directly within the application. Instead, it is used as callback
+     * after a call to WiFiP2pManager.requestConnectionInfo() during handling of a
+     * WIFI_P2P_CONNECTION_CHANGED_ACTION event on WiFiDirectBroadcastReceiver
+     */
     public void onConnectionInfoAvailable(WifiP2pInfo info) {
-        Log.d("JINCHI", "onConnectionInfoAvailable()");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onConnectionInfoAvailable()");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "info: " + info);
 
-        Log.d("JINCHI", "info: "+info);
+        //Reset flag to indicate you are no longer in the middle of the connection process, group creation process
+        //or joining a group
+        isThisDeviceAttemptingToJoinGroup = false;
+        Log.d(WIFI_P2P_DEBUG_LABEL, "isThisDeviceAttemptingToJoinGroup flag set to " + isThisDeviceAttemptingToJoinGroup);
 
-        //reset flag to indcate you are no more in connection process
-        tryingToMakeConnection=false;
-        Log.d("JINCHI", "tryingToMakeConnection flag set to "+tryingToMakeConnection);
+        isThisDevicePartOfGroup = info.groupFormed;
+        Log.d(WIFI_P2P_DEBUG_LABEL, "isThisDevicePartOfGroup flag set to " + isThisDevicePartOfGroup);
+        if (info.groupFormed) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Got the IP: " + info.groupOwnerAddress.getHostAddress());
+            commsManager.setServerIPAddress(info.groupOwnerAddress.getHostAddress());
 
-        //Execution resumes via callback due to manager.requestConnectionInfo() from WIFI_P2P_CONNECTION_CHANGED_ACTION handler on WiFiDirectBroadcastReceiver
-        if(info.isGroupOwner) {
+            isThisDeviceGroupOwner = info.isGroupOwner;
+            if (isThisDeviceGroupOwner) {
+                Log.d(WIFI_P2P_DEBUG_LABEL, "This device will act as the group owner/server for peers");
+                Utility.toast("This device will act as the group owner/server for peers", context);
+            } else {
+                Log.d(WIFI_P2P_DEBUG_LABEL, "This device will act as peer/client connecting to a group owner");
+                Utility.toast("This device will act as peer/client connecting to a group owner", context);
 
-            Log.d("JINCHI", "You are the owner/server of peers");
-            Utility.toast("You are the owner/server of peers",context);
-            mIGroupOwner=true;
-            groupOwnerAddress=null;
-
-        }
-        else{
-            Log.d("JINCHI", "You are a client connected to a peer server");
-            Utility.toast("You are a client connected to a peer server",context);
-            mIGroupOwner=false;
-            groupOwnerAddress=info.groupOwnerAddress.getHostAddress();
-        }
-
-        //only if you are connecting to group first time then only start the below threads for receiving messages and creating group-owner specific local broadcast listene r
-        if(! (connectedToGroup && info.groupFormed)){
-            //thread to start socket for receiving messages
-            new Thread(new ReceiveMessageTask(context)).start();
-
-            //only group owner needs to start local broadcast listener to listen for incoming messages and re-broadcast them again
-            if(info.isGroupOwner) {
-                //local broadcast-message receiver for group owner to listen to message sent from peers
-                BroadcastReceiver messageReceiver = new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        String messageJson = intent.getStringExtra("message");
-                        Log.d("JINCHI", "Local broadcast received in group-owner specific receiver: " + messageJson);
-                        Message message = Utility.fromJson(messageJson);
-                        macToIpMapping.put(message.getFromMAC(), message.getFromIP());
-                        //send it to all the peers
-                        sendMessage(message,false);
-
-                        //record the message
-                        routing.recordPeerMessage(message);
-                    }
-                };
-                LocalBroadcastManager.getInstance(context).registerReceiver(messageReceiver, new IntentFilter("MESSAGE_RECEIVED_FOR_GROUP_OWNER"));
             }
         }
 
-        //set variable to indicate you are already connected
-        connectedToGroup=info.groupFormed;
-        Log.d("JINCHI", "connectedToGroup flag set to "+connectedToGroup);
+        commsManager.notifyConnected(isThisDevicePartOfGroup);
+        commsManager.notifyDeviceRole(isThisDeviceGroupOwner);
+        commsManager.notifyEvaluateSending();
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END onConnectionInfoAvailable()");
     }
 
-    @Override
-    public void onGroupInfoAvailable(WifiP2pGroup wifiP2pGroup) {
-        Log.d("MONITOR", "**********Logging group info**********");
-
-        //sometimes on old device it it shown that group is formed, but in reality it is not.
-        if(wifiP2pGroup==null) return;
-
-        WifiP2pDevice groupOwner=wifiP2pGroup.getOwner();
-        if(groupOwner==null){
-            Log.d("MONITOR", "No group owner found in onGroupInfoAvailable. So you are no longer in group. Resetting connectedToGroup");
-            connectedToGroup=false;
-            return;
-        }
-
-        if(groupOwner.deviceAddress.equals(Constants.myMACAddress)){
-            Log.d("MONITOR", "You are the owner of the group");
-            Log.d("MONITOR", "List of the peers in the group");
-            Collection<WifiP2pDevice> peerList= wifiP2pGroup.getClientList();
-            if(peerList.size()==0){
-                Log.d("MONITOR", "No peers found in onGroupInfoAvailable. So you are no longer in group. Resetting connectedToGroup");
-                connectedToGroup=false;
-                mIGroupOwner=false;
-                return;
-            }
-
-            int count=1;
-            for(WifiP2pDevice peer:peerList){
-                Log.d("MONITOR", ""+count++);
-                Log.d("MONITOR", "Device Address: "+peer.deviceAddress);
-                Log.d("MONITOR", "Device Name: "+peer.deviceName);
-                Log.d("MONITOR", "Device Primary Type: "+peer.primaryDeviceType);
-                Log.d("MONITOR", "Device Status: "+peer.status);
-
-            }
-        }
-        else{
-            Log.d("MONITOR", "You are NOT the owner of the group");
-            Log.d("MONITOR", "Group owner information");
-
-            Log.d("MONITOR", "Group owner Address: "+groupOwner.deviceAddress);
-            Log.d("MONITOR", "Group owner Name: "+groupOwner.deviceName);
-            Log.d("MONITOR", "Group owner Primary Type: "+groupOwner.primaryDeviceType);
-            Log.d("MONITOR", "Group owner Status: "+groupOwner.status);
-        }
-
-
-        Log.d("MONITOR", "**********Logging group info ends**********");
-    }
-
+    /***
+     * Establishes a WiFi P2P connection to a group owner, resulting on this device joining a group
+     * Turns on and off the flag that allows the NetworkManager to track whether the process of
+     * establishing a connection is ongoing
+     * @param deviceDTO Contains the group owner device information
+     */
     private void connect(final DeviceDTO deviceDTO) {
-        Log.d("JINCHI", "Connecting to device with name: " + deviceDTO.getDeviceName() + ", and device address: " + deviceDTO.getDeviceAddress());
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN connect()");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "Connecting to device with name: " + deviceDTO.getDeviceName() + ", and device MAC address: " + deviceDTO.getDeviceMACAddress());
 
-        //set flag to indicate this device is trying to make connection
-        //setting this flag on onSucess method below is not enough as wifiP2pManager.connect is asynchronous and in the meantime when callback could return to
-        //onSuccess, onPeersAvaiable() can get invoked (observed when Fire device connects third)
-        tryingToMakeConnection=true;
+        //Set flag to indicate this device is trying to make connection to the group owner
+        //Setting this flag early on to avoid possible onPeersAvailable() events to interrupt the connection process
+        //Observed when Fire device connects third
+        isThisDeviceAttemptingToJoinGroup = true;
 
-        Utility.toast("Connecting to device with name: " + deviceDTO.getDeviceName() + ", and device address: " + deviceDTO.getDeviceAddress(),context);
+        Utility.toast("Connecting to device with name: " + deviceDTO.getDeviceName() + ", and device address: " + deviceDTO.getDeviceMACAddress(), context);
 
         WifiP2pConfig config = new WifiP2pConfig();
-        config.deviceAddress = deviceDTO.getDeviceAddress();
-
-        //This is configuration of Push Button Connectivity when connecting to WPS. Class deprecated on API 28, because of security vulnerabilities
+        config.deviceAddress = deviceDTO.getDeviceMACAddress();
+        //This is configuration of Push Button Connectivity when connecting to WPS
+        //Class deprecated on API 28, because of security vulnerabilities but remains the only way
+        //to make this work
         config.wps.setup = WpsInfo.PBC;
-
+        //Indicates that this device doesn't want to take over group owner responsibilities
         config.groupOwnerIntent = 1;
 
-        //connect sends a request for connection (as connecting to a WiFi network, than peer needs to respond, and may require user approval
-
-        Log.d("JINCHI", "Calling WiFiP2pManager.connect()");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "Calling WiFiP2pManager.connect()");
+        //WiFiP2pManager.connect() method sends a request for connection
+        //Similar to connecting to a WiFi network. The receiver of the request, in this case the group
+        //owner needs to respond, and in some cases, it might require user approval on the device acting
+        //as group owner
         wifiP2pManager.connect(wifiP2pChannel, config, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                Log.d("JINCHI", "Invocation of WiFiP2pManager.connect() successful for device address: " + deviceDTO.getDeviceAddress());
-                Utility.toast("Successfully requested connection to: " + deviceDTO.getDeviceAddress(),context);
-                tryingToMakeConnection=true;
-                Log.d("JINCHI", "tryingToMakeConnection flag is set to true");
+                isThisDeviceAttemptingToJoinGroup = true;
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Successful invocation of WiFiP2pManager.connect() to device with MAC address: " + deviceDTO.getDeviceMACAddress());
+                Utility.toast("Successfully requested connection to: " + deviceDTO.getDeviceMACAddress(), context);
             }
 
             @Override
             public void onFailure(int reasonCode) {
-                Log.d("JINCHI", "Failed to invoke WiFiP2pManager.connect() for device address:: " + deviceDTO.getDeviceAddress());
-                Utility.toast("Failed to get connection to: " + deviceDTO.getDeviceAddress() + ", because of reasonCode: " + reasonCode,context);
-                tryingToMakeConnection=false;
-                Log.d("JINCHI", "tryingToMakeConnection flag is set to false");
+                isThisDeviceAttemptingToJoinGroup = false;
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Failed to invoke WiFiP2pManager.connect() for device with MAC address: " + deviceDTO.getDeviceMACAddress());
+                Utility.toast("Failed to get connection to: " + deviceDTO.getDeviceMACAddress() + ", because of reasonCode: " + reasonCode, context);
             }
         });
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END connect()");
     }
 
-    private void createGroup(final DeviceDTO deviceDTO) {
-        Log.d("JINCHI", "in createGroup method");
+    /***
+     * Creates a WiFi P2P group
+     */
+    private void createGroup() {
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN createGroup()");
 
-        //TODO: add tryingToConnect like in connect()
+        isThisDeviceAttemptingToJoinGroup = true;
 
-        Log.d("JINCHI", "Calling WiFiP2pManager.createGroup()");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "Calling WiFiP2pManager.createGroup()");
+        //WiFiP2pManager.createGroup() method will result in creation of a group, and events
+        //WIFI_P2P_THIS_DEVICE_CHANGED_ACTION and WIFI_P2P_CONNECTION_CHANGED_ACTION being raised by
+        //the framework and captured by WiFiDirectBroadcastReceiver
+        //WIFI_P2P_THIS_DEVICE_CHANGED_ACTION will indicate that this device's status is connected
+        //while WIFI_P2P_CONNECTION_CHANGED_ACTION will indicate that a network handled by this device
+        //was created and indicate that this device is the group owner. It will also probably
+        //show that the list of devices part of the group is empty, for the first WIFI_P2P_CONNECTION_CHANGED_ACTION event
         wifiP2pManager.createGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                Log.d("JINCHI", "Invocation of WiFiP2pManager.createGroup() successful ");
-                Utility.toast("Successfully requested group formation to: ",context);
-                tryingToMakeConnection=true;
-                Log.d("JINCHI", "tryingToMakeConnection flag is set to true");
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Invocation of WiFiP2pManager.createGroup() successful");
+                Utility.toast("Successfully requested group formation", context);
+                isThisDeviceAttemptingToJoinGroup = true;
             }
 
             @Override
             public void onFailure(int reason) {
-                Log.d("JINCHI", "Failed to invoke WiFiP2pManager.createGroup() ");
-                Utility.toast("Failed to form group ",context);
-                tryingToMakeConnection=false;
-                Log.d("JINCHI", "tryingToMakeConnection flag is set to false");
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Failed to invoke WiFiP2pManager.createGroup(). Reason: " + reason);
+                Utility.toast("Failed to form group ", context);
+                isThisDeviceAttemptingToJoinGroup = false;
             }
         });
-
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END createGroup()");
     }
 
-    void resetNetwork(){
-        //currently only calling findPeers
-        //TODO: in future other parameters' reset may be required
-        initiateNetworkActivity();
-    }
-
-
-    private boolean isNonPhoneDevice(WifiP2pDevice peer){
-        //temporary provision to ignore devices such as printers and other phoes
+    /***
+     * We need a list of devices that are not phones
+     * @param peer
+     * @return
+     */
+    private boolean isDeviceAPhone(WifiP2pDevice peer) {
+        //temporary provision to ignore devices such as printers and other phones
         //TODO: more analysis is needed to decide which devices to consider
-        if(peer.deviceName.contains("HP")) return true;
-        if(peer.deviceName.contains("DELL")) return true;
-        if(peer.deviceName.contains("Iceberg") || peer.deviceName.contains("iceberg")) return true;
+        if (peer.deviceName.contains("HP")) return false;
+        if (peer.deviceName.contains("DELL")) return false;
+        if (peer.deviceName.contains("aRM2070")) return false;
+        if (peer.deviceName.contains("Iceberg") || peer.deviceName.contains("iceberg"))
+            return false;
+        if (!peer.primaryDeviceType.contains("0050F204")) {
+            return false;
+        }
         //if(! peer.deviceName.startsWith("null")) return true;
         //if(!peer.primaryDeviceType.contains("0050F204")) return true;
-        return false;
+        return true;
     }
 
-    public void sendMessage(Message message, boolean sendingTripDetails){
-        sendMessage=message;
-        Log.d("JINCHI", "In send message: message= "+message+", sendTripDetails= "+sendingTripDetails);
-        if(connectedToGroup) {
-            if(mIGroupOwner){
-                if(sendingTripDetails) {
-                    Log.d("JINCHI", "If you are group owner then don't send trip details to anyone. Just record them.");
-                    routing.recordPeerMessage(message);
-                }
-                else {
-                    Log.d("JINCHI", "Broadcasting the message to all the peers as I am the group owner");
-                    for (Map.Entry<String, String> entry : macToIpMapping.entrySet()) {
-                        Log.d("JINCHI", "Broadcasting to " + entry.getValue());
-                        new Thread(new SendMessageTask(entry.getValue(), message)).start();
-                    }
-                }
-            }
-            else{
-                Log.d("JINCHI", "Sending the message to the group owner.");
-                new Thread(new SendMessageTask(groupOwnerAddress,message)).start();
-                //new SendMessageTask().execute(groupOwnerAddress, messageText);
-            }
-        }
-        else{
-            Log.d("JINCHI", "You are not in the network. reset netwrok initiated");
-            resetNetwork();
-        }
+    public boolean isThisDevicePartOfGroup() {
+        return isThisDevicePartOfGroup;
     }
 
-     void doRepeatedTasks(){
-        if(mIGroupOwner){
-            //if you are group owner, check if routing is done and if group is ready then broadcast the groups
-            if(routing.isGroupsReady()){
-                Log.d("JINCHI", "Groups are ready, so broadcast them to peers");
-                Message broadcastMessage=new Message();
-                broadcastMessage.setList(routing.getUserInfoList());
-                sendMessage(broadcastMessage,false);
-            }
-        }else{
-            //broadcast your search regularly
-            sendMessage(sendMessage,true);
-        }
-    }
-
-}
-
-class NetworkManagerMonitor implements Runnable {
-    NetworkManager netwrokManager;
-    private int notInGroupTime=0;
-    public NetworkManagerMonitor(NetworkManager netwrokManager){
-        this.netwrokManager=netwrokManager;
+    public boolean isThisDeviceGroupOwner() {
+        return isThisDeviceGroupOwner;
     }
 
     @Override
-    public void run() {
-        try{
-            while(true) {
-                //check network conditions in timely manner
-                Thread.sleep(Constants.NETWORK_MANAGER_MONITOR_WAITING_PERIOD);
+    public void onGroupInfoAvailable(WifiP2pGroup wifiP2pGroup) {
+        Log.d("JINCHI_MONITOR", "**********Logging group info**********");
 
-                if (netwrokManager.connectedToGroup) {
-                    Log.d("MONITOR", "You are Connected to group");
-                    notInGroupTime=0;
-                    netwrokManager.wifiP2pManager.requestGroupInfo(netwrokManager.wifiP2pChannel, netwrokManager);
-                    netwrokManager.doRepeatedTasks();
+        //sometimes on old device it it shown that group is formed, but in reality it is not.
+        if (wifiP2pGroup == null) return;
+
+        Log.d("JINCHI_MONITOR", "wifiP2pGroup: " + wifiP2pGroup);
+
+        WifiP2pDevice groupOwner = wifiP2pGroup.getOwner();
+        if (groupOwner == null) {
+            Log.d("JINCHI_MONITOR", "No group owner found in onGroupInfoAvailable. So you are no longer in group. Resetting isThisDevicePartOfGroup");
+            isThisDevicePartOfGroup = false;
+            return;
+        }
+
+        if (groupOwner.deviceAddress.equals(Constants.THIS_DEVICE_MAC_ADDRESS)) {
+            Log.d("JINCHI_MONITOR", "You are the owner of the group");
+            Log.d("JINCHI_MONITOR", "List of the peers in the group");
+            Collection<WifiP2pDevice> peerList = wifiP2pGroup.getClientList();
+            if (peerList.size() == 0) {
+                //This might not be true
+                Log.d("JINCHI_MONITOR", "No peers found in onGroupInfoAvailable. So you are no longer in group. Resetting isThisDevicePartOfGroup");
+                isThisDevicePartOfGroup = false;
+                isThisDeviceGroupOwner = false;
+                return;
+            }
+
+            int count = 1;
+            for (WifiP2pDevice peer : peerList) {
+                Log.d("JINCHI_MONITOR", "" + count++);
+                Log.d("JINCHI_MONITOR", "Device Address: " + peer.deviceAddress);
+                Log.d("JINCHI_MONITOR", "Device Name: " + peer.deviceName);
+                Log.d("JINCHI_MONITOR", "Device Primary Type: " + peer.primaryDeviceType);
+                Log.d("JINCHI_MONITOR", "Device Status: " + peer.status);
+
+            }
+        } else {
+            Log.d("JINCHI_MONITOR", "You are NOT the owner of the group");
+            Log.d("JINCHI_MONITOR", "Group owner information");
+
+            Log.d("JINCHI_MONITOR", "Group owner Address: " + groupOwner.deviceAddress);
+            Log.d("JINCHI_MONITOR", "Group owner Name: " + groupOwner.deviceName);
+            Log.d("JINCHI_MONITOR", "Group owner Primary Type: " + groupOwner.primaryDeviceType);
+            Log.d("JINCHI_MONITOR", "Group owner Status: " + groupOwner.status);
+        }
+
+
+        Log.d("JINCHI_MONITOR", "**********Logging group info ends**********");
+    }
+
+    public String getThisDeviceMACAddress() {
+        return this.thisDeviceMACAddress;
+
+    }
+
+    public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
+        this.isWifiP2pEnabled = isWifiP2pEnabled;
+    }
+
+    /*
+    public void sendMessage2(Message message, boolean sendingTripDetails) {
+        sendMessage = message;
+        Log.d(WIFI_P2P_DEBUG_LABEL, "In send message: message= " + message + ", sendTripDetails= " + sendingTripDetails);
+        if (isThisDevicePartOfGroup) {
+            if (isThisDeviceGroupOwner) {
+                if (sendingTripDetails) {
+                    Log.d(WIFI_P2P_DEBUG_LABEL, "If you are group owner then don't send trip details to anyone. Just record them.");
+                    //routing.addJourneyRequest(message);
                 } else {
-                    Log.d("MONITOR", "You are not connected to group");
-                    notInGroupTime++;
-                    if(notInGroupTime>1){
-                        Log.d("MONITOR", "You are not in a group for long time.");
-                        Log.d("MONITOR", "Either there is no one else to connect to or some problem has occurred. Netwrok reset is required (TODO:)");
-                        //it seems in some cases even if a device can see the other device and can form the group with it, that other device cannot see the grouped formed.
-                        netwrokManager.resetNetwork();
+                    Log.d(WIFI_P2P_DEBUG_LABEL, "Broadcasting the message to all the peers as I am the group owner");
+                    /*
+                    for (Map.Entry<String, String> entry : macToIpMapping.entrySet()) {
+                        Log.d(WIFI_P2P_DEBUG_LABEL, "Broadcasting to " + entry.getValue());
+                        new Thread(new SendMessageTask(entry.getValue(), message)).start();
                     }
                 }
+            } else {
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Sending the message to the group owner.");
+                new Thread(new SendMessageTask(groupOwnerIPAddress, message)).start();
+                //new SendMessageTask().execute(groupOwnerIPAddress, messageText);
             }
-        }
-        catch(Exception e){
-            Log.d("MONITOR", "Some exception occured in NetworkManagerMonitor. CHeck errors");
-            e.printStackTrace();
+        } else {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "You are not in the network. reset netwrok initiated");
         }
     }
+  */
+    /*
+    void doRepeatedTasks() {
+        if (isThisDeviceGroupOwner) {
+            //if you are group owner, check if routing is done and if group is ready then broadcast the groups
+            if (routing.isMatchDone()) {
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Groups are ready, so broadcast them to peers");
+                Message broadcastMessage = new Message();
+                broadcastMessage.setList(routing.getJourneyRequests());
+                sendMessage(broadcastMessage, false);
+            }
+        } else {
+            //broadcast your search regularly
+            sendMessage(sendMessage, true);
+        }
+    }
+    */
 }

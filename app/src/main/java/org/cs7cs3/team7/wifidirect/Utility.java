@@ -15,7 +15,7 @@ import com.google.gson.GsonBuilder;
 public class Utility {
 
     public static void toast(String str, Context context){
-        Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
     }
 
     public static String toJson(Message message){

@@ -33,7 +33,10 @@ import org.cs7cs3.team7.journeysharing.Models.ScheduledJourneyInfo;
 import org.cs7cs3.team7.journeysharing.Models.ScheduledJourneyType;
 import org.cs7cs3.team7.journeysharing.Models.UserInfo;
 import org.cs7cs3.team7.wifidirect.INetworkManager;
+import org.cs7cs3.team7.wifidirect.CommsManagerFactory;
+import org.cs7cs3.team7.wifidirect.ICommsManager;
 import org.cs7cs3.team7.wifidirect.Message;
+import org.cs7cs3.team7.wifidirect.UserInfo;
 
 import org.cs7cs3.team7.wifidirect.NetworkManagerFactory;
 import org.cs7cs3.team7.wifidirect.Utility;
@@ -50,7 +53,7 @@ import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class OnDemandJourneyFragment extends Fragment {
-    
+
     private MainViewModel mViewModel;
     private TextView fromAddress;
     private TextView toAddress;
@@ -58,6 +61,7 @@ public class OnDemandJourneyFragment extends Fragment {
     private Button toButton;
     private Spinner spinner;
     private INetworkManager networkManager;
+    private ICommsManager commsManager;
 
     private Button setDate, timeSet;
 //    private NetworkManager networkManager;
@@ -127,7 +131,6 @@ public class OnDemandJourneyFragment extends Fragment {
             public void onChanged(@Nullable String msg) {
                 fromAddress.setText(msg);
             }
-
         });
 
         // Inti the 'toAddress' TextView and automatically update the View content.
@@ -240,26 +243,46 @@ public class OnDemandJourneyFragment extends Fragment {
         mParent = layout.findViewById(R.id.content);
         //getView().findViewById(R.layout.on_demand_journey_fragment).findViewById();
 
-        networkManager = NetworkManagerFactory.getNetworkManager(this.getActivity());
+        commsManager = CommsManagerFactory.getCommsManager(this.getContext());
+        //networkManager = NetworkManagerFactory.getNetworkManager(this.getActivity(), null);
         searchButton = (Button) layout.getChildAt(5);
         searchButton.setOnClickListener(view -> {
             Log.d("JINCHI", "in onClick sendButton handler");
             // Sent the user's info to the server.
-            Message message = new Message();
+
             // TODO: Need to test the format of UserInfo got via getSender().getValue()
+            // Sent the user's info to the server, including @param name, @param phoneNum and @param destination
             Log.d("JINCHI", "Viewmodel: ");
 
             initializeMsg(message);
 
             message.setIntent("SEND_TRIP_REQUEST");
+            mViewModel.setSender(new UserInfo(commsManager.getMACAddress() + mViewModel.getNames().getValue(), mViewModel.getNames().getValue(), mViewModel.getPhone().getValue(), mViewModel.getTo().getValue()));
+            UserInfo userInfo = new UserInfo(commsManager.getMACAddress() + mViewModel.getNames().getValue(), mViewModel.getNames().getValue(), mViewModel.getPhone().getValue(), mViewModel.getTo().getValue());
+
+            //There should be an object or structure defining the journey details, like preferences
             try {
                 waitingForMatchResult.acquire();
                 Log.d("JINCHI", "current num of semaphore: " + waitingForMatchResult.toString());
-                Log.d("JINCHI", "when sending -- message.toString(): " + message.toString());
+                //Log.d("JINCHI", "when sending -- message.toString(): " + message.toString());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            networkManager.sendMessage(message,true);
+            //networkManager.sendMessage(message,true);
+            /*****
+             Handler mHandler = new Handler(Looper.getMainLooper()) {
+            @Override public void handleMessage(android.os.Message message) {
+            // This is where you do your work in the UI thread.
+            // Your worker tells you in the message what to do.
+
+            }
+            };
+             /*****/
+            //commsManager.sendMessage(message, ICommsManager.MESSAGE_TYPES.JOURNEY_MATCH_REQUEST);
+            commsManager.requestJourneyMatch(userInfo);
+
+
+            Log.d("JINCHI", "OnDemandJourneyFragment: After calling sendMessage()");
             Toast.makeText(this.getActivity(), "Request Sent! Waiting for matching...", Toast.LENGTH_SHORT).show();
 
             // Register the messageReceiver
@@ -305,7 +328,7 @@ public class OnDemandJourneyFragment extends Fragment {
             @Override
             public void onReceive(Context context, Intent intent) {
                 Message message = Utility.fromJson(intent.getStringExtra("message"));
-                Utility.toast(message.getMessageText(),getContext());
+                //Toast.makeText(context, message.getMessageText(), Toast.LENGTH_SHORT).show();
                 Log.d("JINCHI", "Local broadcast received in general receiver: " + message);
                 // TODO: Need to check the membersList<UserInfo> from the message.
                 mViewModel.setMembersList(message.getMatchingResultInfo().getGroupMembers());
@@ -357,34 +380,35 @@ public class OnDemandJourneyFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Log.d("JINCHI", "in onResume() of MainActivity");
-        Log.d("JINCHI", "WiFi Direct Broadcast receiver registered with intent filter");
-        networkManager.onResume();
+        Log.d("JINCHI", "BEGIN onResume() of OnDemandJourneyFragment");
+        commsManager.onResume();
+        Log.d("JINCHI", "END onResume() of OnDemandJourneyFragment");
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        Log.d("JINCHI", "in onPause() of MainActivity");
-        networkManager.onPause();
+        Log.d("JINCHI", "BEGIN onPause() of OnDemandJourneyFragment");
+        commsManager.onPause();
+        Log.d("JINCHI", "END onPause() of OnDemandJourneyFragment");
     }
 
 
     @Override
     public void onStop() {
         super.onStop();
-        Log.d("JINCHI", "in onStop() of MainActivity");
-        networkManager.onStop();
+        Log.d("JINCHI", "BEGIN onStop() of OnDemandJourneyFragment");
+        commsManager.onStop();
+        Log.d("JINCHI", "END onStop() of OnDemandJourneyFragment");
     }
 
     @Override
     public void onDestroy() {
         //TODO: Need to review this
         super.onDestroy();
-        Log.d("JINCHI", "in onDestroy() of MainActivity");
-        networkManager.onDestroy();
-        Log.d("JINCHI", "in onDestroy() of MainActivity");
+        Log.d("JINCHI", "BEGIN onDestroy() of OnDemandJourneyFragment");
+        commsManager.onDestroy();
+        //commsManager.clean();
+        Log.d("JINCHI", "END onDestroy() of OnDemandJourneyFragment");
     }
-
-
 }
