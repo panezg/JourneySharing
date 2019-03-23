@@ -15,7 +15,7 @@ import androidx.test.runner.AndroidJUnit4;
 @RunWith(AndroidJUnit4.class)
 public class TestGson {
     @Test
-    public static void main(String[] args) {
+    public void testGson() {
         Message msg = new Message();
 
         msg.setFromIP("192.168.1.1");
@@ -23,10 +23,21 @@ public class TestGson {
         msg.setMessageText("Jia-test");
         msg.setTimeStamp("12:00");
 
-        UserInfo me = new UserInfo("Mengxuan", "12345", "Hangzhou");
+        UserInfo me = new UserInfo();
+        me.setName("mengxuan");
+        me.setGender("Male");
+        me.setPhoneNum("123");
         HashMap<String, UserInfo> list = new HashMap<>();
-        list.put("Jinchi", new UserInfo("Jinchi", "123", "Chongqing"));
-        list.put("Paras", new UserInfo("Paras", "123", "Dublin"));
+        UserInfo jinchi = new UserInfo();
+        jinchi.setPhoneNum("456");
+        jinchi.setGender("Male");
+        jinchi.setName("jinchi");
+        UserInfo Paras = new UserInfo();
+        Paras.setName("paras");
+        Paras.setGender("Male");
+        Paras.setPhoneNum("123");
+        list.put("Jinchi", jinchi);
+        list.put("Paras", Paras);
 
         msg.setSender(me);
         //msg.setList(list);
