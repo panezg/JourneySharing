@@ -6,9 +6,9 @@ import org.cs7cs3.team7.journeysharing.Models.UserInfo;
 import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-
+import java.util.List;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -32,7 +32,7 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<UserInfo> sender;
     private MutableLiveData<String> Time;
     private MutableLiveData<String> Date;
-    private MutableLiveData<Map<String, UserInfo>> membersList;
+    private MutableLiveData<List<UserInfo>> membersList;
 
     // Preferences
     private MutableLiveData<String> genderPreference;
@@ -48,11 +48,11 @@ public class MainViewModel extends ViewModel {
         this.sender.setValue(sender);
     }
 
-    public MutableLiveData<Map<String, UserInfo>> getMembersList() {
+    public MutableLiveData<List<UserInfo>> getMembersList() {
         return membersList;
     }
 
-    public void setMembersList(Map<String, UserInfo>membersList) {
+    public void setMembersList(List<UserInfo> membersList) {
         this.membersList.setValue(membersList);
     }
 
@@ -205,6 +205,12 @@ public class MainViewModel extends ViewModel {
         Time.setValue("Date");
         Date = new MutableLiveData<>();
         Date.setValue("Time");
+        preGenderItemIndexSelected = new MutableLiveData<>();
+        preGenderItemIndexSelected.setValue(0);
+        this.genderPreference = new MutableLiveData<String>();
+        preMethodItemIndexSelected = new MutableLiveData<>();
+        preMethodItemIndexSelected.setValue(0);
+        this.methodPreference = new MutableLiveData<String>();
 
         // Initialization of data in ProfileFragment.
         names = new MutableLiveData<>();
@@ -215,13 +221,13 @@ public class MainViewModel extends ViewModel {
         phone.setValue("");
 
         sender = new MutableLiveData<>();
+        sender.setValue(new UserInfo("", names.getValue(), phone.getValue(), to.getValue()));
         // TODO: Need to check if 0 represents Male.
-        sender.setValue(new UserInfo());
         membersList = new MutableLiveData<>();
-        membersList.setValue(new HashMap<>());
+        membersList.setValue(new ArrayList<>());
     }
 
-    public void saveUserProfile(){
+    public void saveUserProfile() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://35.190.162.77:8080")
                 .build();

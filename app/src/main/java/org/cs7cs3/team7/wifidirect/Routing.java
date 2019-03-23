@@ -3,73 +3,81 @@ package org.cs7cs3.team7.wifidirect;
 import android.util.Log;
 
 import org.cs7cs3.team7.journeysharing.Constants;
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequestInfo;
+import org.cs7cs3.team7.journeysharing.Models.MatchingResultInfo;
 import org.cs7cs3.team7.journeysharing.Models.UserInfo;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public class Routing {
-    private Map<String,UserInfo> userInfoList;
-    private boolean groupsReady;
+    private static String WIFI_P2P_DEBUG_LABEL = "JINCHI_P2P_MATCHING";
 
-    public Map<String, UserInfo> getUserInfoList() {
-        return userInfoList;
-    }
-    public void setUserInfoList(Map<String, UserInfo> userInfoList) {
-        this.userInfoList = userInfoList;
-    }
-    public boolean isGroupsReady() {
-        return groupsReady;
-    }
-    public void setGroupsReady(boolean groupsReady) {
-        this.groupsReady = groupsReady;
+    private P2PCommsManager p2pCommsManager;
+
+    private Map<String, JourneyRequestInfo> journeyRequests;
+
+
+    public Routing(P2PCommsManager p2pCommsManager) {
+        Log.d(WIFI_P2P_DEBUG_LABEL, "P2P Matching constructor");
+        this.p2pCommsManager = p2pCommsManager;
+        journeyRequests = new HashMap<>();
     }
 
-    public Routing(){
-        Log.d("ROUTING", "Routing object initialized");
-        userInfoList=new HashMap<>();
-    }
-    public void recordPeerMessage(Message message){
+    public void addJourneyRequest(JourneyRequestInfo journeyRequestInfo) {
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN Routing.addJourneyRequest()");
         //as we dont have many devices, let's make some data
-        if(userInfoList.size()==0){
-            Log.d("ROUTING", "Adding dummy data to simulate people around");
-//            letsFakeSomeData();
+        if (journeyRequests.size() == 0) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Adding test data to simulate people around");
+            addTestData();
         }
-        Log.d("ROUTING", "Recording peer trip info");
-        userInfoList.put(message.getSender()==null? "dummyName":message.getSender().getName(),message.getSender());
-        if (userInfoList.size()> Constants.THRESHOLD_TO_START_ROUTING){
-            Log.d("ROUTING", "Enough people to run routing logic. Calling find Matches");
-            findMatches();
+        //using userInfo, but should be an id-like value instead
+        journeyRequests.put(journeyRequestInfo.getUserInfo().getId(), journeyRequestInfo);
+        if (journeyRequests.size() > Constants.THRESHOLD_TO_START_ROUTING) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Enough people to run matching logic. Calling match()");
+            this.match();
         }
-        Log.d("ROUTING", "No. Peers' request recorded "+userInfoList.size());
+        Log.d(WIFI_P2P_DEBUG_LABEL, "No. Peers' request recorded " + journeyRequests.size());
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END Routing.addJourneyRequest()");
     }
 
-    private void findMatches(){
-        Iterator iterator=userInfoList.keySet().iterator();
-        int i=1;
-        for (String key : userInfoList.keySet()) {
-            UserInfo userInfo=userInfoList.get(key);
-            userInfo.setGroupId( i++%2==0? 1: 2);
+    private void match() {
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN Routing.match()");
+        int i = 0;
+
+        List<MatchingResultInfo> matchingResultInfoList = new ArrayList<>();
+        MatchingResultInfo matchingResultInfo = new MatchingResultInfo(new ArrayList<>());
+        matchingResultInfo.setStatus(MatchingResultInfo.MatchingResultStatus.MATCHED);
+        matchingResultInfoList.add(matchingResultInfo);
+        matchingResultInfo = new MatchingResultInfo(new ArrayList<>());
+        matchingResultInfo.setStatus(MatchingResultInfo.MatchingResultStatus.MATCHED);
+        matchingResultInfoList.add(matchingResultInfo);
+        for (String key : journeyRequests.keySet()) {
+            JourneyRequestInfo journeyRequestInfo = journeyRequests.get(key);
+            matchingResultInfoList.get(i++ % 2).getGroupMembers().add(journeyRequestInfo.getUserInfo());
         }
-        Log.d("ROUTING", "Peple matching is finished and trips are ready!");
-        groupsReady=true;
+        Log.d(WIFI_P2P_DEBUG_LABEL, "Matching is done and groups are ready!");
+        p2pCommsManager.broadcastMatchingResult(matchingResultInfoList);
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END Routing.match()");
     }
 
-//    private void letsFakeSomeData() {
-//        UserInfo pankaj=new UserInfo("pankaj","8982300456","dublin city center");
-//        userInfoList.put("pankaj",pankaj);
-//
-//        UserInfo shashank=new UserInfo("shashank","8982210466","dublin city center");
-//        userInfoList.put("shashank",shashank);
-//
-//        UserInfo vishal=new UserInfo("vishal","8982210173","dublin castle");
-//        userInfoList.put("vishal",vishal);
-//
-//        UserInfo gunjan=new UserInfo("gunjan","8982210581","dublin castle");
-//        userInfoList.put("gunjan",gunjan);
-//
-//        UserInfo swara=new UserInfo("swara","8982167149","dublin city center");
-//        userInfoList.put("swara",swara);
-//    }
+    private void addTestData() {
+        UserInfo userInfo = new UserInfo("1-pankaj", "pankaj", "8982300456", "dublin city center");
+        JourneyRequestInfo journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+        userInfo = new UserInfo("2-shashank", "shashank", "8982210466", "dublin city center");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+        userInfo = new UserInfo("3-vishal", "vishal", "8982210173", "dublin castle");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+        userInfo = new UserInfo("4-gunjan", "gunjan", "8982210581", "dublin castle");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+        userInfo = new UserInfo("5-swara", "swara", "8982167149", "dublin city center");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+    }
 }

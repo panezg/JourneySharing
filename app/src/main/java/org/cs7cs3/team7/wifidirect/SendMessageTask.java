@@ -9,47 +9,44 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 public class SendMessageTask implements Runnable {
+    private static String WIFI_P2P_DEBUG_LABEL = "JINCHI_DATA";
 
-    int port;
-    int len;
-    Socket socket;
-    byte buf[]  = new byte[1024];
-    String sendToIP;
-    Message message;
-    public SendMessageTask(String sendToIP, Message message){
-        this.sendToIP=sendToIP;
-        this.message=message;
+    private Message message;
+    private Socket socket;
+
+    public SendMessageTask(Message message) {
+        this.message = message;
     }
-    /*@Override
-    protected Object doInBackground(Object[] objects) {
-
-    }*/
 
     @Override
     public void run() {
         try {
-            Log.d("DATA","Sending Message starts");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN SendMessageTask.run()");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Sending message starts");
 
+            //Creates a new socket from which the client will attempt to establish a TCP connection
+            //to the server
             socket = new Socket();
+            //Request the OS to choose a ephemeral local port for the client to use
             socket.bind(null);
-
-            socket.connect((new InetSocketAddress(sendToIP, Constants.PORT)), Constants.REQUEST_TIMEOUT);
-            Log.d("DATA","Connected to socket");
+            //Attempts to connect to the device acting as group owner or server, at the predefined listening port
+            socket.connect((new InetSocketAddress(message.getDestinationIP(), Constants.LISTENING_PORT)), Constants.REQUEST_TIMEOUT);
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Connected to recipient device");
             PrintWriter writer = new PrintWriter(socket.getOutputStream());
 
-            //set your your MAC ID
-            message.setFromMAC(Constants.myMACAddress);
+            //Send the message
+            Log.d(WIFI_P2P_DEBUG_LABEL, "message: " + message.toJSON());
+            writer.write(message.toJSON() + "\n");
 
-            writer.write(Utility.toJson(message)+"\n");
             writer.flush();
             writer.close();
             socket.close();
-
-            Log.d("DATA","Sending Message completed");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Sending message completed");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "END SendMessageTask.run()");
         } catch (Exception e) {
-            Log.e("DATA","Exception occured in SendMessageTask" );
+            Log.e(WIFI_P2P_DEBUG_LABEL, "Exception occurred in SendMessageTask");
             e.printStackTrace();
+            Log.d(WIFI_P2P_DEBUG_LABEL, "END SendMessageTask.run()");
         }
-        //Thread.currentThread().stop();
     }
 }

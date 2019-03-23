@@ -1,16 +1,8 @@
 package org.cs7cs3.team7.journeysharing;
 
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -32,6 +24,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProviders;
 //
 
 public class TypeAddressFragment extends Fragment implements OnMapReadyCallback {
@@ -45,7 +43,7 @@ public class TypeAddressFragment extends Fragment implements OnMapReadyCallback 
     private final String TAG = "myTag";
 
     static TypeAddressFragment newInstance() {
-       return new TypeAddressFragment();
+        return new TypeAddressFragment();
     }
 
     @Override
@@ -67,7 +65,7 @@ public class TypeAddressFragment extends Fragment implements OnMapReadyCallback 
         // Inti the EditView 'inputAddress'.
         inputAddress = getView().findViewById(R.id.input_search);
 
-        addressSaveButton.setOnClickListener( (v) -> {
+        addressSaveButton.setOnClickListener((v) -> {
             String address = inputAddress.getText().toString();
             //TODO: Exception here should be handled.
             if (mViewModel.getIsDestination().getValue()) {
@@ -92,7 +90,7 @@ public class TypeAddressFragment extends Fragment implements OnMapReadyCallback 
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-        SupportMapFragment mapFragment=(SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
 
@@ -107,7 +105,7 @@ public class TypeAddressFragment extends Fragment implements OnMapReadyCallback 
 
 
     private void init() {
-        inputAddress=getView().findViewById(R.id.input_search);
+        inputAddress = getView().findViewById(R.id.input_search);
         inputAddress.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -129,7 +127,7 @@ public class TypeAddressFragment extends Fragment implements OnMapReadyCallback 
         String searchString = inputAddress.getText().toString();
         Geocoder geocoder;
         geocoder = new Geocoder(getActivity().getApplicationContext());
-        Log.d("Geolo","getContext"+getContext());
+        Log.d("Geolo", "getContext" + getContext());
         List<Address> list = new ArrayList<>();
         try {
             list = geocoder.getFromLocationName(searchString, 1);
