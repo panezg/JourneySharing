@@ -1,13 +1,22 @@
 package org.cs7cs3.team7.wifidirect;
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Parcelable;
 import android.util.Log;
+
+import org.cs7cs3.team7.journeysharing.Constants;
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequestInfo;
+import org.cs7cs3.team7.journeysharing.Models.MatchingResultInfo;
+import org.cs7cs3.team7.journeysharing.Models.UserInfo;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 /***
  * Every device runs a server socket to listen for messagesReceived
@@ -17,7 +26,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class P2PCommsManager implements ICommsManager {
     private static String WIFI_P2P_DEBUG_LABEL = "JINCHI";
 
-    private NetworkManager networkManager;
+    private Context context;
+    private P2PNetworkManager networkManager;
     private Thread networkManagerMonitorThread;
     private String serverIPAddress;
     private boolean thisDeviceActsAsServer;
@@ -33,7 +43,8 @@ public class P2PCommsManager implements ICommsManager {
     private Routing p2pMatching;
 
     public P2PCommsManager(Context context) {
-        this.networkManager = new NetworkManager(context, this);
+        this.context = context;
+        this.networkManager = new P2PNetworkManager(context, this);
         this.thisDeviceActsAsServer = false;
         this.thisDeviceConnected = false;
         this.p2pMatching = new Routing(this);
@@ -45,14 +56,14 @@ public class P2PCommsManager implements ICommsManager {
     /***
      * Wrapper method that the UI can use to request a Journey Match
      */
-    public void requestJourneyMatch(UserInfo userInfo) {
+    public void requestJourneyMatch(JourneyRequestInfo journeyRequestInfo) {
         Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN P2PCommsManager.requestJourneyMatch()");
-        Log.d(WIFI_P2P_DEBUG_LABEL, "userInfo: " + userInfo);
+        Log.d(WIFI_P2P_DEBUG_LABEL, "journeyRequestInfo: " + journeyRequestInfo);
         //At this point, if there is no connection, the message will be saved with destinationIP = null
         //Thus, when pulling the messages, it is necessary to check if destinationIP is null and if so, replacing with
         //serverIPAddress
         Message message = new Message(this.serverIPAddress, MESSAGE_TYPES.JOURNEY_MATCH_REQUEST);
-        message.setPayload(userInfo);
+        message.setPayload(journeyRequestInfo);
         Log.d(WIFI_P2P_DEBUG_LABEL, "Adding a message to the queue");
         pendingMessagesToSendQueue.add(message);
 
@@ -62,7 +73,7 @@ public class P2PCommsManager implements ICommsManager {
             Log.d(WIFI_P2P_DEBUG_LABEL, "You are not in the network. reset network initiated");
             if (networkManagerMonitorThread == null || networkManagerMonitorThread.isAlive() == false) {
                 //This thread is to monitor network conditions in timely manner and take proper actions (e.g., reset network, log group owner)
-                networkManagerMonitorThread = new Thread(new NetworkManagerMonitor((NetworkManager) networkManager));
+                networkManagerMonitorThread = new Thread(new NetworkManagerMonitor((P2PNetworkManager) networkManager));
                 Log.d(WIFI_P2P_DEBUG_LABEL, "Starting NetworkManagerMonitorThread");
                 networkManagerMonitorThread.start();
             }
@@ -73,18 +84,18 @@ public class P2PCommsManager implements ICommsManager {
     /***
      * Wrapper method that the matching process can use to inform peers of result of the matching
      */
-    public void broadcastMatchingResult(List<List<UserInfo>> groups) {
+    public void broadcastMatchingResult(List<MatchingResultInfo> matchingResultInfoList) {
         Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN P2PCommsManager.broadcastMatchingResult()");
-        Log.d(WIFI_P2P_DEBUG_LABEL, "Count of groups: " + groups.size());
-        for (List<UserInfo> group : groups) {
-            Log.d(WIFI_P2P_DEBUG_LABEL, "Count of one group: " + group.size());
-            for (UserInfo userInfo : group) {
+        Log.d(WIFI_P2P_DEBUG_LABEL, "Count of groups: " + matchingResultInfoList.size());
+        for (MatchingResultInfo matchingResultInfo : matchingResultInfoList) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Count of one group: " + matchingResultInfo.getGroupMembers().size());
+            for (UserInfo userInfo : matchingResultInfo.getGroupMembers()) {
                 String destinationIP = clients.get(userInfo.getId());
                 Log.d(WIFI_P2P_DEBUG_LABEL, "User Info in the group: " + userInfo);
                 if (destinationIP != null) {
                     Log.d(WIFI_P2P_DEBUG_LABEL, "Preparing message for destinationIP: " + destinationIP);
                     Message message = new Message(destinationIP, MESSAGE_TYPES.MATCHING_RESULT);
-                    message.setPayload(group);
+                    message.setPayload(matchingResultInfo);
                     Log.d(WIFI_P2P_DEBUG_LABEL, "Adding a message to the queue");
                     Log.d(WIFI_P2P_DEBUG_LABEL, "Message: " + message);
                     pendingMessagesToSendQueue.add(message);
@@ -121,7 +132,7 @@ public class P2PCommsManager implements ICommsManager {
             } else if (message.getMessageType() == MESSAGE_TYPES.JOURNEY_MATCH_REQUEST) {
                 //don't send message but put it in local data structure
                 //interacting with matching
-                p2pMatching.addJourneyRequest((UserInfo) message.getPayload());
+                p2pMatching.addJourneyRequest((JourneyRequestInfo) message.getPayload());
             }
         } else {
             Log.d(WIFI_P2P_DEBUG_LABEL, "Polling a message from the queue");
@@ -163,12 +174,9 @@ public class P2PCommsManager implements ICommsManager {
     }
 
     public void notifyDeviceRole(boolean thisDeviceActsAsServer) {
-        //Register a local broadcast receiver to be informed when
         this.thisDeviceActsAsServer = thisDeviceActsAsServer;
-        //if (thisDeviceActsAsServer) {
-        //LocalBroadcastManager.getInstance(context).registerReceiver(messageReceiver, new IntentFilter("MESSAGE_RECEIVED_FOR_GROUP_OWNER"));
-        //}
-        //clean list
+        //TODO
+        // clean list
     }
 
     public void notifyEvaluateSending() {
@@ -180,53 +188,22 @@ public class P2PCommsManager implements ICommsManager {
     public void notifyMessageReceived(Message message) {
         if (message.getMessageType() == MESSAGE_TYPES.JOURNEY_MATCH_REQUEST) {
             if (this.thisDeviceActsAsServer) {
-                UserInfo userInfo = (UserInfo) message.getPayload();
-                Log.d(WIFI_P2P_DEBUG_LABEL, "Adding to the clients hashmap (key, value):" + userInfo.getId() + ", " + message.getOriginIP());
-                clients.put(userInfo.getId(), message.getOriginIP());
-                p2pMatching.addJourneyRequest(userInfo);
+                JourneyRequestInfo journeyRequestInfo = (JourneyRequestInfo) message.getPayload();
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Adding to the clients hashmap (key, value):" + journeyRequestInfo.getUserInfo().getId() + ", " + message.getOriginIP());
+                clients.put(journeyRequestInfo.getUserInfo().getId(), message.getOriginIP());
+                p2pMatching.addJourneyRequest(journeyRequestInfo);
             }
         } else if (message.getMessageType() == MESSAGE_TYPES.MATCHING_RESULT) {
-            //raise local broadcast to update interface
+            //Raise local broadcast to update interface with the match result
+            Intent intent = new Intent(Constants.JOURNEY_MATCHED_INTENT_ACTION);
+            intent.putExtra(Constants.JOURNEY_MATCHED_INTENT_ACTION_PARCELABLE_KEY, (Parcelable) message.getPayload());
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         }
     }
 
     public String getMACAddress() {
         return networkManager.getThisDeviceMACAddress();
     }
-
-    public void foo() {
-        /*
-        if (isThisDeviceGroupOwner) {
-            //if you are group owner, check if matching is done and if group is ready then broadcast the groups
-            if (matching.isMatchDone()) {
-                Log.d(WIFI_P2P_DEBUG_LABEL, "Groups are ready, so broadcast them to peers");
-                Message broadcastMessage = new Message();
-                broadcastMessage.setList(matching.getJourneyRequests());
-                sendMessage(broadcastMessage, false);
-            }
-        } else {
-            //broadcast your search regularly
-            sendMessage(sendMessage, true);
-        }
-        */
-    }
-
-    /*
-    public void fooMethod(String messageJson) {
-        //locally broadcast the received message to local listeners
-        Log.d("DATA", "broadcast the message");
-        if (messageJson.contains("SEND_TRIP_REQUEST")) {
-            //send local broadcast is for the group owner to broadcast it to all the other peers
-            Intent intentOwner = new Intent("MESSAGE_RECEIVED_FOR_GROUP_OWNER");
-            intentOwner.putExtra("message", messageJson);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intentOwner);
-        } else {
-            //this local broadcast is for normal peers to receive message
-            Intent intent = new Intent("MESSAGE_RECEIVED");
-            intent.putExtra("message", messageJson);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-        }
-    }*/
 
     @Override
     public void onResume() {
@@ -246,7 +223,7 @@ public class P2PCommsManager implements ICommsManager {
     @Override
     public void onDestroy() {
         networkManager.onDestroy();
-        /*
+        /*TODO: find a way to clean up threads
         //Cleaning up the Network Manager Monitor Thread
         if (networkManagerMonitorThread != null && networkManagerMonitorThread.isAlive()) {
             Log.d(WIFI_P2P_DEBUG_LABEL, "Stopping Network Manager Monitor Thread");

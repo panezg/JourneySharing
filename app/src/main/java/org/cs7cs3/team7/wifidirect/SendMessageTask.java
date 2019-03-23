@@ -12,7 +12,6 @@ public class SendMessageTask implements Runnable {
     private static String WIFI_P2P_DEBUG_LABEL = "JINCHI_DATA";
 
     private Message message;
-
     private Socket socket;
 
     public SendMessageTask(Message message) {

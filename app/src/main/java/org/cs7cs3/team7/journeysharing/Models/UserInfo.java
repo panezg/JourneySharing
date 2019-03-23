@@ -1,15 +1,31 @@
 package org.cs7cs3.team7.journeysharing.Models;
 
-import org.cs7cs3.team7.journeysharing.MainViewModel;
-
-import androidx.lifecycle.ViewModel;
-
 public class UserInfo {
     // User Info
+    private String id;
     private String name;
     private String phoneNum;
     private String gender;
-    private int uniqueID;
+
+    /* Need to remove */
+    // TODO: Need to wait @JInchi finished the new Fragment, and then just read the @param destination info from the mainViewModel.
+    private final String destination = "fakeDestination";
+    /**/
+
+    public UserInfo() {
+    }
+
+    public UserInfo(String id, String name, String phone, String des) {
+        this.id = id;
+        this.name = name;
+        phoneNum = phone;
+        // TODO
+        //destination = des;
+    }
+
+    public String getId() {
+        return id;
+    }
 
     public String getName() {
         return name;
@@ -27,14 +43,6 @@ public class UserInfo {
         this.phoneNum = phoneNum;
     }
 
-    public int getUniqueID() {
-        return uniqueID;
-    }
-
-    public void setUniqueID(int uniqueID) {
-        this.uniqueID = uniqueID;
-    }
-
     public String getGender() {
         return gender;
     }
@@ -43,9 +51,23 @@ public class UserInfo {
         this.gender = gender;
     }
 
-    @Override
-    public String toString() {
-        return "name= " + name + "\nphoneNum= " + phoneNum + "\n";
+    public String getDestination() {
+        return destination;
     }
 
+    public void setDestination(String destination) {
+        // TODO
+        //this.destination = destination;
+    }
+
+    @Override
+    public String toString() {
+        return "UserInfo{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", phoneNum='" + phoneNum + '\'' +
+                ", gender='" + gender + '\'' +
+                ", destination='" + destination + '\'' +
+                '}';
+    }
 }

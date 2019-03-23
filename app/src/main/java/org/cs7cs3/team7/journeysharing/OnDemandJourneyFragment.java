@@ -1,9 +1,5 @@
 package org.cs7cs3.team7.journeysharing;
 
-import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.BroadcastReceiver;
@@ -16,8 +12,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
@@ -28,28 +22,24 @@ import android.widget.Toast;
 
 import com.dyhdyh.widget.loadingbar.LoadingBar;
 
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequestInfo;
 import org.cs7cs3.team7.journeysharing.Models.MatchingResultInfo;
-import org.cs7cs3.team7.journeysharing.Models.ScheduledJourneyInfo;
-import org.cs7cs3.team7.journeysharing.Models.ScheduledJourneyType;
 import org.cs7cs3.team7.journeysharing.Models.UserInfo;
-import org.cs7cs3.team7.wifidirect.INetworkManager;
 import org.cs7cs3.team7.wifidirect.CommsManagerFactory;
 import org.cs7cs3.team7.wifidirect.ICommsManager;
 import org.cs7cs3.team7.wifidirect.Message;
-import org.cs7cs3.team7.wifidirect.UserInfo;
-
-import org.cs7cs3.team7.wifidirect.NetworkManagerFactory;
 import org.cs7cs3.team7.wifidirect.Utility;
-
 
 import java.text.DateFormat;
 import java.util.Calendar;
-
 import java.util.concurrent.Semaphore;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class OnDemandJourneyFragment extends Fragment {
@@ -60,11 +50,10 @@ public class OnDemandJourneyFragment extends Fragment {
     private Button fromButton;
     private Button toButton;
     private Spinner spinner;
-    private INetworkManager networkManager;
     private ICommsManager commsManager;
 
     private Button setDate, timeSet;
-//    private NetworkManager networkManager;
+//    private P2PNetworkManager networkManager;
     private TextView showDate,showTime;
     private UserInfo userInfo;
 
@@ -254,11 +243,9 @@ public class OnDemandJourneyFragment extends Fragment {
             // Sent the user's info to the server, including @param name, @param phoneNum and @param destination
             Log.d("JINCHI", "Viewmodel: ");
 
-            initializeMsg(message);
-
-            message.setIntent("SEND_TRIP_REQUEST");
             mViewModel.setSender(new UserInfo(commsManager.getMACAddress() + mViewModel.getNames().getValue(), mViewModel.getNames().getValue(), mViewModel.getPhone().getValue(), mViewModel.getTo().getValue()));
             UserInfo userInfo = new UserInfo(commsManager.getMACAddress() + mViewModel.getNames().getValue(), mViewModel.getNames().getValue(), mViewModel.getPhone().getValue(), mViewModel.getTo().getValue());
+            JourneyRequestInfo journeyRequestInfo = new JourneyRequestInfo(userInfo, genderSpinner.getSelectedItem().toString(), methodSpinner.getSelectedItem().toString());
 
             //There should be an object or structure defining the journey details, like preferences
             try {
@@ -268,18 +255,14 @@ public class OnDemandJourneyFragment extends Fragment {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            //networkManager.sendMessage(message,true);
-            /*****
-             Handler mHandler = new Handler(Looper.getMainLooper()) {
-            @Override public void handleMessage(android.os.Message message) {
-            // This is where you do your work in the UI thread.
-            // Your worker tells you in the message what to do.
 
-            }
-            };
-             /*****/
-            //commsManager.sendMessage(message, ICommsManager.MESSAGE_TYPES.JOURNEY_MATCH_REQUEST);
-            commsManager.requestJourneyMatch(userInfo);
+            journeyRequestInfo.setState(JourneyRequestInfo.JourneyRequestStatus.PENDING);
+            journeyRequestInfo.setDate(mViewModel.getDate().getValue());
+            journeyRequestInfo.setTime(mViewModel.getTime().getValue());
+            journeyRequestInfo.setDestination(mViewModel.getTo().getValue());
+            journeyRequestInfo.setStartPoint(mViewModel.getFrom().getValue());
+
+            commsManager.requestJourneyMatch(journeyRequestInfo);
 
 
             Log.d("JINCHI", "OnDemandJourneyFragment: After calling sendMessage()");
@@ -324,18 +307,18 @@ public class OnDemandJourneyFragment extends Fragment {
 
     private void onListeningReceiveEvent() {
         //local broadcast message receiver to listen to message sent from peers
-        BroadcastReceiver messageReceiver = new BroadcastReceiver() {
+        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Message message = Utility.fromJson(intent.getStringExtra("message"));
+                MatchingResultInfo matchingResultInfo = intent.getParcelableExtra(Constants.JOURNEY_MATCHED_INTENT_ACTION_PARCELABLE_KEY);
                 //Toast.makeText(context, message.getMessageText(), Toast.LENGTH_SHORT).show();
-                Log.d("JINCHI", "Local broadcast received in general receiver: " + message);
+                Log.d("JINCHI", "Local broadcast received in general receiver: " + matchingResultInfo);
                 // TODO: Need to check the membersList<UserInfo> from the message.
-                mViewModel.setMembersList(message.getMatchingResultInfo().getGroupMembers());
+                mViewModel.setMembersList(matchingResultInfo.getGroupMembers());
                 waitingForMatchResult.release();
             }
         };
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(messageReceiver, new IntentFilter("MESSAGE_RECEIVED"));
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, new IntentFilter(Constants.JOURNEY_MATCHED_INTENT_ACTION));
     }
 
     private void waitForMatchAndSkip() {
@@ -354,27 +337,6 @@ public class OnDemandJourneyFragment extends Fragment {
             }
         });
         td.start();
-    }
-
-    private void initializeMsg(Message message) {
-        UserInfo sender = new UserInfo();
-        sender.setName(mViewModel.getNames().getValue());
-        sender.setPhoneNum(mViewModel.getPhone().getValue());
-        sender.setGender(mViewModel.getGender().getValue());
-        sender.setUniqueID(mViewModel.getUniqueID().getValue());
-
-        ScheduledJourneyInfo scheduledJourneyInfo = new ScheduledJourneyInfo();
-        scheduledJourneyInfo.setState(ScheduledJourneyType.SCHEDULED);
-        scheduledJourneyInfo.setDate(mViewModel.getDate().getValue());
-        scheduledJourneyInfo.setTime(mViewModel.getTime().getValue());
-        scheduledJourneyInfo.setDestination(mViewModel.getTo().getValue());
-        scheduledJourneyInfo.setStartPoint(mViewModel.getFrom().getValue());
-        scheduledJourneyInfo.setGender(mViewModel.getGenderPreference().getValue());
-        scheduledJourneyInfo.setMethod(mViewModel.getMethodPreference().getValue());
-
-        message.setMatchingResultInfo(new MatchingResultInfo());
-        message.setSender(sender);
-        message.setScheduledJourneyInfo(scheduledJourneyInfo);
     }
 
     @Override

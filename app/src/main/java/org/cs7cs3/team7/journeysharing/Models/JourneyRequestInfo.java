@@ -1,8 +1,14 @@
 package org.cs7cs3.team7.journeysharing.Models;
 
-public class ScheduledJourneyInfo {
+public class JourneyRequestInfo {
 
-    ScheduledJourneyType state;
+    public static enum JourneyRequestStatus {
+        FINISHED,
+        SCHEDULED,
+        PENDING,
+    }
+
+    private JourneyRequestStatus state;
 
     // Time scheduled
     private String date;
@@ -16,11 +22,23 @@ public class ScheduledJourneyInfo {
     private String destination;
     private String startPoint;
 
-    public ScheduledJourneyType getState() {
+    private UserInfo userInfo;
+
+    public JourneyRequestInfo(UserInfo userInfo, String gender, String method) {
+        this.userInfo = userInfo;
+        this.gender = gender;
+        this.method = method;
+    }
+
+    public UserInfo getUserInfo() {
+        return userInfo;
+    }
+
+    public JourneyRequestStatus getState() {
         return state;
     }
 
-    public void setState(ScheduledJourneyType state) {
+    public void setState(JourneyRequestStatus state) {
         this.state = state;
     }
 
@@ -44,16 +62,8 @@ public class ScheduledJourneyInfo {
         return gender;
     }
 
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
     public String getMethod() {
         return method;
-    }
-
-    public void setMethod(String method) {
-        this.method = method;
     }
 
     public String getDestination() {
@@ -70,5 +80,19 @@ public class ScheduledJourneyInfo {
 
     public void setStartPoint(String startPoint) {
         this.startPoint = startPoint;
+    }
+
+    @Override
+    public String toString() {
+        return "JourneyRequestInfo{" +
+                "state=" + state +
+                ", date='" + date + '\'' +
+                ", time='" + time + '\'' +
+                ", gender='" + gender + '\'' +
+                ", method='" + method + '\'' +
+                ", destination='" + destination + '\'' +
+                ", startPoint='" + startPoint + '\'' +
+                ", userInfo=" + userInfo +
+                '}';
     }
 }

@@ -1,10 +1,5 @@
 package org.cs7cs3.team7.journeysharing;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -17,7 +12,12 @@ import android.widget.TextView;
 import org.cs7cs3.team7.journeysharing.Models.UserInfo;
 
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.List;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProviders;
 
 public class ViewMatchFragment extends Fragment {
 
@@ -74,8 +74,8 @@ public class ViewMatchFragment extends Fragment {
 
     private void initData() {
         listData = new ArrayList<String>();
-        Map<String, UserInfo> membersList = mViewModel.getMembersList().getValue();
-        for(UserInfo user : membersList.values()) {
+        List<UserInfo> membersList = mViewModel.getMembersList().getValue();
+        for(UserInfo user : membersList) {
             // TODO: What format should the members info be displayed into??
             listData.add(user.toString());
         }

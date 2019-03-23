@@ -1,13 +1,15 @@
 package org.cs7cs3.team7.wifidirect;
 
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequestInfo;
+
 public class DummyCommsManager implements ICommsManager {
     @Override
-    public void requestJourneyMatch(UserInfo userInfo) {
+    public void requestJourneyMatch(JourneyRequestInfo userInfo) {
     }
 
     @Override
     public String getMACAddress() {
-        return null;
+        return "";
     }
 
     @Override

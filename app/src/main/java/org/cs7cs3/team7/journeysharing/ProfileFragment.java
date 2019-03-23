@@ -1,9 +1,5 @@
 package org.cs7cs3.team7.journeysharing;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -15,17 +11,11 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import org.cs7cs3.team7.wifidirect.INetworkManager;
-import org.cs7cs3.team7.wifidirect.Message;
-import org.cs7cs3.team7.wifidirect.NetworkManagerFactory;
-import org.cs7cs3.team7.wifidirect.Utility;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 
 public class ProfileFragment extends Fragment {
@@ -46,7 +36,6 @@ public class ProfileFragment extends Fragment {
     private Button start;
     private Button sendButton;
     private EditText msg;
-    private INetworkManager networkManager;
 
     static ProfileFragment newInstance() {
         return new ProfileFragment();
@@ -123,7 +112,7 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        msg = (EditText)getView().findViewById(R.id.msgTv);
+        msg = (EditText) getView().findViewById(R.id.msgTv);
         start = getView().findViewById(R.id.start);
         /*start.setOnClickListener(new View.OnClickListener() {
             @Override

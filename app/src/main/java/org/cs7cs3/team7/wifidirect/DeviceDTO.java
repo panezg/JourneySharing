@@ -19,16 +19,6 @@ public class DeviceDTO {
         return deviceName;
     }
 
-    /*
-    public void setDeviceAddress(String deviceMACAddress) {
-        this.deviceMACAddress = deviceMACAddress;
-    }
-
-    public void setDeviceName(String deviceName) {
-        this.deviceName = deviceName;
-    }
-    */
-
     @Override
     public boolean equals(Object obj) {
         return deviceMACAddress.equals(((DeviceDTO)obj).deviceMACAddress);

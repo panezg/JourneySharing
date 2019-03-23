@@ -2,13 +2,12 @@ package org.cs7cs3.team7.wifidirect;
 
 import android.content.Context;
 import android.content.IntentFilter;
+import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.net.wifi.WpsInfo;
-import android.net.wifi.WifiInfo;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
-import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Looper;
@@ -17,9 +16,8 @@ import android.util.Log;
 import org.cs7cs3.team7.journeysharing.Constants;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
-public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pManager.ConnectionInfoListener, WifiP2pManager.GroupInfoListener, INetworkManager {
+public class P2PNetworkManager implements WifiP2pManager.PeerListListener, WifiP2pManager.ConnectionInfoListener {
     private static String WIFI_P2P_DEBUG_LABEL = "JINCHI";
 
     private WifiManager wifiManager;
@@ -38,7 +36,7 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
     private boolean isThisDeviceGroupOwner = false;
 
 
-    public NetworkManager(Context context, P2PCommsManager commsManager) {
+    public P2PNetworkManager(Context context, P2PCommsManager commsManager) {
         this.context = context;
         this.commsManager = commsManager;
         //Enabling and resetting WiFi
@@ -47,6 +45,7 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
         wifiManager.setWifiEnabled(false);
         wifiManager.setWifiEnabled(true);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+        //For some reason the MAC address reported by WiFiManager doesn't match the one reported by WiFi P2P on Xiaomi
         this.thisDeviceMACAddress = wifiInfo.getMacAddress();
 
         //Calls to wifiManager.getConnectionInfo() and wifiManager.getWifiState() are not useful
@@ -76,27 +75,27 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
 
 
     public void onResume() {
-        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onResume() of NetworkManager");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onResume() of P2PNetworkManager");
         Log.d(WIFI_P2P_DEBUG_LABEL, "Registering WiFi Direct Broadcast Receiver with the intent filter");
         context.registerReceiver(wifiDirectBroadcastReceiver, intentFilter);
-        Log.d(WIFI_P2P_DEBUG_LABEL, "END onResume() of NetworkManager");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END onResume() of P2PNetworkManager");
     }
 
     public void onPause() {
-        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onPause() of NetworkManager");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onPause() of P2PNetworkManager");
         Log.d(WIFI_P2P_DEBUG_LABEL, "Unregistering WiFi Direct Broadcast Receiver");
         context.unregisterReceiver(wifiDirectBroadcastReceiver);
-        Log.d(WIFI_P2P_DEBUG_LABEL, "END onPause() of NetworkManager");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END onPause() of P2PNetworkManager");
     }
 
 
     public void onStop() {
-        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onStop() of NetworkManager");
-        Log.d(WIFI_P2P_DEBUG_LABEL, "END onStop() of NetworkManager");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onStop() of P2PNetworkManager");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END onStop() of P2PNetworkManager");
     }
 
     public void onDestroy() {
-        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onDestroy() of NetworkManager");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onDestroy() of P2PNetworkManager");
         Log.d(WIFI_P2P_DEBUG_LABEL, "Calling WiFiP2pManager.removeGroup(), which could help handle disconnection scenarios");
         wifiP2pManager.removeGroup(wifiP2pChannel, new WifiP2pManager.ActionListener() {
             @Override
@@ -109,27 +108,12 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
                 Log.d(WIFI_P2P_DEBUG_LABEL, "Invocation of WiFiP2pManager.removeGroup() failed. Reason: " + reason);
             }
         });
-
-        //Cleaning up the Network Manager Monitor Thread
-        /*
-        if (networkManagerMonitorThread != null && networkManagerMonitorThread.isAlive()) {
-            Log.d(WIFI_P2P_DEBUG_LABEL, "Stopping Network Manager Monitor Thread");
-            //stop() on Thread probably won't work
-            networkManagerMonitorThread.stop();
-        }
-        */
-        Log.d(WIFI_P2P_DEBUG_LABEL, "END onDestroy() of NetworkManager");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END onDestroy() of P2PNetworkManager");
     }
 
     public void initiateWiFiP2PGroupFormation() {
         isThisDevicePartOfGroup = false;
         isThisDeviceGroupOwner = false;
-
-        //routing = new Routing();
-
-        //shouldn't find peers always be executed by the NetworkManagerMonitorThread?
-        //create a thread that tries to find peers if it is not connected to a GO/
-
         findPeers();
     }
 
@@ -261,7 +245,7 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
             else {
                 Log.d(WIFI_P2P_DEBUG_LABEL, "Either this devices is the one with greatest MAC, or the peer with the greatest MAC is NOT AVAILABLE");
                 Log.d(WIFI_P2P_DEBUG_LABEL, "So, this device will proceed to form a group");
-                Log.d(WIFI_P2P_DEBUG_LABEL, "Calling NetworkManager.createGroup()");
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Calling P2PNetworkManager.createGroup()");
                 this.createGroup();
             }
         }
@@ -325,7 +309,7 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
 
     /***
      * Establishes a WiFi P2P connection to a group owner, resulting on this device joining a group
-     * Turns on and off the flag that allows the NetworkManager to track whether the process of
+     * Turns on and off the flag that allows the P2PNetworkManager to track whether the process of
      * establishing a connection is ongoing
      * @param deviceDTO Contains the group owner device information
      */
@@ -413,7 +397,7 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
      */
     private boolean isDeviceAPhone(WifiP2pDevice peer) {
         //temporary provision to ignore devices such as printers and other phones
-        //TODO: more analysis is needed to decide which devices to consider
+        //TODO: more analysis is needed to decide which devices to blacklist
         if (peer.deviceName.contains("HP")) return false;
         if (peer.deviceName.contains("DELL")) return false;
         if (peer.deviceName.contains("aRM2070")) return false;
@@ -422,8 +406,6 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
         if (!peer.primaryDeviceType.contains("0050F204")) {
             return false;
         }
-        //if(! peer.deviceName.startsWith("null")) return true;
-        //if(!peer.primaryDeviceType.contains("0050F204")) return true;
         return true;
     }
 
@@ -431,111 +413,11 @@ public class NetworkManager implements WifiP2pManager.PeerListListener, WifiP2pM
         return isThisDevicePartOfGroup;
     }
 
-    public boolean isThisDeviceGroupOwner() {
-        return isThisDeviceGroupOwner;
-    }
-
-    @Override
-    public void onGroupInfoAvailable(WifiP2pGroup wifiP2pGroup) {
-        Log.d("JINCHI_MONITOR", "**********Logging group info**********");
-
-        //sometimes on old device it it shown that group is formed, but in reality it is not.
-        if (wifiP2pGroup == null) return;
-
-        Log.d("JINCHI_MONITOR", "wifiP2pGroup: " + wifiP2pGroup);
-
-        WifiP2pDevice groupOwner = wifiP2pGroup.getOwner();
-        if (groupOwner == null) {
-            Log.d("JINCHI_MONITOR", "No group owner found in onGroupInfoAvailable. So you are no longer in group. Resetting isThisDevicePartOfGroup");
-            isThisDevicePartOfGroup = false;
-            return;
-        }
-
-        if (groupOwner.deviceAddress.equals(Constants.THIS_DEVICE_MAC_ADDRESS)) {
-            Log.d("JINCHI_MONITOR", "You are the owner of the group");
-            Log.d("JINCHI_MONITOR", "List of the peers in the group");
-            Collection<WifiP2pDevice> peerList = wifiP2pGroup.getClientList();
-            if (peerList.size() == 0) {
-                //This might not be true
-                Log.d("JINCHI_MONITOR", "No peers found in onGroupInfoAvailable. So you are no longer in group. Resetting isThisDevicePartOfGroup");
-                isThisDevicePartOfGroup = false;
-                isThisDeviceGroupOwner = false;
-                return;
-            }
-
-            int count = 1;
-            for (WifiP2pDevice peer : peerList) {
-                Log.d("JINCHI_MONITOR", "" + count++);
-                Log.d("JINCHI_MONITOR", "Device Address: " + peer.deviceAddress);
-                Log.d("JINCHI_MONITOR", "Device Name: " + peer.deviceName);
-                Log.d("JINCHI_MONITOR", "Device Primary Type: " + peer.primaryDeviceType);
-                Log.d("JINCHI_MONITOR", "Device Status: " + peer.status);
-
-            }
-        } else {
-            Log.d("JINCHI_MONITOR", "You are NOT the owner of the group");
-            Log.d("JINCHI_MONITOR", "Group owner information");
-
-            Log.d("JINCHI_MONITOR", "Group owner Address: " + groupOwner.deviceAddress);
-            Log.d("JINCHI_MONITOR", "Group owner Name: " + groupOwner.deviceName);
-            Log.d("JINCHI_MONITOR", "Group owner Primary Type: " + groupOwner.primaryDeviceType);
-            Log.d("JINCHI_MONITOR", "Group owner Status: " + groupOwner.status);
-        }
-
-
-        Log.d("JINCHI_MONITOR", "**********Logging group info ends**********");
-    }
-
     public String getThisDeviceMACAddress() {
         return this.thisDeviceMACAddress;
-
     }
 
     public void setIsWifiP2pEnabled(boolean isWifiP2pEnabled) {
         this.isWifiP2pEnabled = isWifiP2pEnabled;
     }
-
-    /*
-    public void sendMessage2(Message message, boolean sendingTripDetails) {
-        sendMessage = message;
-        Log.d(WIFI_P2P_DEBUG_LABEL, "In send message: message= " + message + ", sendTripDetails= " + sendingTripDetails);
-        if (isThisDevicePartOfGroup) {
-            if (isThisDeviceGroupOwner) {
-                if (sendingTripDetails) {
-                    Log.d(WIFI_P2P_DEBUG_LABEL, "If you are group owner then don't send trip details to anyone. Just record them.");
-                    //routing.addJourneyRequest(message);
-                } else {
-                    Log.d(WIFI_P2P_DEBUG_LABEL, "Broadcasting the message to all the peers as I am the group owner");
-                    /*
-                    for (Map.Entry<String, String> entry : macToIpMapping.entrySet()) {
-                        Log.d(WIFI_P2P_DEBUG_LABEL, "Broadcasting to " + entry.getValue());
-                        new Thread(new SendMessageTask(entry.getValue(), message)).start();
-                    }
-                }
-            } else {
-                Log.d(WIFI_P2P_DEBUG_LABEL, "Sending the message to the group owner.");
-                new Thread(new SendMessageTask(groupOwnerIPAddress, message)).start();
-                //new SendMessageTask().execute(groupOwnerIPAddress, messageText);
-            }
-        } else {
-            Log.d(WIFI_P2P_DEBUG_LABEL, "You are not in the network. reset netwrok initiated");
-        }
-    }
-  */
-    /*
-    void doRepeatedTasks() {
-        if (isThisDeviceGroupOwner) {
-            //if you are group owner, check if routing is done and if group is ready then broadcast the groups
-            if (routing.isMatchDone()) {
-                Log.d(WIFI_P2P_DEBUG_LABEL, "Groups are ready, so broadcast them to peers");
-                Message broadcastMessage = new Message();
-                broadcastMessage.setList(routing.getJourneyRequests());
-                sendMessage(broadcastMessage, false);
-            }
-        } else {
-            //broadcast your search regularly
-            sendMessage(sendMessage, true);
-        }
-    }
-    */
 }

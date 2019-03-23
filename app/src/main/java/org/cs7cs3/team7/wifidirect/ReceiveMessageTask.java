@@ -11,8 +11,6 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-//import android.support.v4.content.LocalBroadcastManager;
-
 public class ReceiveMessageTask implements Runnable {
     private static final String WIFI_P2P_DEBUG_LABEL = "JINCHI_DATA";
 
@@ -50,10 +48,6 @@ public class ReceiveMessageTask implements Runnable {
                 Log.d(WIFI_P2P_DEBUG_LABEL, "Received following message from this IP [" + originIP + "]: " + messageJson);
                 Message message = Message.fromJSON(messageJson);
                 message.setOriginIP(originIP);
-                //messageJson = Utility.toJson(message);
-
-                //Log.d(WIFI_P2P_DEBUG_LABEL, "Doing something to the message. It now is: " + messageJson);
-                //message = Utility.fromJson(messageJson);
                 commsManager.notifyMessageReceived(message);
             }
         } catch (Exception e) {

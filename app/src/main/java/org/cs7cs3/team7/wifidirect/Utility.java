@@ -1,35 +1,22 @@
 package org.cs7cs3.team7.wifidirect;
 
 import android.content.Context;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
-//import androidx.core.app.ActivityCompat;
-//import androidx.core.content.ContextCompat;
-
-/**
- * Authored by KaushalD on 8/27/2016.
- */
 public class Utility {
 
-    public static void toast(String str, Context context){
+    public static void toast(String str, Context context) {
+        //TODO: Removing Toast functionality because it cannot be called from within a background thread directly, check if it is still necessary
         //Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
     }
 
-    public static String toJson(Message message){
-        return new Gson().toJson(message);
-    }
-
-    public static Message fromJson(String messageText){
-        return new Gson().fromJson(messageText, Message.class);
-    }
-
-    public static String extractIP(String subnetAddress){
-        String ip=subnetAddress.substring(subnetAddress.indexOf("/")+1,subnetAddress.indexOf(":"));
+    public static String extractIP(String subnetAddress) {
+        String ip = subnetAddress.substring(subnetAddress.indexOf("/") + 1, subnetAddress.indexOf(":"));
         return ip;
     }
+
+    //TODO: Check if the code below can be removed
     /*public static boolean copyFile(InputStream inputStream, OutputStream out) {
         byte buf[] = new byte[1024];
         int len;

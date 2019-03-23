@@ -38,7 +38,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
 
     private WifiP2pManager wifiP2pManager;
     private Channel channel;
-    private NetworkManager networkManager;
+    private P2PNetworkManager networkManager;
 
     private boolean hasWiFiOffOnSequenceBeenDetectedAtLeastOnce = false;
     private String eventChain = "";
@@ -49,7 +49,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
      * @param networkManager networkManager associated with the receiver
      */
     public WiFiDirectBroadcastReceiver(WifiP2pManager wifiP2pManager, Channel channel,
-                                       NetworkManager networkManager) {
+                                       P2PNetworkManager networkManager) {
         super();
         this.wifiP2pManager = wifiP2pManager;
         this.channel = channel;
@@ -111,7 +111,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                     Log.d(WIFI_P2P_DEBUG_LABEL, "Calling WifiP2pManager.requestPeers() from BroadcastReceiver");
                     //To actually get the list of peers and the details of each peer, call WiFiP2pManager.requestPeers(Context, PeerListListener). This is an async call.
                     //The onPeersAvailable() method of PeerListListener will be called once the information is available
-                    //NetworkManager implements the PeerListListener interface
+                    //P2PNetworkManager implements the PeerListListener interface
                     wifiP2pManager.requestPeers(channel, networkManager);
                 }
             }
@@ -152,7 +152,7 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
                         //At this point the MAC addresses of members of the group is available, but to get the IP address of the group owner,
                         //call WiFiP2pManager.requestConnectionInfo(Context, ConnectionInfoListener). This is an async call.
                         //The onConnectionInfoAvailable() method of ConnectionInfoListener will be called once the information is available
-                        //NetworkManager implements the ConnectionInfoListener interface
+                        //P2PNetworkManager implements the ConnectionInfoListener interface
                         wifiP2pManager.requestConnectionInfo(channel, networkManager);
                     }
                 } else {
