@@ -16,7 +16,8 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:entries="@array/types_array"/>
+        android:entries="@array/types_array"
+        />
 
     <TextView
         android:id="@+id/odj_label"
@@ -35,7 +36,7 @@
         android:layout_height="wrap_content" />
 
     <include
-        android:id="@+id/preferences_include"
+            android:id="@+id/preferences_include"
         layout="@layout/preferences"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
