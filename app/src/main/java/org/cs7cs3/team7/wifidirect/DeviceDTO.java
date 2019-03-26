@@ -1,28 +1,27 @@
 package org.cs7cs3.team7.wifidirect;
 
 public class DeviceDTO {
-    private String deviceAddress;
+    private String deviceMACAddress;
     private String deviceName;
     public int status;
 
-    public String getDeviceAddress() {
-        return deviceAddress;
+    public DeviceDTO(String deviceAddress, String deviceName, int status) {
+        this.deviceMACAddress = deviceAddress;
+        this.deviceName = deviceName;
+        this.status = status;
+    }
+
+    public String getDeviceMACAddress() {
+        return deviceMACAddress;
     }
 
     public String getDeviceName() {
         return deviceName;
     }
 
-    public void setDeviceAddress(String deviceAddress) {
-        this.deviceAddress = deviceAddress;
-    }
-
-    public void setDeviceName(String deviceName) {
-        this.deviceName = deviceName;
-    }
-
     @Override
     public boolean equals(Object obj) {
-        return deviceAddress.equals(((DeviceDTO)obj).deviceAddress);
+        return deviceMACAddress.equals(((DeviceDTO)obj).deviceMACAddress);
+        //and deviceName?
     }
 }

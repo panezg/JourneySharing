@@ -31,29 +31,29 @@ import org.cs7cs3.team7.journeysharing.Constants;
 
 
 /**
- * A BroadcastReceiver that notifies of important wifi p2p events.
+ * A BroadcastReceiver that is alerted of important WiFi P2P events.
  */
 public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
+    private static final String WIFI_P2P_DEBUG_LABEL = "JINCHI";
 
-    private WifiP2pManager manager;
+    private WifiP2pManager wifiP2pManager;
     private Channel channel;
-    //private MainActivity activity;
-    private NetworkManager activity;
-    private boolean hasWiFiOffBeenDetectedAtLeastOnce = false;
-    private boolean haveSeenThisDeviceChangedEvent = false;
-    private static final String TAG = "JINCHI";
+    private P2PNetworkManager networkManager;
+
+    private boolean hasWiFiOffOnSequenceBeenDetectedAtLeastOnce = false;
+    private String eventChain = "";
 
     /**
-     * @param manager  WifiP2pManager system service
-     * @param channel  Wifi p2p channel
-     * @param activity activity associated with the receiver
+     * @param wifiP2pManager WifiP2pManager system service
+     * @param channel        Wifi p2p channel
+     * @param networkManager networkManager associated with the receiver
      */
-    public WiFiDirectBroadcastReceiver(WifiP2pManager manager, Channel channel,
-                                       NetworkManager activity) {
+    public WiFiDirectBroadcastReceiver(WifiP2pManager wifiP2pManager, Channel channel,
+                                       P2PNetworkManager networkManager) {
         super();
-        this.manager = manager;
+        this.wifiP2pManager = wifiP2pManager;
         this.channel = channel;
-        this.activity = activity;
+        this.networkManager = networkManager;
     }
 
     /*
@@ -63,131 +63,123 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
      */
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d(TAG, "WiFiDirectBroadcastReceiver.onReceive() BEGIN");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "WiFiDirectBroadcastReceiver.onReceive() BEGIN");
         String action = intent.getAction();
-        //Broadcast when Wi-Fi P2P is enabled or disabled on the device.
-        if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
-            Log.d(TAG, "WiFiDirectBroadcastReceiver [WIFI_P2P_STATE_CHANGED_ACTION] BEGIN IF");
-            // Check to see if Wi-Fi is enabled and notify appropriate activity
 
+        //WIFI_P2P_STATE_CHANGED_ACTION broadcast is received when Wi-Fi P2P is enabled or disabled on the device.
+        if (WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION.equals(action)) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "WiFiDirectBroadcastReceiver [WIFI_P2P_STATE_CHANGED_ACTION] BEGIN IF");
+
+            // Check to see if Wi-Fi is enabled and notify appropriate networkManager
             //Check if WiFi P2P/direct is on or off
             int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
             if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
                 // Wifi Direct mode is enabled
-                Log.d(TAG, "[WIFI_P2P_STATE_CHANGED_ACTION] WiFi P2P is on");
-                activity.setIsWifiP2pEnabled(true);
+                Log.d(WIFI_P2P_DEBUG_LABEL, "[WIFI_P2P_STATE_CHANGED_ACTION] WiFi P2P is on");
+                networkManager.setIsWifiP2pEnabled(true);
+                this.eventChain = this.eventChain.concat("ON");
             } else {
-                Log.d(TAG, "[WIFI_P2P_STATE_CHANGED_ACTION] WiFi P2P is off");
-                activity.setIsWifiP2pEnabled(false);
-                hasWiFiOffBeenDetectedAtLeastOnce = true;
+                Log.d(WIFI_P2P_DEBUG_LABEL, "[WIFI_P2P_STATE_CHANGED_ACTION] WiFi P2P is off");
+                networkManager.setIsWifiP2pEnabled(false);
+                this.eventChain = this.eventChain.concat("OFF");
             }
-            Log.d(TAG, "P2P state changed to: " + state + ". 1 means Disabled, 2 means Enabled");
-            Log.d(TAG, "WiFiDirectBroadcastReceiver [WIFI_P2P_STATE_CHANGED_ACTION] END IF");
+
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Event chain: " + eventChain);
+            if (eventChain.endsWith("OFFON")) {
+                hasWiFiOffOnSequenceBeenDetectedAtLeastOnce = true;
+            }
+            else {
+
+            }
+            Log.d(WIFI_P2P_DEBUG_LABEL, "P2P state changed to: " + state + ". 1 means Disabled, 2 means Enabled");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "WiFiDirectBroadcastReceiver [WIFI_P2P_STATE_CHANGED_ACTION] END IF");
         }
-        //Broadcast when you call discoverPeers(). You usually want to call requestPeers() to get an updated list of peers if you handle this intent in your application
+        //WIFI_P2P_PEERS_CHANGED_ACTION broadcast is received after calling discoverPeers() and if peers are available nearby
+        //You usually want to call requestPeers() to get an updated list of peers if you handle this intent in your application
         else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
-            Log.d(TAG, "WiFiDirectBroadcastReceiver [WIFI_P2P_PEERS_CHANGED_ACTION] BEGIN IF");
-
-            // request available peers from the wifi p2p manager. This is an
-            // asynchronous call and the calling activity is notified with a
-            // callback on PeerListListener.onPeersAvailable()
-
-            // Call WifiP2pManager.requestPeers() to get a list of current peers
-
-            //GPV: Should not be null, check before on creation of receiver
-            Log.d(TAG, "[WIFI_P2P_PEERS_CHANGED_ACTION] P2P peers changed");
-            Log.d(TAG, "Is manager null? " + (manager == null));
-            if (manager != null) {
-                //GPV: Why make the activity, listener?
-                //requestPeers() needs to be called to get the list. At this point, API only tells you there has been a change on the list of peers, e.g., new list from zero, new peer, etc.
-                //raises a onPeersAvailable even captured by the activity because it implements interface
-                Log.d(TAG, "hasWiFiOffBeenDetectedAtLeastOnce? " + hasWiFiOffBeenDetectedAtLeastOnce);
-                if (hasWiFiOffBeenDetectedAtLeastOnce) {
-                    Log.d(TAG, "Calling WifiP2pManager.requestPeers() from BroadcastReceiver");
-                    manager.requestPeers(channel, activity);
+            Log.d(WIFI_P2P_DEBUG_LABEL, "WiFiDirectBroadcastReceiver [WIFI_P2P_PEERS_CHANGED_ACTION] BEGIN IF");
+            //At this point, the WiFi P2P framework only tells you the list of peers has changed, either because existing peers have changed properties
+            //or some peers disappeared or new peers appeared.
+            Log.d(WIFI_P2P_DEBUG_LABEL, "[WIFI_P2P_PEERS_CHANGED_ACTION] P2P peers changed");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Is wifiP2pManager null? " + (wifiP2pManager == null));
+            if (wifiP2pManager != null) {
+                Log.d(WIFI_P2P_DEBUG_LABEL, "hasWiFiOffOnSequenceBeenDetectedAtLeastOnce? " + hasWiFiOffOnSequenceBeenDetectedAtLeastOnce);
+                //Only process the relevant events of this kind, that is, the events produced after
+                //the on-off reset of the WiFi, which happens before the application subscribes to
+                //the WiFiP2pManager events
+                if (hasWiFiOffOnSequenceBeenDetectedAtLeastOnce) {
+                    Log.d(WIFI_P2P_DEBUG_LABEL, "Calling WifiP2pManager.requestPeers() from BroadcastReceiver");
+                    //To actually get the list of peers and the details of each peer, call WiFiP2pManager.requestPeers(Context, PeerListListener). This is an async call.
+                    //The onPeersAvailable() method of PeerListListener will be called once the information is available
+                    //P2PNetworkManager implements the PeerListListener interface
+                    wifiP2pManager.requestPeers(channel, networkManager);
                 }
             }
-            Log.d(TAG, "WiFiDirectBroadcastReceiver [WIFI_P2P_PEERS_CHANGED_ACTION] END IF");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "WiFiDirectBroadcastReceiver [WIFI_P2P_PEERS_CHANGED_ACTION] END IF");
         }
-        //When the other device we tried to connect in the step before, accepts the connection request, the connection state of such device changes
-        //Broadcast when the state of the device's Wi-Fi connection changes.
+        //WIFI_P2P_CONNECTION_CHANGED_ACTION broadcast is received when the connection state from the PoV of this device has changed
+        //usually because either this devices successfully connected to a peer, created a group on its own, or joined an existing group
+        //In the case when this device attempts to connect to another one, this event is raised when the second devices accepts the connection request
+        //The event comes with a list for each device it has connection change information, e.g., if 3 devices are connected in total in a group,
+        //each device will get one WIFI_P2P_CONNECTION_CHANGED_ACTION event but with a list of two entries
+        //Broadcast received when the state of the device's Wi-Fi connection changes.
         //Broadcast intent action indicating that the state of Wi-Fi p2p connectivity has changed.
-        //Weird??
         else if (WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION.equals(action)) {
-            Log.d(TAG, "WiFiDirectBroadcastReceiver [WIFI_P2P_CONNECTION_CHANGED_ACTION] BEGIN IF");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "WiFiDirectBroadcastReceiver [WIFI_P2P_CONNECTION_CHANGED_ACTION] BEGIN IF");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Is wifiP2pManager null? " + (wifiP2pManager == null));
+            if (wifiP2pManager != null) {
+                //WifiP2pInfo provides P2P connection information about a Wi-Fi P2P group
+                WifiP2pInfo p2pInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_INFO);
+                Log.d(WIFI_P2P_DEBUG_LABEL, "[WIFI_P2P_CONNECTION_CHANGED_ACTION] p2pInfo (represents connection information about a Wi-Fi P2p group): " + p2pInfo.toString());
+                //NetworkInfo provides the status of the network interface
+                NetworkInfo networkInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
+                Log.d(WIFI_P2P_DEBUG_LABEL, "[WIFI_P2P_CONNECTION_CHANGED_ACTION] networkInfo (describes the status of the network interface): " + networkInfo.toString());
+                //A WifiP2pGroup consists of a single group owner and one or more clients.
+                //WifiP2pGroup provides information about the group per se, such as the members and their MACs
+                WifiP2pGroup wifiP2pGroup = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_GROUP);
+                Log.d(WIFI_P2P_DEBUG_LABEL, "[WIFI_P2P_CONNECTION_CHANGED_ACTION] wifiP2pGroup (represents a Wi-Fi P2p group): " + wifiP2pGroup.toString());
 
-            // Respond to new connection or disconnections
-
-            if (manager == null) {
-                return;
-            }
-            //provides the p2p connection info
-            WifiP2pInfo p2pInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_INFO);
-            Log.d(TAG, "[WIFI_P2P_CONNECTION_CHANGED_ACTION] p2pInfo (represents connection information about a Wi-Fi p2p group): " + p2pInfo.toString());
-            //Provides the network info
-            NetworkInfo networkInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
-            Log.d(TAG, "[WIFI_P2P_CONNECTION_CHANGED_ACTION] networkInfo (describes the status of the network interface): " + networkInfo.toString());
-            WifiP2pGroup wifiP2pGroup = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_GROUP);
-            //A p2p group consists of a single group owner and one or more clients
-            Log.d(TAG, "[WIFI_P2P_CONNECTION_CHANGED_ACTION] wifiP2pGroup (represents a Wi-Fi P2p group): " + wifiP2pGroup.toString());
-
-//            if (p2pInfo != null && p2pInfo.groupOwnerAddress != null) {
-//                String goAddress = Utility.getDottedDecimalIP(p2pInfo.groupOwnerAddress
-//                        .getAddress());
-//                boolean isGroupOwner = p2pInfo.isGroupOwner;
-//            }
-
-            if (networkInfo.isConnected()) {
-                Log.d(TAG, "[WIFI_P2P_CONNECTION_CHANGED_ACTION] Something happened 1 here");
-                //Log.d(TAG, "[WIFI_P2P_CONNECTION_CHANGED_ACTION] A peer device accepted your connection request");
-                // we are connected with the other device, request connection
-                // info to find group owner IP
-                if (hasWiFiOffBeenDetectedAtLeastOnce) {
-                    //TODO: GPV Not sure why invoked here
-                    Log.d(TAG, "Calling WifiP2pManager.requestConnectionInfo() from BroadcastReceiver");
-                    manager.requestConnectionInfo(channel, activity);
+                //If this device is part of a group
+                if (networkInfo.isConnected()) {
+                    Log.d(WIFI_P2P_DEBUG_LABEL, "[WIFI_P2P_CONNECTION_CHANGED_ACTION] This device is connected/part of a group");
+                    //Only process the relevant events of this kind, that is, the events produced after
+                    //the on-off reset of the WiFi, which happens before the application subscribes to
+                    //the WiFiP2pManager events
+                    //Whether a WiFi Off event has been detected before is only relevant if we plan to call a method of WiFiP2pManager
+                    Log.d(WIFI_P2P_DEBUG_LABEL, "hasWiFiOffOnSequenceBeenDetectedAtLeastOnce? " + hasWiFiOffOnSequenceBeenDetectedAtLeastOnce);
+                    if (hasWiFiOffOnSequenceBeenDetectedAtLeastOnce) {
+                        Log.d(WIFI_P2P_DEBUG_LABEL, "Calling WifiP2pManager.requestConnectionInfo() from BroadcastReceiver");
+                        //At this point the MAC addresses of members of the group is available, but to get the IP address of the group owner,
+                        //call WiFiP2pManager.requestConnectionInfo(Context, ConnectionInfoListener). This is an async call.
+                        //The onConnectionInfoAvailable() method of ConnectionInfoListener will be called once the information is available
+                        //P2PNetworkManager implements the ConnectionInfoListener interface
+                        wifiP2pManager.requestConnectionInfo(channel, networkManager);
+                    }
+                } else {
+                    Log.d(WIFI_P2P_DEBUG_LABEL, "[WIFI_P2P_CONNECTION_CHANGED_ACTION] This device is NOT or NOT LONGER connected/part of a group");
                 }
-            } else {
-                Log.d(TAG, "[WIFI_P2P_CONNECTION_CHANGED_ACTION] Something ELSE happened 1 here");
-                // Log.d(TAG, "[WIFI_P2P_CONNECTION_CHANGED_ACTION] A peer device disconnect from you");
-                // It's a disconnect
-                // activity.resetData();
             }
-
-            Log.d(TAG, "WiFiDirectBroadcastReceiver [WIFI_P2P_CONNECTION_CHANGED_ACTION] END IF");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "WiFiDirectBroadcastReceiver [WIFI_P2P_CONNECTION_CHANGED_ACTION] END IF");
         }
-        //Broadcast when a device's details have changed, such as the device's name
-        //Broadcast intent action indicating that this device details have changed.
+        //WIFI_P2P_THIS_DEVICE_CHANGED_ACTION broadcast is received when this device's details have
+        //changed, such as the device's status, e.g., available, connected, etc.
+        //Although this event provides information about your current state, such as your own MAC address. It is not that useful
+        //since other events provide the same information
         else if (WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION.equals(action)) {
-            Log.d(TAG, "WiFiDirectBroadcastReceiver [WIFI_P2P_THIS_DEVICE_CHANGED_ACTION] BEGIN IF");
-            // Respond to this device's wifi state changing
-
-            Log.d(TAG, "[WIFI_P2P_THIS_DEVICE_CHANGED_ACTION] Something happened 2 here");
-            Log.d(TAG, "[WIFI_P2P_THIS_DEVICE_CHANGED_ACTION] getExtras(): " + intent.getExtras().keySet());
-            //NOT needed for our use case
-//            DeviceListFragment fragment = (DeviceListFragment) activity.getFragmentManager()
-//                    .findFragmentById(R.id.frag_list);
-//            WifiP2pDevice device = (WifiP2pDevice) intent.getParcelableExtra(
-//                    WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
-//            fragment.updateThisDevice(device);
+            Log.d(WIFI_P2P_DEBUG_LABEL, "WiFiDirectBroadcastReceiver [WIFI_P2P_THIS_DEVICE_CHANGED_ACTION] BEGIN IF");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "[WIFI_P2P_THIS_DEVICE_CHANGED_ACTION] getExtras(): " + intent.getExtras().keySet());
             WifiP2pDevice device = (WifiP2pDevice) intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
-            Constants.myMACAddress=device.deviceAddress;
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Your device information");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "device Name: " + device.deviceName);
+            Log.d(WIFI_P2P_DEBUG_LABEL, "device MAC Address: " + device.deviceAddress);
+            Log.d(WIFI_P2P_DEBUG_LABEL, "deviceStatus: " + device.status);
+            Log.d(WIFI_P2P_DEBUG_LABEL, "deviceStatus interpretation: CONNECTED = 0, INVITED = 1, FAILED = 2, AVAILABLE = 3, UNAVAILABLE = 4");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "device primary device type: " + device.primaryDeviceType);
+            Log.d(WIFI_P2P_DEBUG_LABEL, "device secondary device type: " + device.secondaryDeviceType);
+            Log.d(WIFI_P2P_DEBUG_LABEL, "WiFiDirectBroadcastReceiver [WIFI_P2P_THIS_DEVICE_CHANGED_ACTION] END IF");
 
-            Log.d(TAG, "Your device information");
-            Log.d(TAG, "device Name: " + device.deviceName);
-            Log.d(TAG, "device MAC Address: " + device.deviceAddress);
-            Log.d(TAG, "deviceStatus: " + device.status);
-            Log.d(TAG, "deviceStatus interpretation: CONNECTED = 0, INVITED = 1, FAILED = 2, AVAILABLE = 3, UNAVAILABLE = 4");
-            Log.d(TAG, "device primary device type: " + device.primaryDeviceType);
-            Log.d(TAG, "device secondary device type: " + device.secondaryDeviceType);
-
-            Log.d(TAG, "WiFiDirectBroadcastReceiver [WIFI_P2P_THIS_DEVICE_CHANGED_ACTION] END IF");
-            /*if (!haveSeenThisDeviceChangedEvent) {
-                activity.deviceName = device.deviceName;
-                activity.changeDeviceName(0);
-                haveSeenThisDeviceChangedEvent=true;
-            }*/
+            Constants.THIS_DEVICE_MAC_ADDRESS = device.deviceAddress;
         }
-        Log.d(TAG, "WiFiDirectBroadcastReceiver.onReceive() END");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "WiFiDirectBroadcastReceiver.onReceive() END");
     }
 }

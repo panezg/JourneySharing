@@ -1,94 +1,78 @@
 package org.cs7cs3.team7.wifidirect;
 
-import org.cs7cs3.team7.journeysharing.Models.MatchingResultInfo;
-import org.cs7cs3.team7.journeysharing.Models.ScheduledJourneyInfo;
-import org.cs7cs3.team7.journeysharing.Models.UserInfo;
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 
-import java.util.Map;
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequestInfo;
+import org.cs7cs3.team7.journeysharing.Models.MatchingResultInfo;
 
 public class Message {
-    private String fromMAC;
-    private String fromIP;
-    private String timeStamp;
-    private String messageText;
-    private String intent;
+    //TODO:  timeStamp could be useful
+    //private String timeStamp;
 
-    private UserInfo sender;
-    private MatchingResultInfo matchingResultInfo;
-    private ScheduledJourneyInfo scheduledJourneyInfo;
+    private String destinationIP;
+    private String originIP;
+    private ICommsManager.MESSAGE_TYPES messageType;
+    private Object payload;
 
-    public UserInfo getSender() {
-        return sender;
-    }
-
-    public void setSender(UserInfo sender) {
-        this.sender = sender;
-    }
-
-    public MatchingResultInfo getMatchingResultInfo() {
-        return matchingResultInfo;
-    }
-
-    public void setMatchingResultInfo(MatchingResultInfo matchingResultInfo) {
-        this.matchingResultInfo = matchingResultInfo;
-    }
-
-    public ScheduledJourneyInfo getScheduledJourneyInfo() {
-        return scheduledJourneyInfo;
-    }
-
-    public void setScheduledJourneyInfo(ScheduledJourneyInfo scheduledJourneyInfo) {
-        this.scheduledJourneyInfo = scheduledJourneyInfo;
-    }
-
-    public String getFromMAC() {
-        return fromMAC;
-    }
-
-    public void setFromMAC(String fromMAC) {
-        this.fromMAC = fromMAC;
-    }
-
-    public String getFromIP() {
-        return fromIP;
-    }
-
-    public void setFromIP(String fromIP) {
-        this.fromIP = fromIP;
-    }
-
-    public String getTimeStamp() {
-        return timeStamp;
-    }
-
-    public void setTimeStamp(String timeStamp) {
-        this.timeStamp = timeStamp;
-    }
-
-    public String getMessageText() {
-        return messageText;
-    }
-
-    public void setMessageText(String messageText) {
-        this.messageText = messageText;
-    }
-
-    public String getIntent() {
-        return intent;
-    }
-
-    public void setIntent(String intent) {
-        this.intent = intent;
+    public Message(String destinationIP, ICommsManager.MESSAGE_TYPES messageType) {
+        this.destinationIP = destinationIP;
+        this.messageType = messageType;
     }
 
     @Override
     public String toString() {
         return "Message{" +
-                "fromMAC='" + fromMAC + '\'' +
-                ", fromIP='" + fromIP + '\'' +
-                ", timeStamp='" + timeStamp + '\'' +
-                ", messageText='" + messageText + '\'' +
-                ", intent='" + intent + '\'' +
+                "destinationIP='" + destinationIP + '\'' +
+                ", originIP='" + originIP + '\'' +
+                ", messageType=" + messageType +
+                ", payload=" + payload +
                 '}';
+    }
+
+    public String getDestinationIP() {
+        return destinationIP;
+    }
+
+    public void setDestinationIP(String destinationIP) {
+        this.destinationIP = destinationIP;
+    }
+
+    public void setOriginIP(String originIP) {
+        this.originIP = originIP;
+    }
+
+    public String getOriginIP() {
+        return originIP;
+    }
+
+    public ICommsManager.MESSAGE_TYPES getMessageType() {
+        return messageType;
+    }
+
+    public Object getPayload() {
+        return payload;
+    }
+
+    public void setPayload(Object payload) {
+        this.payload = payload;
+    }
+
+    public String toJSON() {
+        return new Gson().toJson(this);
+    }
+
+    public static Message fromJSON(String JSON) {
+        Message message = new Gson().fromJson(JSON, Message.class);
+        if (message.messageType == ICommsManager.MESSAGE_TYPES.JOURNEY_MATCH_REQUEST) {
+            String tempJSON = new Gson().toJson(message.getPayload(), LinkedTreeMap.class);
+            JourneyRequestInfo journeyRequestInfo = new Gson().fromJson(tempJSON, JourneyRequestInfo.class);
+            message.setPayload(journeyRequestInfo);
+        } else if (message.messageType == ICommsManager.MESSAGE_TYPES.MATCHING_RESULT) {
+            String tempJSON = new Gson().toJson(message.getPayload(), LinkedTreeMap.class);
+            MatchingResultInfo matchingResultInfo = new Gson().fromJson(tempJSON, MatchingResultInfo.class);
+            message.setPayload(matchingResultInfo);
+        }
+        return message;
     }
 }

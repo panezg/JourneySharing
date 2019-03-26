@@ -1,14 +1,15 @@
 package org.cs7cs3.team7.wifidirect;
 
-public class DummyNetworkManager implements INetworkManager {
-    @Override
-    public void sendMessage(Message message, boolean sendingTripDetails) {
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequestInfo;
 
+public class DummyCommsManager implements ICommsManager {
+    @Override
+    public void requestJourneyMatch(JourneyRequestInfo userInfo) {
     }
 
     @Override
-    public void initiateNetworkActivity() {
-
+    public String getMACAddress() {
+        return "";
     }
 
     @Override

@@ -4,8 +4,6 @@ import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import org.cs7cs3.team7.wifidirect.NetworkManagerFactory;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -48,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         Fragment profileFragment = ProfileFragment.newInstance();
         loadFragment(profileFragment);
         //NetworkManagerFactory.setSimulatorModeOn(true);
+        //CommsManagerFactory.setSimulatorModeOn(true);
         //TODO: don't allow navigation
         //else
         //Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
