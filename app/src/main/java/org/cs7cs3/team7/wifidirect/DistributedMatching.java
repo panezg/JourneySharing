@@ -117,14 +117,14 @@ public class DistributedMatching {
                 int taxiCapacity = 3;
                 int numSubGroups = 0;
                 for (int j = taxiCapacity; j <= destinationOwnPreferenceGenderMethodGroup.size(); j += taxiCapacity) {
-                    numSubGroups++;
                     MatchingResultInfo matchingResultInfo = new MatchingResultInfo(new ArrayList<>());
-                    for (int k = numSubGroups * taxiCapacity; k < numSubGroups * taxiCapacity + taxiCapacity; k++) {
+                    for (int k = j - taxiCapacity; k < j; k++) {
                         JourneyRequestInfo journeyRequestInfo = destinationOwnPreferenceGenderMethodGroup.get(k);
                         matchingResultInfo.getGroupMembers().add(journeyRequestInfo.getUserInfo());
                     }
                     matchingResultInfo.setStatus(MatchingResultInfo.MatchingResultStatus.MATCHED);
                     matchingResultInfoList.add(matchingResultInfo);
+                    numSubGroups++;
                 }
                 //Figuring out if remainders could be grouped too
                 //There are no groups of 1 member
@@ -170,6 +170,58 @@ public class DistributedMatching {
         journeyRequests.put(userInfo.getId(), journeyRequestInfo);
         userInfo = new UserInfo("5-swara", "swara", "8982167149", "Male");
         journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin city center");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+        //More
+        userInfo = new UserInfo("6-jhon", "john", "111", "Male");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Walking", "dublin city center");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+
+        userInfo = new UserInfo("7-rebecca", "rebecca", "222", "Female");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Walking", "dublin city center");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+
+        userInfo = new UserInfo("8-paula", "paula", "333", "Female");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "dublin city center");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+
+        userInfo = new UserInfo("9-ringo", "ringo", "444", "Male");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "dublin city center");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+
+        userInfo = new UserInfo("10-sara", "sara", "555", "Female");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Taxi", "dublin city center");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+
+        userInfo = new UserInfo("11-laura", "laura", "666", "Female");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin city center");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+
+        userInfo = new UserInfo("12-carla", "carla", "777", "Female");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "TCD");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+
+        userInfo = new UserInfo("13-peter", "peter", "888", "Male");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "TCD");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+
+        userInfo = new UserInfo("14-justin", "justin", "999", "Male");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Walking", "TCD");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+
+        userInfo = new UserInfo("15-frank", "frank", "101", "Male");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Taxi", "TCD");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+
+        userInfo = new UserInfo("16-daphne", "daphne", "102", "Female");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Walking", "TCD");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+
+        userInfo = new UserInfo("17-candice", "candice", "103", "Female");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "TCD");
+        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+
+        userInfo = new UserInfo("18-katrina", "katrina", "104", "Female");
+        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "TCD");
         journeyRequests.put(userInfo.getId(), journeyRequestInfo);
     }
 }

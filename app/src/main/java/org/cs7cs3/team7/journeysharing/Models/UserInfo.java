@@ -51,4 +51,10 @@ public class UserInfo {
                 ", gender='" + gender + '\'' +
                 '}';
     }
+
+    public String toMatchResultString() {
+        return "Name: " + name +
+                ", Phone #: " + phoneNum +
+                ", Gender: " + gender;
+    }
 }
