@@ -1,8 +1,6 @@
 package org.cs7cs3.team7.journeysharing;
 
-import com.google.gson.JsonElement;
-
-import org.cs7cs3.team7.journeysharing.Models.User;
+import org.cs7cs3.team7.journeysharing.Models.HTTPResponse;
 import org.cs7cs3.team7.journeysharing.Models.UserRequest;
 import org.cs7cs3.team7.journeysharing.httpservice.HTTPClient;
 import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
@@ -12,9 +10,6 @@ import java.io.IOException;
 
 import retrofit2.Call;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class HTTPServiceTest {
     @Test
@@ -34,7 +29,7 @@ public class HTTPServiceTest {
         UserRequest userRequest = new UserRequest("Bao lei", 1, "110");
 
 
-        Call<String> res = client.register(userRequest);
+        Call<String> res = client.save(userRequest);
         Response<String> response =  res.execute();
         if(response.isSuccessful()){
             System.out.println("succ");
@@ -57,14 +52,15 @@ public class HTTPServiceTest {
 //        HTTPService client = retrofit.create(HTTPService.class);
         HTTPService client = HTTPClient.INSTANCE.getClient();
 
-        Call<String> res = client.hello();
-        Response<String> response =  res.execute();
+        Call<HTTPResponse> res = client.hello();
+        Response<HTTPResponse> response =  res.execute();
 
         if(response.isSuccessful()){
             System.out.println("succ");
-            String body = response.body();
+            HTTPResponse body = response.body();
 
-            System.out.println(body);
+            System.out.println(body.getStatus());
+            System.out.print(body.getData().toString());
 
         }else {
             System.out.println("fail");
