@@ -94,7 +94,7 @@ public class OnDemandJourneyFragment extends Fragment {
         mViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
         LinearLayout layout = getView().findViewById(R.id.linear_layout);
         // Inti the 'fromAddress' TextView and automatically update the View content.
-        spinner=layout.findViewById(R.id.spinner);
+        spinner = layout.findViewById(R.id.spinner);
         spinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener(){
 
             @Override
@@ -243,9 +243,9 @@ public class OnDemandJourneyFragment extends Fragment {
             // Sent the user's info to the server, including @param name, @param phoneNum and @param destination
             Log.d("JINCHI", "Viewmodel: ");
 
-            mViewModel.setSender(new UserInfo(commsManager.getMACAddress() + mViewModel.getNames().getValue(), mViewModel.getNames().getValue(), mViewModel.getPhone().getValue(), mViewModel.getTo().getValue()));
-            UserInfo userInfo = new UserInfo(commsManager.getMACAddress() + mViewModel.getNames().getValue(), mViewModel.getNames().getValue(), mViewModel.getPhone().getValue(), mViewModel.getTo().getValue());
-            JourneyRequestInfo journeyRequestInfo = new JourneyRequestInfo(userInfo, genderSpinner.getSelectedItem().toString(), methodSpinner.getSelectedItem().toString());
+            mViewModel.setSender(new UserInfo(commsManager.getMACAddress() + mViewModel.getNames().getValue(), mViewModel.getNames().getValue(), mViewModel.getPhone().getValue(), mViewModel.getGender().getValue()));
+            UserInfo userInfo = new UserInfo(commsManager.getMACAddress() + mViewModel.getNames().getValue(), mViewModel.getNames().getValue(), mViewModel.getPhone().getValue(), mViewModel.getGender().getValue());
+            JourneyRequestInfo journeyRequestInfo = new JourneyRequestInfo(userInfo, genderSpinner.getSelectedItem().toString(), methodSpinner.getSelectedItem().toString(), mViewModel.getTo().getValue());
 
             //There should be an object or structure defining the journey details, like preferences
             try {
@@ -259,13 +259,13 @@ public class OnDemandJourneyFragment extends Fragment {
             journeyRequestInfo.setState(JourneyRequestInfo.JourneyRequestStatus.PENDING);
             journeyRequestInfo.setDate(mViewModel.getDate().getValue());
             journeyRequestInfo.setTime(mViewModel.getTime().getValue());
-            journeyRequestInfo.setDestination(mViewModel.getTo().getValue());
             journeyRequestInfo.setStartPoint(mViewModel.getFrom().getValue());
-
             commsManager.requestJourneyMatch(journeyRequestInfo);
 
 
-            Log.d("JINCHI", "OnDemandJourneyFragment: After calling sendMessage()");
+            Log.d("JINCHI", "OnDemandJourneyFragment: After calling requestJourneyMatch()");
+            Log.d("JINCHI", "sender:" + mViewModel.getSender().toString() + '\n' +
+                                       "");
             Toast.makeText(this.getActivity(), "Request Sent! Waiting for matching...", Toast.LENGTH_SHORT).show();
 
             // Register the messageReceiver

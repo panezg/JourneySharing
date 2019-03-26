@@ -10,7 +10,7 @@ public class Constants {
 
     public static int NETWORK_MANAGER_MONITOR_WAITING_PERIOD = 15000;//millisecond
 
-    public static int THRESHOLD_TO_START_ROUTING = 6;
+    public static int THRESHOLD_TO_START_ROUTING = 19;
 
     public static String HOST = "http://34.73.229.48:8080/JSBackend-1.0/";
 

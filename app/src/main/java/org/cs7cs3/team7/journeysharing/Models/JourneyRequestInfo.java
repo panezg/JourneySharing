@@ -5,7 +5,7 @@ public class JourneyRequestInfo {
     public static enum JourneyRequestStatus {
         FINISHED,
         SCHEDULED,
-        PENDING,
+        PENDING
     }
 
     private JourneyRequestStatus state;
@@ -24,10 +24,11 @@ public class JourneyRequestInfo {
 
     private UserInfo userInfo;
 
-    public JourneyRequestInfo(UserInfo userInfo, String gender, String method) {
+    public JourneyRequestInfo(UserInfo userInfo, String gender, String method, String destination) {
         this.userInfo = userInfo;
         this.gender = gender;
         this.method = method;
+        this.destination = destination;
     }
 
     public UserInfo getUserInfo() {

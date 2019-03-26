@@ -40,14 +40,14 @@ public class P2PCommsManager implements ICommsManager {
     //Only used when this device is acting as server
     private Map<String, String> clients;
 
-    private Routing p2pMatching;
+    private DistributedMatching p2pMatching;
 
     public P2PCommsManager(Context context) {
         this.context = context;
         this.networkManager = new P2PNetworkManager(context, this);
         this.thisDeviceActsAsServer = false;
         this.thisDeviceConnected = false;
-        this.p2pMatching = new Routing(this);
+        this.p2pMatching = new DistributedMatching(this);
         this.pendingMessagesToSendQueue = new ConcurrentLinkedQueue<Message>();
         //maps user ids to IPs
         this.clients = new HashMap<String, String>();

@@ -202,9 +202,9 @@ public class MainViewModel extends ViewModel {
         isDestination = new MutableLiveData<>();
         isDestination.setValue(false);
         Time = new MutableLiveData<>();
-        Time.setValue("Date");
+        Time.setValue("Time");
         Date = new MutableLiveData<>();
-        Date.setValue("Time");
+        Date.setValue("Date");
         preGenderItemIndexSelected = new MutableLiveData<>();
         preGenderItemIndexSelected.setValue(0);
         this.genderPreference = new MutableLiveData<String>();
@@ -215,6 +215,7 @@ public class MainViewModel extends ViewModel {
         // Initialization of data in ProfileFragment.
         names = new MutableLiveData<>();
         names.setValue("");
+        gender = new MutableLiveData<>();
         genderItemIndexSelected = new MutableLiveData<>();
         genderItemIndexSelected.setValue(0);
         phone = new MutableLiveData<>();

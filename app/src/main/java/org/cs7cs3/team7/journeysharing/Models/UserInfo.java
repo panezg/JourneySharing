@@ -7,20 +7,11 @@ public class UserInfo {
     private String phoneNum;
     private String gender;
 
-    /* Need to remove */
-    // TODO: Need to wait @JInchi finished the new Fragment, and then just read the @param destination info from the mainViewModel.
-    private final String destination = "fakeDestination";
-    /**/
-
-    public UserInfo() {
-    }
-
-    public UserInfo(String id, String name, String phone, String des) {
+    public UserInfo(String id, String name, String phone, String gender) {
         this.id = id;
         this.name = name;
-        phoneNum = phone;
-        // TODO
-        //destination = des;
+        this.phoneNum = phone;
+        this.gender = gender;
     }
 
     public String getId() {
@@ -51,15 +42,6 @@ public class UserInfo {
         this.gender = gender;
     }
 
-    public String getDestination() {
-        return destination;
-    }
-
-    public void setDestination(String destination) {
-        // TODO
-        //this.destination = destination;
-    }
-
     @Override
     public String toString() {
         return "UserInfo{" +
@@ -67,7 +49,12 @@ public class UserInfo {
                 ", name='" + name + '\'' +
                 ", phoneNum='" + phoneNum + '\'' +
                 ", gender='" + gender + '\'' +
-                ", destination='" + destination + '\'' +
                 '}';
+    }
+
+    public String toMatchResultString() {
+        return "Name: " + name +
+                ", Phone #: " + phoneNum +
+                ", Gender: " + gender;
     }
 }
