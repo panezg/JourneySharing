@@ -9,6 +9,7 @@ public class JourneyRequestInfo {
     }
 
     private JourneyRequestStatus state;
+    private boolean isOffline;
 
     // Time scheduled
     private String date;
@@ -24,11 +25,20 @@ public class JourneyRequestInfo {
 
     private UserInfo userInfo;
 
-    public JourneyRequestInfo(UserInfo userInfo, String gender, String method, String destination) {
+    public JourneyRequestInfo(UserInfo userInfo, String gender, String method, String destination, boolean isRealTime) {
         this.userInfo = userInfo;
         this.gender = gender;
         this.method = method;
         this.destination = destination;
+        this.isOffline = isRealTime;
+    }
+
+    public boolean isOffline() {
+        return isOffline;
+    }
+
+    public void setOffline(boolean offline) {
+        isOffline = offline;
     }
 
     public UserInfo getUserInfo() {

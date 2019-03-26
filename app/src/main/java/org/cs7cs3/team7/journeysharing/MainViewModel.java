@@ -2,6 +2,7 @@ package org.cs7cs3.team7.journeysharing;
 
 import android.util.Log;
 
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequestInfo;
 import org.cs7cs3.team7.journeysharing.Models.UserInfo;
 import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
 
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -32,6 +34,7 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<UserInfo> sender;
     private MutableLiveData<String> Time;
     private MutableLiveData<String> Date;
+    // Only for P2P part.
     private MutableLiveData<List<UserInfo>> membersList;
 
     // Preferences
@@ -132,7 +135,47 @@ public class MainViewModel extends ViewModel {
     /*
     ------------------------------------ ViewModel For ScheduledJourney Fragment-----------------------------------
      */
-    // TODO:
+
+    // Only keep one single
+    private MutableLiveData<JourneyRequestInfo> offlineRecord;
+
+    // Hold history data get from backend.
+    private MutableLiveData<List<JourneyRequestInfo>> listOfHistory;
+
+    private MutableLiveData<Integer> selectedIndex;
+    // TODO: need to finalize the result data format
+    private MutableLiveData<Map<String, List<UserInfo>>> resultsOfOnlineModel;
+
+    public MutableLiveData<JourneyRequestInfo> getOfflineRecord() {
+        return offlineRecord;
+    }
+
+    public void setOfflineRecord(JourneyRequestInfo offlineRecord) {
+        this.offlineRecord.setValue(offlineRecord);
+    }
+
+    public void addRecordToList(JourneyRequestInfo record) {
+        List<JourneyRequestInfo> tmpList = listOfHistory.getValue();
+        tmpList.add(record);
+        listOfHistory.setValue(tmpList);
+    }
+
+
+    public MutableLiveData<List<JourneyRequestInfo>> getListOfHistory() {
+        return listOfHistory;
+    }
+
+    public void setListOfHistory(List<JourneyRequestInfo> listOfHistory) {
+        this.listOfHistory.setValue(listOfHistory);
+    }
+
+    public MutableLiveData<Integer> getSelectedIndex() {
+        return selectedIndex;
+    }
+
+    public void setSelectedIndex(Integer selectedIndex) {
+        this.selectedIndex.setValue(selectedIndex);
+    }
 
     /*
     ------------------------------------ ViewModel For ProfileFragment -----------------------------------

@@ -4,18 +4,22 @@ import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.List;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProviders;
 
 public class MainActivity extends AppCompatActivity {
+    private MainViewModel mViewModel;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = item -> {
         switch (item.getItemId()) {
             //depending on state, would need to change to use ViewMatchFragment
             case R.id.nav_schedule_journey:
+                refreshScheduledList();
                 Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
                 loadFragment(scheduleJourneyFragment);
                 return true;
@@ -34,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        MainViewModel mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
         mViewModel.init();
         setContentView(R.layout.main_activity);
 
@@ -61,5 +65,12 @@ public class MainActivity extends AppCompatActivity {
         //transaction.addToBackStack(fragment.toString());
         //transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         transaction.commit();
+    }
+
+    private void refreshScheduledList() {
+        // TODO: Refresh data according to the response from server end.
+        mViewModel.setListOfHistory("data from database");
+        mViewModel.setOfflineRecord("data from sharedpreference");
+        mViewModel.addRecordToList(mViewModel.getOfflineRecord().getValue());
     }
 }
