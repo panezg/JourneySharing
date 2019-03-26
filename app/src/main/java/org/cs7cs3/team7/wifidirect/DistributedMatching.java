@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Routing {
+public class DistributedMatching {
     private static String WIFI_P2P_DEBUG_LABEL = "JINCHI_P2P_MATCHING";
 
     private P2PCommsManager p2pCommsManager;
@@ -20,14 +20,14 @@ public class Routing {
     private Map<String, JourneyRequestInfo> journeyRequests;
 
 
-    public Routing(P2PCommsManager p2pCommsManager) {
+    public DistributedMatching(P2PCommsManager p2pCommsManager) {
         Log.d(WIFI_P2P_DEBUG_LABEL, "P2P Matching constructor");
         this.p2pCommsManager = p2pCommsManager;
         journeyRequests = new HashMap<>();
     }
 
     public void addJourneyRequest(JourneyRequestInfo journeyRequestInfo) {
-        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN Routing.addJourneyRequest()");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN DistributedMatching.addJourneyRequest()");
         //as we dont have many devices, let's make some data
         if (journeyRequests.size() == 0) {
             Log.d(WIFI_P2P_DEBUG_LABEL, "Adding test data to simulate people around");
@@ -40,11 +40,11 @@ public class Routing {
             this.match();
         }
         Log.d(WIFI_P2P_DEBUG_LABEL, "No. Peers' request recorded " + journeyRequests.size());
-        Log.d(WIFI_P2P_DEBUG_LABEL, "END Routing.addJourneyRequest()");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END DistributedMatching.addJourneyRequest()");
     }
 
     private void match() {
-        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN Routing.match()");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN DistributedMatching.match()");
         int i = 0;
 
         List<MatchingResultInfo> matchingResultInfoList = new ArrayList<>();
@@ -60,7 +60,7 @@ public class Routing {
         }
         Log.d(WIFI_P2P_DEBUG_LABEL, "Matching is done and groups are ready!");
         p2pCommsManager.broadcastMatchingResult(matchingResultInfoList);
-        Log.d(WIFI_P2P_DEBUG_LABEL, "END Routing.match()");
+        Log.d(WIFI_P2P_DEBUG_LABEL, "END DistributedMatching.match()");
     }
 
     private void addTestData() {
