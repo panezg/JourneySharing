@@ -94,7 +94,7 @@ public class OnDemandJourneyFragment extends Fragment {
         mViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
         LinearLayout layout = getView().findViewById(R.id.linear_layout);
         // Inti the 'fromAddress' TextView and automatically update the View content.
-        spinner=layout.findViewById(R.id.spinner);
+        spinner = layout.findViewById(R.id.spinner);
         spinner.setOnItemSelectedListener(new Spinner.OnItemSelectedListener(){
 
             @Override
@@ -265,7 +265,9 @@ public class OnDemandJourneyFragment extends Fragment {
             commsManager.requestJourneyMatch(journeyRequestInfo);
 
 
-            Log.d("JINCHI", "OnDemandJourneyFragment: After calling sendMessage()");
+            Log.d("JINCHI", "OnDemandJourneyFragment: After calling requestJourneyMatch()");
+            Log.d("JINCHI", "sender:" + mViewModel.getSender().toString() + '\n' +
+                                       "");
             Toast.makeText(this.getActivity(), "Request Sent! Waiting for matching...", Toast.LENGTH_SHORT).show();
 
             // Register the messageReceiver

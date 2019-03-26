@@ -5,7 +5,7 @@ public class JourneyRequestInfo {
     public static enum JourneyRequestStatus {
         FINISHED,
         SCHEDULED,
-        PENDING,
+        PENDING
     }
 
     private JourneyRequestStatus state;
