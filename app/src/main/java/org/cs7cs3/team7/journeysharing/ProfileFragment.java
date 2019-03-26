@@ -157,6 +157,8 @@ public class ProfileFragment extends Fragment {
         String phone = phoneEditText.getText().toString();
         String names = namesEditText.getText().toString();
         int index = genderSpinner.getSelectedItemPosition();
+        String gender = index == 0 ? "Male" : "Female";
+        mViewModel.setGender(gender);
         mViewModel.setNames(names);
         mViewModel.setPhone(phone);
         mViewModel.setGenderItemIndexSelected(index);

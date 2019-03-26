@@ -215,6 +215,7 @@ public class MainViewModel extends ViewModel {
         // Initialization of data in ProfileFragment.
         names = new MutableLiveData<>();
         names.setValue("");
+        gender = new MutableLiveData<>();
         genderItemIndexSelected = new MutableLiveData<>();
         genderItemIndexSelected.setValue(0);
         phone = new MutableLiveData<>();
