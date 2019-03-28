@@ -15,14 +15,14 @@ public interface HTTPService {
     @GET("/")
     Call<ResponseBody> test();
 
-    @GET("controller/hello")
+    @GET("hello")
     Call<HTTPResponse> hello();
 
     @POST("user/add")
-    Call<String> save(@Body UserRequest user);
+    Call<HTTPResponse> save(@Body UserRequest user);
 
-    @POST("schedule/add")
-    Call<String> addSchedule(@Body Schedule schedule);
+//    @POST("schedule/add")
+//    Call<String> addSchedule(@Body Schedule schedule);
 
 
 
