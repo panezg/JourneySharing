@@ -1,12 +1,11 @@
 package org.cs7cs3.team7.wifidirect;
 
+import android.util.Base64;
 import android.util.Log;
 
 import org.cs7cs3.team7.journeysharing.Constants;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -31,21 +30,24 @@ public class ReceiveMessageTask implements Runnable {
             while (true) {
                 client = serverSocket.accept();
                 Log.d(WIFI_P2P_DEBUG_LABEL, "Connected to peer socket");
-                InputStream inputstream = client.getInputStream();
-                DataInputStream dis = new DataInputStream(inputstream);
-                InputStreamReader osw = new InputStreamReader(client.getInputStream());
-                BufferedReader reader = new BufferedReader(osw);
-                String messageJson = "";
+                InputStreamReader isr = new InputStreamReader(client.getInputStream());
+                BufferedReader reader = new BufferedReader(isr);
+                String cipherTextString = "";
                 while (true) {
                     String line = reader.readLine();
                     if (line == null)
                         break;
-                    messageJson += line;
+                    cipherTextString += line;
                 }
                 //IP of other peers in the group is not readily available to group owner. Hence, group owner needs to extract the IP of connection
                 //from socket when client peer sends the message to group owner at first time.
                 String originIP = Utility.extractIP(client.getRemoteSocketAddress().toString());
-                Log.d(WIFI_P2P_DEBUG_LABEL, "Received following message from this IP [" + originIP + "]: " + messageJson);
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Received following cipherTextString from this IP [" + originIP + "]: " + cipherTextString);
+
+                //Decrypting
+                String messageJson = Crypto.decryptMsg(Base64.decode(cipherTextString, Base64.DEFAULT));
+                Log.d(WIFI_P2P_DEBUG_LABEL, "message: " + messageJson);
+
                 Message message = Message.fromJSON(messageJson);
                 message.setOriginIP(originIP);
                 commsManager.notifyMessageReceived(message);

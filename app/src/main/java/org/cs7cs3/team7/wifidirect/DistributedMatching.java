@@ -31,7 +31,7 @@ public class DistributedMatching {
         //as we dont have many devices, let's make some data
         if (journeyRequests.size() == 0) {
             Log.d(WIFI_P2P_DEBUG_LABEL, "Adding test data to simulate people around");
-            addTestData();
+            //addTestData();
         }
         //using userInfo, but should be an id-like value instead
         journeyRequests.put(journeyRequestInfo.getUserInfo().getId(), journeyRequestInfo);
@@ -155,10 +155,10 @@ public class DistributedMatching {
         Log.d(WIFI_P2P_DEBUG_LABEL, "END DistributedMatching.match()");
     }
 
-    private void addTestData() {
-        UserInfo userInfo = new UserInfo("1-pankaj", "pankaj", "8982300456", "Male");
-        JourneyRequestInfo journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin city center",true);
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//    private void addTestData() {
+//        UserInfo userInfo = new UserInfo("1-pankaj", "pankaj", "8982300456", "Male");
+//        JourneyRequestInfo journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin city center");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
 //        userInfo = new UserInfo("2-shashank", "shashank", "8982210466", "Male");
 //        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin city center");
 //        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
@@ -223,5 +223,5 @@ public class DistributedMatching {
 //        userInfo = new UserInfo("18-katrina", "katrina", "104", "Female");
 //        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "TCD");
 //        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-    }
+//    }
 }
