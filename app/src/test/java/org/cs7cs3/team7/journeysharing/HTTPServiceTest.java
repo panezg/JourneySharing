@@ -37,6 +37,7 @@ public class HTTPServiceTest {
         if(response.isSuccessful()){
             System.out.println("succ");
             JsonElement user = response.body().getData();
+            System.out.println(user.getAsJsonObject().get("id").toString());
 
             System.out.println(user.toString());
 

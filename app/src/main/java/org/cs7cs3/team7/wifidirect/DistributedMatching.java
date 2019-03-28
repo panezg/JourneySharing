@@ -31,7 +31,7 @@ public class DistributedMatching {
         //as we dont have many devices, let's make some data
         if (journeyRequests.size() == 0) {
             Log.d(WIFI_P2P_DEBUG_LABEL, "Adding test data to simulate people around");
-            addTestData();
+            //addTestData();
         }
         //using userInfo, but should be an id-like value instead
         journeyRequests.put(journeyRequestInfo.getUserInfo().getId(), journeyRequestInfo);
@@ -155,73 +155,73 @@ public class DistributedMatching {
         Log.d(WIFI_P2P_DEBUG_LABEL, "END DistributedMatching.match()");
     }
 
-    private void addTestData() {
-        UserInfo userInfo = new UserInfo("1-pankaj", "pankaj", "8982300456", "Male");
-        JourneyRequestInfo journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin city center");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-        userInfo = new UserInfo("2-shashank", "shashank", "8982210466", "Male");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin city center");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-        userInfo = new UserInfo("3-vishal", "vishal", "8982210173", "Male");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin castle");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-        userInfo = new UserInfo("4-gunjan", "gunjan", "8982210581", "Male");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin castle");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-        userInfo = new UserInfo("5-swara", "swara", "8982167149", "Male");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin city center");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-        //More
-        userInfo = new UserInfo("6-jhon", "john", "111", "Male");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Walking", "dublin city center");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-
-        userInfo = new UserInfo("7-rebecca", "rebecca", "222", "Female");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Walking", "dublin city center");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-
-        userInfo = new UserInfo("8-paula", "paula", "333", "Female");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "dublin city center");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-
-        userInfo = new UserInfo("9-ringo", "ringo", "444", "Male");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "dublin city center");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-
-        userInfo = new UserInfo("10-sara", "sara", "555", "Female");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Taxi", "dublin city center");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-
-        userInfo = new UserInfo("11-laura", "laura", "666", "Female");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin city center");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-
-        userInfo = new UserInfo("12-carla", "carla", "777", "Female");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "TCD");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-
-        userInfo = new UserInfo("13-peter", "peter", "888", "Male");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "TCD");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-
-        userInfo = new UserInfo("14-justin", "justin", "999", "Male");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Walking", "TCD");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-
-        userInfo = new UserInfo("15-frank", "frank", "101", "Male");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Taxi", "TCD");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-
-        userInfo = new UserInfo("16-daphne", "daphne", "102", "Female");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Walking", "TCD");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-
-        userInfo = new UserInfo("17-candice", "candice", "103", "Female");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "TCD");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-
-        userInfo = new UserInfo("18-katrina", "katrina", "104", "Female");
-        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "TCD");
-        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
-    }
+//    private void addTestData() {
+//        UserInfo userInfo = new UserInfo("1-pankaj", "pankaj", "8982300456", "Male");
+//        JourneyRequestInfo journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin city center");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//        userInfo = new UserInfo("2-shashank", "shashank", "8982210466", "Male");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin city center");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//        userInfo = new UserInfo("3-vishal", "vishal", "8982210173", "Male");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin castle");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//        userInfo = new UserInfo("4-gunjan", "gunjan", "8982210581", "Male");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin castle");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//        userInfo = new UserInfo("5-swara", "swara", "8982167149", "Male");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin city center");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//        //More
+//        userInfo = new UserInfo("6-jhon", "john", "111", "Male");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Walking", "dublin city center");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//
+//        userInfo = new UserInfo("7-rebecca", "rebecca", "222", "Female");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Walking", "dublin city center");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//
+//        userInfo = new UserInfo("8-paula", "paula", "333", "Female");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "dublin city center");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//
+//        userInfo = new UserInfo("9-ringo", "ringo", "444", "Male");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "dublin city center");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//
+//        userInfo = new UserInfo("10-sara", "sara", "555", "Female");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Taxi", "dublin city center");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//
+//        userInfo = new UserInfo("11-laura", "laura", "666", "Female");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Walking", "dublin city center");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//
+//        userInfo = new UserInfo("12-carla", "carla", "777", "Female");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "TCD");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//
+//        userInfo = new UserInfo("13-peter", "peter", "888", "Male");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "TCD");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//
+//        userInfo = new UserInfo("14-justin", "justin", "999", "Male");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Walking", "TCD");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//
+//        userInfo = new UserInfo("15-frank", "frank", "101", "Male");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Male", "Taxi", "TCD");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//
+//        userInfo = new UserInfo("16-daphne", "daphne", "102", "Female");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Walking", "TCD");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//
+//        userInfo = new UserInfo("17-candice", "candice", "103", "Female");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "TCD");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//
+//        userInfo = new UserInfo("18-katrina", "katrina", "104", "Female");
+//        journeyRequestInfo = new JourneyRequestInfo(userInfo, "Female", "Taxi", "TCD");
+//        journeyRequests.put(userInfo.getId(), journeyRequestInfo);
+//    }
 }

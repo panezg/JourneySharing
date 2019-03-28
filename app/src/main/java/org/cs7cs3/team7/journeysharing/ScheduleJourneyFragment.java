@@ -44,10 +44,10 @@ public class ScheduleJourneyFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         mViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
         scheduleList=(ListView)getActivity().findViewById(R.id.scheduleList);
-        SimpleAdapter adapter = new SimpleAdapter(getContext(),mViewModel.getListOfHistory(),R.layout.vlist,
-                new String[]{"orderID","date","time","destination","state"},
-                new int[]{R.id.orderID,R.id.date,R.id.time,R.id.destination,R.id.state});
-        scheduleList.setAdapter(adapter);
+//        SimpleAdapter adapter = new SimpleAdapter(getContext(),mViewModel.getListOfHistory(),R.layout.vlist,
+//                new String[]{"orderID","date","time","destination","state"},
+//                new int[]{R.id.orderID,R.id.date,R.id.time,R.id.destination,R.id.state});
+//        scheduleList.setAdapter(adapter);
         scheduleList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
