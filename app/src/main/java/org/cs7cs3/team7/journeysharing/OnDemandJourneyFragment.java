@@ -57,6 +57,8 @@ public class OnDemandJourneyFragment extends Fragment {
     private TextView showDate,showTime;
     private UserInfo userInfo;
 
+    private boolean isRealTime;
+
     private View mParent;
     private Button searchButton;
     private Spinner genderSpinner;
@@ -102,9 +104,11 @@ public class OnDemandJourneyFragment extends Fragment {
                 String content=parent.getSelectedItem().toString();
 //                Toast.makeText(getContext(),content,Toast.LENGTH_SHORT).show();
                 if(content.equals("Real Time")){
+                    isRealTime = true;
                     fromButton.setEnabled(false);
                     Toast.makeText(getContext(),content,Toast.LENGTH_SHORT).show();
                 }else{
+                    isRealTime = false;
                     fromButton.setEnabled(true);
                 }
             }
@@ -245,36 +249,40 @@ public class OnDemandJourneyFragment extends Fragment {
 
             mViewModel.setSender(new UserInfo(commsManager.getMACAddress() + mViewModel.getNames().getValue(), mViewModel.getNames().getValue(), mViewModel.getPhone().getValue(), mViewModel.getGender().getValue()));
             UserInfo userInfo = new UserInfo(commsManager.getMACAddress() + mViewModel.getNames().getValue(), mViewModel.getNames().getValue(), mViewModel.getPhone().getValue(), mViewModel.getGender().getValue());
-            JourneyRequestInfo journeyRequestInfo = new JourneyRequestInfo(userInfo, genderSpinner.getSelectedItem().toString(), methodSpinner.getSelectedItem().toString(), mViewModel.getTo().getValue());
+            JourneyRequestInfo journeyRequestInfo = new JourneyRequestInfo(userInfo, genderSpinner.getSelectedItem().toString(), methodSpinner.getSelectedItem().toString(), mViewModel.getTo().getValue(), isRealTime);
 
             //There should be an object or structure defining the journey details, like preferences
-            try {
-                waitingForMatchResult.acquire();
-                Log.d("JINCHI", "current num of semaphore: " + waitingForMatchResult.toString());
-                //Log.d("JINCHI", "when sending -- message.toString(): " + message.toString());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if(isRealTime) {
+                try {
+                    waitingForMatchResult.acquire();
+                    Log.d("JINCHI", "current num of semaphore: " + waitingForMatchResult.toString());
+                    //Log.d("JINCHI", "when sending -- message.toString(): " + message.toString());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                commsManager.requestJourneyMatch(journeyRequestInfo);
+                journeyRequestInfo.setState(JourneyRequestInfo.JourneyRequestStatus.PENDING);
+                mViewModel.setOfflineRecord(journeyRequestInfo);
+
+                Log.d("JINCHI", "OnDemandJourneyFragment: After calling requestJourneyMatch()");
+                Log.d("JINCHI", "sender:" + mViewModel.getSender().toString() + '\n' + "");
+                Toast.makeText(this.getActivity(), "Request Sent! Waiting for matching...", Toast.LENGTH_SHORT).show();
+
+                // Register the messageReceiver
+                onListeningReceiveEvent();
+                LoadingBar.show(mParent);
+                Toast.makeText(this.getActivity(), "Request Sent! Waiting for matching...", Toast.LENGTH_SHORT).show();
+
+                // Waiting the match to finish and received the message from server.
+                waitForMatchAndSkip();
+            } else {
+                journeyRequestInfo.setState(JourneyRequestInfo.JourneyRequestStatus.PENDING);
+                journeyRequestInfo.setDate(mViewModel.getDate().getValue());
+                journeyRequestInfo.setTime(mViewModel.getTime().getValue());
+                journeyRequestInfo.setStartPoint(mViewModel.getFrom().getValue());
+                mViewModel.addRecordToList(journeyRequestInfo);
+                Toast.makeText(this.getActivity(), "Request Sent! Please check details in the first page ", Toast.LENGTH_SHORT).show();
             }
-
-            journeyRequestInfo.setState(JourneyRequestInfo.JourneyRequestStatus.PENDING);
-            journeyRequestInfo.setDate(mViewModel.getDate().getValue());
-            journeyRequestInfo.setTime(mViewModel.getTime().getValue());
-            journeyRequestInfo.setStartPoint(mViewModel.getFrom().getValue());
-            commsManager.requestJourneyMatch(journeyRequestInfo);
-
-
-            Log.d("JINCHI", "OnDemandJourneyFragment: After calling requestJourneyMatch()");
-            Log.d("JINCHI", "sender:" + mViewModel.getSender().toString() + '\n' +
-                                       "");
-            Toast.makeText(this.getActivity(), "Request Sent! Waiting for matching...", Toast.LENGTH_SHORT).show();
-
-            // Register the messageReceiver
-            onListeningReceiveEvent();
-            LoadingBar.show(mParent);
-            Toast.makeText(this.getActivity(), "Request Sent! Waiting for matching...", Toast.LENGTH_SHORT).show();
-
-            // Waiting the match to finish and received the message from server.
-            waitForMatchAndSkip();
         });
 
         // Faking a Semaphore to testing the 'waitingForMatch->skip to ViewMatchModel Fragment' logic.
@@ -315,6 +323,9 @@ public class OnDemandJourneyFragment extends Fragment {
                 Log.d("JINCHI", "Local broadcast received in general receiver: " + matchingResultInfo);
                 // TODO: Need to check the membersList<UserInfo> from the message.
                 mViewModel.setMembersList(matchingResultInfo.getGroupMembers());
+                JourneyRequestInfo journeyRequestInfo = new JourneyRequestInfo(userInfo, genderSpinner.getSelectedItem().toString(), methodSpinner.getSelectedItem().toString(), mViewModel.getTo().getValue(), true);
+                journeyRequestInfo.setState(JourneyRequestInfo.JourneyRequestStatus.FINISHED);
+                mViewModel.setOfflineRecord(journeyRequestInfo);
                 waitingForMatchResult.release();
             }
         };

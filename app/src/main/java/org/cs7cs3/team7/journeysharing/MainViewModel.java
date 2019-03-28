@@ -2,6 +2,7 @@ package org.cs7cs3.team7.journeysharing;
 
 import android.util.Log;
 
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequestInfo;
 import org.cs7cs3.team7.journeysharing.Models.UserInfo;
 import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
 
@@ -9,6 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -32,6 +34,7 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<UserInfo> sender;
     private MutableLiveData<String> Time;
     private MutableLiveData<String> Date;
+    // Only for P2P part.
     private MutableLiveData<List<UserInfo>> membersList;
 
     // Preferences
@@ -118,7 +121,7 @@ public class MainViewModel extends ViewModel {
     }
 
     public void setPreGenderItemIndexSelected(int preGenderItemIndexSelected) {
-        this.genderItemIndexSelected.setValue(preGenderItemIndexSelected);
+        this.preGenderItemIndexSelected.setValue(preGenderItemIndexSelected);
     }
 
     public MutableLiveData<Integer> getPreMethodItemIndexSelected() {
@@ -132,7 +135,48 @@ public class MainViewModel extends ViewModel {
     /*
     ------------------------------------ ViewModel For ScheduledJourney Fragment-----------------------------------
      */
-    // TODO:
+
+    // Only keep one single
+    private MutableLiveData<JourneyRequestInfo> offlineRecord;
+
+    // Hold history data get from backend.
+    private MutableLiveData<List<JourneyRequestInfo>> listOfHistory;
+
+    private MutableLiveData<Integer> selectedIndex;
+
+    // TODO: need to finalize the result data format
+    private MutableLiveData<Map<String, List<UserInfo>>> resultsOfOnlineModel;
+
+    public MutableLiveData<JourneyRequestInfo> getOfflineRecord() {
+        return offlineRecord;
+    }
+
+    public void setOfflineRecord(JourneyRequestInfo offlineRecord) {
+        this.offlineRecord.setValue(offlineRecord);
+    }
+
+    public void addRecordToList(JourneyRequestInfo record) {
+        List<JourneyRequestInfo> tmpList = listOfHistory.getValue();
+        tmpList.add(record);
+        listOfHistory.setValue(tmpList);
+    }
+
+
+    public MutableLiveData<List<JourneyRequestInfo>> getListOfHistory() {
+        return listOfHistory;
+    }
+
+    public void setListOfHistory(List<JourneyRequestInfo> listOfHistory) {
+        this.listOfHistory.setValue(listOfHistory);
+    }
+
+    public MutableLiveData<Integer> getSelectedIndex() {
+        return selectedIndex;
+    }
+
+    public void setSelectedIndex(Integer selectedIndex) {
+        this.selectedIndex.setValue(selectedIndex);
+    }
 
     /*
     ------------------------------------ ViewModel For ProfileFragment -----------------------------------
@@ -196,64 +240,45 @@ public class MainViewModel extends ViewModel {
 
         // Initialization of data in OnDemandJourneyFragment
         from = new MutableLiveData<>();
-        from.setValue("Default");
+        setFrom("Default");
         to = new MutableLiveData<>();
-        to.setValue("Default");
+        setTo("Default");
         isDestination = new MutableLiveData<>();
-        isDestination.setValue(false);
+        setIsDestination(false);
         Time = new MutableLiveData<>();
-        Time.setValue("Time");
+        setTime("Time");
         Date = new MutableLiveData<>();
-        Date.setValue("Date");
+        setDate("Date");
         preGenderItemIndexSelected = new MutableLiveData<>();
-        preGenderItemIndexSelected.setValue(0);
-        this.genderPreference = new MutableLiveData<String>();
+        setPreGenderItemIndexSelected(0);
+        genderPreference = new MutableLiveData<>();
+        setGenderPreference("Male");
         preMethodItemIndexSelected = new MutableLiveData<>();
-        preMethodItemIndexSelected.setValue(0);
-        this.methodPreference = new MutableLiveData<String>();
+        setPreMethodItemIndexSelected(0);
+        methodPreference = new MutableLiveData<>();
+        setMethodPreference("Walk");
 
         // Initialization of data in ProfileFragment.
         names = new MutableLiveData<>();
-        names.setValue("");
+        setNames("");
         gender = new MutableLiveData<>();
+        setGender("Male");
         genderItemIndexSelected = new MutableLiveData<>();
-        genderItemIndexSelected.setValue(0);
+        setGenderItemIndexSelected(0);
         phone = new MutableLiveData<>();
-        phone.setValue("");
+        setPhone("");
+        uniqueID = new MutableLiveData<>();
 
         sender = new MutableLiveData<>();
-        sender.setValue(new UserInfo("", names.getValue(), phone.getValue(), to.getValue()));
+        setSender(new UserInfo("", names.getValue(), phone.getValue(), to.getValue()));
         // TODO: Need to check if 0 represents Male.
         membersList = new MutableLiveData<>();
-        membersList.setValue(new ArrayList<>());
+        setMembersList(new ArrayList<UserInfo>());
+
+        // Initialization of data in ScheduledJourneyFragment.
+        offlineRecord = new MutableLiveData<>();
+        listOfHistory = new MutableLiveData<>();
+        selectedIndex = new MutableLiveData<>();
+        resultsOfOnlineModel = new MutableLiveData<>();
     }
-
-    public void saveUserProfile() {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://35.190.162.77:8080")
-                .build();
-        HTTPService httpService = retrofit.create(HTTPService.class);
-        Call<ResponseBody> repos = httpService.test();
-        repos.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                JsonObject post = new JsonObject().get(response.body().toString()).getAsJsonObject();
-//                if (post.get("Level").getAsString().contains("Administrator")) {
-//
-//                }
-
-                try {
-                    Log.d("JINCHIServer", response.body().string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-            }
-        });
-
-    }
-
 }

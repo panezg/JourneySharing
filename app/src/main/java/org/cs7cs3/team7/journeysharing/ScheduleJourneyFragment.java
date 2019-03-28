@@ -5,8 +5,12 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProviders;
 
 import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +27,7 @@ import java.util.Map;
 
 public class ScheduleJourneyFragment extends Fragment {
     private ListView scheduleList;
+    private MainViewModel mViewModel;
 
     static ScheduleJourneyFragment newInstance() {
         return new ScheduleJourneyFragment();
@@ -37,22 +42,34 @@ public class ScheduleJourneyFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        mViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
         scheduleList=(ListView)getActivity().findViewById(R.id.scheduleList);
-        SimpleAdapter adapter = new SimpleAdapter(getContext(),getData(),R.layout.vlist,
+        SimpleAdapter adapter = new SimpleAdapter(getContext(),mViewModel.getListOfHistory(),R.layout.vlist,
                 new String[]{"orderID","date","time","destination","state"},
                 new int[]{R.id.orderID,R.id.date,R.id.time,R.id.destination,R.id.state});
         scheduleList.setAdapter(adapter);
         scheduleList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                long s=(long)parent.getItemAtPosition(position);
-//                Toast.makeText(getContext(),s.get("orderID"),Toast.LENGTH_SHORT).show();
-
+                Map<String, Object> map = (Map<String, Object>) parent.getItemAtPosition(position);
+                Log.d("JINCHI", map.get("date").toString());
+                mViewModel.setSelectedIndex(position);
+                Fragment viewMatchFragment = ViewMatchFragment.newInstance();
+                loadFragment(viewMatchFragment);
             }
         });
     }
 
+    private void loadFragment(Fragment fragment) {
+        // load fragment
+        //TODO: exception here should be handled.
+        FragmentTransaction transaction = this.getActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.frame_container, fragment);
+        transaction.addToBackStack(null);
+        transaction.commit();
+    }
 
+/*
     private List<Map<String, Object>> getData() {
         List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
 
@@ -127,5 +144,5 @@ public class ScheduleJourneyFragment extends Fragment {
         return list;
     }
 
-
+*/
 }
