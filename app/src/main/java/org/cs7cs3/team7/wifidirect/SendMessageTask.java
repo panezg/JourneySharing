@@ -1,5 +1,6 @@
 package org.cs7cs3.team7.wifidirect;
 
+import android.util.Base64;
 import android.util.Log;
 
 import org.cs7cs3.team7.journeysharing.Constants;
@@ -32,12 +33,16 @@ public class SendMessageTask implements Runnable {
             //Attempts to connect to the device acting as group owner or server, at the predefined listening port
             socket.connect((new InetSocketAddress(message.getDestinationIP(), Constants.LISTENING_PORT)), Constants.REQUEST_TIMEOUT);
             Log.d(WIFI_P2P_DEBUG_LABEL, "Connected to recipient device");
-            PrintWriter writer = new PrintWriter(socket.getOutputStream());
+            Log.d(WIFI_P2P_DEBUG_LABEL, "message: " + message.toJSON());
+
+            //Encrypt the message
+            String cipherTextString = Base64.encodeToString(Crypto.encryptMsg(message.toJSON() + "\n"), Base64.DEFAULT);
 
             //Send the message
-            Log.d(WIFI_P2P_DEBUG_LABEL, "message: " + message.toJSON());
-            writer.write(message.toJSON() + "\n");
+            Log.d(WIFI_P2P_DEBUG_LABEL, "cipherTextString: " + cipherTextString);
+            PrintWriter writer = new PrintWriter(socket.getOutputStream());
 
+            writer.write(cipherTextString);
             writer.flush();
             writer.close();
             socket.close();
