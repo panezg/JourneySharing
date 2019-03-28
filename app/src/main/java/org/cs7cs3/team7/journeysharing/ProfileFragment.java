@@ -1,5 +1,6 @@
 package org.cs7cs3.team7.journeysharing;
 
+import android.app.AlertDialog;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -92,6 +93,11 @@ public class ProfileFragment extends Fragment {
             blockAllComponents();
             showAllData();
         } else {
+            new AlertDialog.Builder(getContext())
+                    .setTitle("First Time Using the App")
+                    .setMessage("Please, complete your profile, and save it to continue.")
+                    .setPositiveButton("OK", null)
+                    .show();
             mViewModel.getNames().observe(this, new Observer<String>() {
                 @Override
                 public void onChanged(@Nullable String msg) {
