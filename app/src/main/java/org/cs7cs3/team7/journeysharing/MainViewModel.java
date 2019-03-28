@@ -121,7 +121,7 @@ public class MainViewModel extends ViewModel {
     }
 
     public void setPreGenderItemIndexSelected(int preGenderItemIndexSelected) {
-        this.genderItemIndexSelected.setValue(preGenderItemIndexSelected);
+        this.preGenderItemIndexSelected.setValue(preGenderItemIndexSelected);
     }
 
     public MutableLiveData<Integer> getPreMethodItemIndexSelected() {
@@ -240,36 +240,40 @@ public class MainViewModel extends ViewModel {
 
         // Initialization of data in OnDemandJourneyFragment
         from = new MutableLiveData<>();
-        from.setValue("Default");
+        setFrom("Default");
         to = new MutableLiveData<>();
-        to.setValue("Default");
+        setTo("Default");
         isDestination = new MutableLiveData<>();
-        isDestination.setValue(false);
+        setIsDestination(false);
         Time = new MutableLiveData<>();
-        Time.setValue("Time");
+        setTime("Time");
         Date = new MutableLiveData<>();
-        Date.setValue("Date");
+        setDate("Date");
         preGenderItemIndexSelected = new MutableLiveData<>();
-        preGenderItemIndexSelected.setValue(0);
-        this.genderPreference = new MutableLiveData<String>();
+        setPreGenderItemIndexSelected(0);
+        genderPreference = new MutableLiveData<>();
+        setGenderPreference("Male");
         preMethodItemIndexSelected = new MutableLiveData<>();
-        preMethodItemIndexSelected.setValue(0);
-        this.methodPreference = new MutableLiveData<String>();
+        setPreMethodItemIndexSelected(0);
+        methodPreference = new MutableLiveData<>();
+        setMethodPreference("Walk");
 
         // Initialization of data in ProfileFragment.
         names = new MutableLiveData<>();
-        names.setValue("");
+        setNames("");
         gender = new MutableLiveData<>();
+        setGender("Male");
         genderItemIndexSelected = new MutableLiveData<>();
-        genderItemIndexSelected.setValue(0);
+        setGenderItemIndexSelected(0);
         phone = new MutableLiveData<>();
-        phone.setValue("");
+        setPhone("");
+        uniqueID = new MutableLiveData<>();
 
         sender = new MutableLiveData<>();
-        sender.setValue(new UserInfo("", names.getValue(), phone.getValue(), to.getValue()));
+        setSender(new UserInfo("", names.getValue(), phone.getValue(), to.getValue()));
         // TODO: Need to check if 0 represents Male.
         membersList = new MutableLiveData<>();
-        membersList.setValue(new ArrayList<>());
+        setMembersList(new ArrayList<UserInfo>());
 
         // Initialization of data in ScheduledJourneyFragment.
         offlineRecord = new MutableLiveData<>();
@@ -277,33 +281,4 @@ public class MainViewModel extends ViewModel {
         selectedIndex = new MutableLiveData<>();
         resultsOfOnlineModel = new MutableLiveData<>();
     }
-
-    public void saveUserProfile() {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://35.190.162.77:8080")
-                .build();
-        HTTPService httpService = retrofit.create(HTTPService.class);
-        Call<ResponseBody> repos = httpService.test();
-        repos.enqueue(new Callback<ResponseBody>() {
-            @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
-//                JsonObject post = new JsonObject().get(response.body().toString()).getAsJsonObject();
-//                if (post.get("Level").getAsString().contains("Administrator")) {
-//
-//                }
-
-                try {
-                    Log.d("JINCHIServer", response.body().string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
-            }
-        });
-
-    }
-
 }

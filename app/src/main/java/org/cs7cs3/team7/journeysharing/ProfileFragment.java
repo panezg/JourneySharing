@@ -68,49 +68,53 @@ public class ProfileFragment extends Fragment {
         // Init the shared preferences with the local data already had.
         sharedPreferences = getActivity().getSharedPreferences(PROFILE, 0);
 
-        loadDataFromLocal();
-
-        // Init the profile layout.
+        // Init the components.
         View userInfoLayout = getView().findViewById(R.id.user_info_include);
-
-        // Init the 'EditText' form.
         namesEditText = userInfoLayout.findViewById(R.id.names_text);
-        mViewModel.getNames().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String msg) {
-                namesEditText.setText(msg);
-                Log.d("myTag", "Name in MainView Model Saved: " + mViewModel.getNames().getValue());
-            }
-        });
-
-        // Init the 'EditText' form.
         phoneEditText = userInfoLayout.findViewById(R.id.phone_number_text);
-        mViewModel.getPhone().observe(this, new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String msg) {
-                phoneEditText.setText(msg);
-                Log.d("myTag", "Phone in MainView Model Saved: " + mViewModel.getPhone().getValue());
-            }
-        });
-
-        // Init the 'Gender' spinner.
         genderSpinner = userInfoLayout.findViewById(R.id.gender_spinner);
-        mViewModel.getGenderItemIndexSelected().observe(this, new Observer<Integer>() {
-            @Override
-            public void onChanged(@Nullable Integer msg) {
-                genderSpinner.setSelection(msg);
-                Log.d("myTag", "Gender in MainView Model saved: " + mViewModel.getGenderItemIndexSelected().getValue());
-            }
-        });
-
-        // Init the 'Save' saveProfileButton.
         saveProfileButton = getView().findViewById(R.id.save_button);
-        saveProfileButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                saveData();
-            }
-        });
+
+        if (tryToLoadID()) {
+            loadDataFromLocal();
+            blockAllComponents();
+            showAllData();
+        } else {
+            mViewModel.getNames().observe(this, new Observer<String>() {
+                @Override
+                public void onChanged(@Nullable String msg) {
+                    namesEditText.setText(msg);
+                    Log.d("myTag", "Name in MainView Model Saved: " + mViewModel.getNames().getValue());
+                }
+            });
+
+            mViewModel.getPhone().observe(this, new Observer<String>() {
+                @Override
+                public void onChanged(@Nullable String msg) {
+                    phoneEditText.setText(msg);
+                    Log.d("myTag", "Phone in MainView Model Saved: " + mViewModel.getPhone().getValue());
+                }
+            });
+
+            mViewModel.getGenderItemIndexSelected().observe(this, new Observer<Integer>() {
+                @Override
+                public void onChanged(@Nullable Integer msg) {
+                    genderSpinner.setSelection(msg);
+                    Log.d("myTag", "Gender in MainView Model saved: " + mViewModel.getGenderItemIndexSelected().getValue());
+                }
+            });
+
+            saveProfileButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    saveData();
+                    blockAllComponents();
+                }
+            });
+        }
+
+
+
 
         msg = (EditText) getView().findViewById(R.id.msgTv);
         start = getView().findViewById(R.id.start);
@@ -120,7 +124,7 @@ public class ProfileFragment extends Fragment {
                 Log.d("JINCHI","in onClick button handler");
                 networkManager.initiateWiFiP2PGroupFormation();
             }
-        });*/
+        });
 
         sendButton = getView().findViewById(R.id.sendButton);
         /*sendButton.setOnClickListener(new View.OnClickListener() {
@@ -146,11 +150,31 @@ public class ProfileFragment extends Fragment {
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(messageReceiver, new IntentFilter("MESSAGE_RECEIVED"));*/
     }
 
+    private void showAllData() {
+        namesEditText.setText(mViewModel.getNames().getValue());
+        phoneEditText.setText(mViewModel.getPhone().getValue());
+        genderSpinner.setSelection(mViewModel.getGenderItemIndexSelected().getValue());
+    }
+
+    private void blockAllComponents() {
+        namesEditText.setEnabled(false);
+        phoneEditText.setEnabled(false);
+        genderSpinner.setEnabled(false);
+        saveProfileButton.setEnabled(false);
+        saveProfileButton.setVisibility(View.INVISIBLE);
+    }
+
+    private boolean tryToLoadID() {
+        return sharedPreferences.contains(UNIQUE_ID);
+    }
+
     // Load data from the shared preferences file in local.
     private void loadDataFromLocal() {
-        mViewModel.getNames().setValue(sharedPreferences.getString(NAME, ""));
-        mViewModel.getPhone().setValue(sharedPreferences.getString(PHONE, ""));
-        mViewModel.getGenderItemIndexSelected().setValue(sharedPreferences.getInt(GENDER_POSITION, 0));
+        mViewModel.setNames(sharedPreferences.getString(NAME, ""));
+        mViewModel.setPhone(sharedPreferences.getString(PHONE, ""));
+        mViewModel.setGenderItemIndexSelected(sharedPreferences.getInt(GENDER_POSITION, 0));
+        mViewModel.setGender(mViewModel.getGenderItemIndexSelected().getValue() == 0 ? "Male" : "Female");
+        mViewModel.setUniqueID(sharedPreferences.getInt(UNIQUE_ID, 0));
     }
 
     private void saveData() {
@@ -162,7 +186,9 @@ public class ProfileFragment extends Fragment {
         mViewModel.setNames(names);
         mViewModel.setPhone(phone);
         mViewModel.setGenderItemIndexSelected(index);
-        mViewModel.saveUserProfile();
+        // TODO: Send request and Get id assigned from the backend.
+        // fake ID
+        mViewModel.setUniqueID(123);
         saveProfileToLocal();
     }
 
@@ -175,6 +201,7 @@ public class ProfileFragment extends Fragment {
         sharedPreferences = getActivity().getSharedPreferences(PROFILE, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(NAME, mViewModel.getNames().getValue());
+        editor.putInt(UNIQUE_ID, mViewModel.getUniqueID().getValue());
         editor.putString(PHONE, mViewModel.getPhone().getValue());
 
         //TODO: Exception here should be handled.
@@ -189,36 +216,4 @@ public class ProfileFragment extends Fragment {
         // Toast message for user.
         Toast.makeText(this.getActivity(), "Profile Saved!", Toast.LENGTH_SHORT).show();
     }
-
-    /*@Override
-    public void onResume() {
-        super.onResume();
-        Log.d("JINCHI", "in onResume() of MainActivity");
-        Log.d("JINCHI", "WiFi Direct Broadcast receiver registered with intent filter");
-        networkManager.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.d("JINCHI", "in onPause() of MainActivity");
-        networkManager.onPause();
-    }
-
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.d("JINCHI", "in onStop() of MainActivity");
-        networkManager.onStop();
-    }
-
-    @Override
-    public void onDestroy() {
-        //TODO: Need to review this
-        super.onDestroy();
-        Log.d("JINCHI", "in onDestroy() of MainActivity");
-        networkManager.onDestroy();
-        Log.d("JINCHI", "in onDestroy() of MainActivity");
-    }*/
 }

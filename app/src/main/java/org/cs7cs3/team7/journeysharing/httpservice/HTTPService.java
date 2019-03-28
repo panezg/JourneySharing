@@ -21,8 +21,8 @@ public interface HTTPService {
     @POST("user/add")
     Call<String> save(@Body UserRequest user);
 
-    @POST("schedule/add")
-    Call<String> addSchedule(@Body Schedule schedule);
+    //@POST("schedule/add")
+    //Call<String> addSchedule(@Body Schedule schedule);
 
 
 
