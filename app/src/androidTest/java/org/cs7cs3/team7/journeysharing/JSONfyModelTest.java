@@ -6,6 +6,6 @@ import java.util.Date;
 
 public class JSONfyModelTest {
     public static void main(String[] args) {
-        
+
     }
 }

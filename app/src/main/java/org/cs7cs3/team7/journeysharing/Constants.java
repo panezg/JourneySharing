@@ -12,7 +12,7 @@ public class Constants {
 
     public static int THRESHOLD_TO_START_ROUTING = 19;
 
-    public static String HOST = "http://34.73.229.48:8080/JSBackend-1.0/";
+    public static String HOST = "http://35.196.96.75/";
 
     public static final String JOURNEY_MATCHED_INTENT_ACTION = "JOURNEY_MATCHED";
     public static final String JOURNEY_MATCHED_INTENT_ACTION_PARCELABLE_KEY = "matchingResultInfo";
