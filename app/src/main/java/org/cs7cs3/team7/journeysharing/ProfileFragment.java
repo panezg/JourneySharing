@@ -26,6 +26,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 
@@ -202,16 +203,20 @@ public class ProfileFragment extends Fragment {
         UserRequest userRequest = new UserRequest(mViewModel.getNames().getValue(), mViewModel.getGenderItemIndexSelected().getValue(), mViewModel.getPhone().getValue());
         Call<HTTPResponse> res = client.save(userRequest);
         Response<HTTPResponse> response = null;
-        try {
-            response = res.execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        while(!response.isSuccessful()){
-            JsonElement user = response.body().getData();
-            mViewModel.setUniqueID(Integer.valueOf(user.getAsJsonObject().get("id").toString()));
-        }
-        saveProfileToLocal();
+        res.enqueue(new Callback<HTTPResponse>() {
+            @Override
+            public void onResponse(Call<HTTPResponse> call, Response<HTTPResponse> response) {
+                if(response.isSuccessful()){
+                    JsonElement user = response.body().getData();
+                    mViewModel.setUniqueID(Integer.valueOf(user.getAsJsonObject().get("id").toString()));
+                    saveProfileToLocal();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<HTTPResponse> call, Throwable t) {
+            }
+        });
     }
 
     // Save the data currently at the ViewModel to the local file.
