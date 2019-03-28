@@ -1,50 +1,60 @@
 package org.cs7cs3.team7.journeysharing;
 
 import android.os.Bundle;
-import android.view.MenuItem;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import androidx.annotation.NonNull;
+import java.util.List;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProviders;
 
 public class MainActivity extends AppCompatActivity {
+    private MainViewModel mViewModel;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.nav_schedule_journey:
-                    Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
-                    loadFragment(scheduleJourneyFragment);
-                    return true;
-                case R.id.nav_on_demand_journey:
-                    Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance();
-                    loadFragment(onDemandJourneyFragment);
-                    return true;
-                case R.id.nav_profile:
-                    Fragment profileFragment = ProfileFragment.newInstance();
-                    loadFragment(profileFragment);
-                    return true;
-            }
-            return false;
+            = item -> {
+        switch (item.getItemId()) {
+            //depending on state, would need to change to use ViewMatchFragment
+            case R.id.nav_schedule_journey:
+                refreshScheduledList();
+                Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
+                loadFragment(scheduleJourneyFragment);
+                return true;
+            case R.id.nav_on_demand_journey:
+                Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance();
+                loadFragment(onDemandJourneyFragment);
+                return true;
+            case R.id.nav_profile:
+                Fragment profileFragment = ProfileFragment.newInstance();
+                loadFragment(profileFragment);
+                return true;
         }
+        return false;
     };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        mViewModel.init();
         setContentView(R.layout.main_activity);
 
-        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         //loading default fragment
-        Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
-        loadFragment(scheduleJourneyFragment);
+        //TODO: If basic flow hasn't completed, then load Profile; else, load default
+        //need some kind of global property
+        Fragment profileFragment = ProfileFragment.newInstance();
+        loadFragment(profileFragment);
+        //NetworkManagerFactory.setSimulatorModeOn(true);
+        //CommsManagerFactory.setSimulatorModeOn(true);
+        //TODO: don't allow navigation
+        //else
+        //Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
+        //loadFragment(scheduleJourneyFragment);
     }
 
     private void loadFragment(Fragment fragment) {
@@ -55,5 +65,12 @@ public class MainActivity extends AppCompatActivity {
         //transaction.addToBackStack(fragment.toString());
         //transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         transaction.commit();
+    }
+
+    private void refreshScheduledList() {
+        // TODO: Refresh data according to the response from server end.
+        //mViewModel.setListOfHistory("data from database");
+        //mViewModel.setOfflineRecord("data from sharedpreference");
+        mViewModel.addRecordToList(mViewModel.getOfflineRecord().getValue());
     }
 }

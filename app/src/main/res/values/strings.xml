@@ -8,6 +8,21 @@
     <string name="sj_fragment_title">Schedule Journey</string>
     <string name="profile_fragment_title">Profile</string>
     <string name="addresses">Addresses</string>
+    <string name="from_label">From</string>
+    <string name="to_label">To</string>
+    <string name="preferences_label">Preferences</string>
+    <string name="gender_label">Gender</string>
+    <string name="method_label">Method</string>
+    <string name="search_button">Search</string>
+    <string name="names_label">Names</string>
+    <string name="phone_number_label">Phone Number</string>
+    <string name="user_info_label">User Info</string>
+    <string name="save_button">Save</string>
+    <string name="match_group_label">Matched with</string>
+    <string name="match_details_label">Match Details</string>
+    <string name="ok_button">OK</string>
+    <string name="address_label">Address</string>
+    <string name="address_text_hint">Please type your address</string>
     <string-array name="gender_array">
         <item>Male</item>
         <item>Female</item>
@@ -15,5 +30,9 @@
     <string-array name="methods_array">
         <item>Walking</item>
         <item>Taxi</item>
+    </string-array>
+    <string-array name="types_array">
+        <item>Commute</item>
+        <item>Real Time</item>
     </string-array>
 </resources>
