@@ -11,11 +11,22 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.google.gson.JsonElement;
+
+import org.cs7cs3.team7.journeysharing.Models.HTTPResponse;
+import org.cs7cs3.team7.journeysharing.Models.UserRequest;
+import org.cs7cs3.team7.journeysharing.httpservice.HTTPClient;
+import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
+
+import java.io.IOException;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import retrofit2.Call;
+import retrofit2.Response;
 
 
 public class ProfileFragment extends Fragment {
@@ -187,8 +198,19 @@ public class ProfileFragment extends Fragment {
         mViewModel.setPhone(phone);
         mViewModel.setGenderItemIndexSelected(index);
         // TODO: Send request and Get id assigned from the backend.
-        // fake ID
-        mViewModel.setUniqueID(123);
+        HTTPService client = HTTPClient.INSTANCE.getClient();
+        UserRequest userRequest = new UserRequest(mViewModel.getNames().getValue(), mViewModel.getGenderItemIndexSelected().getValue(), mViewModel.getPhone().getValue());
+        Call<HTTPResponse> res = client.save(userRequest);
+        Response<HTTPResponse> response = null;
+        try {
+            response = res.execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        while(!response.isSuccessful()){
+            JsonElement user = response.body().getData();
+            mViewModel.setUniqueID(Integer.valueOf(user.getAsJsonObject().get("id").toString()));
+        }
         saveProfileToLocal();
     }
 
