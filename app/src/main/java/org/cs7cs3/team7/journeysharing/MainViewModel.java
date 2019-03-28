@@ -143,6 +143,7 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<List<JourneyRequestInfo>> listOfHistory;
 
     private MutableLiveData<Integer> selectedIndex;
+
     // TODO: need to finalize the result data format
     private MutableLiveData<Map<String, List<UserInfo>>> resultsOfOnlineModel;
 
@@ -269,6 +270,12 @@ public class MainViewModel extends ViewModel {
         // TODO: Need to check if 0 represents Male.
         membersList = new MutableLiveData<>();
         membersList.setValue(new ArrayList<>());
+
+        // Initialization of data in ScheduledJourneyFragment.
+        offlineRecord = new MutableLiveData<>();
+        listOfHistory = new MutableLiveData<>();
+        selectedIndex = new MutableLiveData<>();
+        resultsOfOnlineModel = new MutableLiveData<>();
     }
 
     public void saveUserProfile() {

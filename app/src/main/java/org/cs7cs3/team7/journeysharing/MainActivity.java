@@ -69,8 +69,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void refreshScheduledList() {
         // TODO: Refresh data according to the response from server end.
-        mViewModel.setListOfHistory("data from database");
-        mViewModel.setOfflineRecord("data from sharedpreference");
+        //mViewModel.setListOfHistory("data from database");
+        //mViewModel.setOfflineRecord("data from sharedpreference");
         mViewModel.addRecordToList(mViewModel.getOfflineRecord().getValue());
     }
 }
