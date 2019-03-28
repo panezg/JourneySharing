@@ -79,7 +79,7 @@ public class ViewMatchFragment extends Fragment {
         List<UserInfo> membersList = mViewModel.getMembersList().getValue();
         for(UserInfo user : membersList) {
             // TODO: What format should the members info be displayed into??
-            listData.add(user.toString());
+            listData.add(user.toMatchResultString());
         }
     }
 
@@ -89,8 +89,8 @@ public class ViewMatchFragment extends Fragment {
             public View getView(int position, View convertView, ViewGroup parent) {
                 TextView textView = (TextView) super.getView(position, convertView, parent);
                 //TODO: Could set the color and the text format here.
-                textView.setTextColor(Color.GREEN);
-                textView.setTextSize(25);
+                textView.setTextColor(Color.BLACK);
+                textView.setTextSize(14);
                 return textView;
             }
         });
