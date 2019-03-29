@@ -74,7 +74,7 @@ public class ViewMatchFragment extends Fragment {
 
     private void initData() {
         listData = new ArrayList<String>();
-        int index = mViewModel.getSelectedIndex().getValue();
+        //int index = mViewModel.getSelectedIndex().getValue();
         //TODO: Find the correct result by the index id saved at the last page.
         List<UserInfo> membersList = mViewModel.getMembersList().getValue();
         for(UserInfo user : membersList) {

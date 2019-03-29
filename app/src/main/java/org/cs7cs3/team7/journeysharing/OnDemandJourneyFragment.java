@@ -323,7 +323,7 @@ public class OnDemandJourneyFragment extends Fragment {
                 Log.d("JINCHI", "Local broadcast received in general receiver: " + matchingResultInfo);
                 // TODO: Need to check the membersList<UserInfo> from the message.
                 mViewModel.setMembersList(matchingResultInfo.getGroupMembers());
-                JourneyRequestInfo journeyRequestInfo = new JourneyRequestInfo(userInfo, genderSpinner.getSelectedItem().toString(), methodSpinner.getSelectedItem().toString(), mViewModel.getTo().getValue(), true);
+                JourneyRequestInfo journeyRequestInfo = new JourneyRequestInfo(userInfo, genderSpinner.getSelectedItem().toString(), methodSpinner.getSelectedItem().toString(), mViewModel.getTo().getValue(), false);
                 journeyRequestInfo.setState(JourneyRequestInfo.JourneyRequestStatus.FINISHED);
                 mViewModel.setOfflineRecord(journeyRequestInfo);
                 waitingForMatchResult.release();
