@@ -280,7 +280,7 @@ public class OnDemandJourneyFragment extends Fragment {
                 journeyRequestInfo.setDate(mViewModel.getDate().getValue());
                 journeyRequestInfo.setTime(mViewModel.getTime().getValue());
                 journeyRequestInfo.setStartPoint(mViewModel.getFrom().getValue());
-                //mViewModel.addRecordToList(journeyRequestInfo);
+                mViewModel.addRecordToList(journeyRequestInfo);
                 Toast.makeText(this.getActivity(), "Request Sent! Please check details in the first page ", Toast.LENGTH_SHORT).show();
             }
         });
