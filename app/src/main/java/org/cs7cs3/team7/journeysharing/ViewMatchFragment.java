@@ -9,18 +9,22 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.cs7cs3.team7.journeysharing.Models.UserInfo;
+import org.cs7cs3.team7.journeysharing.database.entity.User;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
 public class ViewMatchFragment extends Fragment {
-
+    @Inject
+    ViewModelProvider.Factory viewModelFactory;
     private MainViewModel mViewModel;
     private ListView mListView;
     private ArrayList<String> listData;
@@ -64,7 +68,7 @@ public class ViewMatchFragment extends Fragment {
 
         //TODO: Exception here should be handled.
         // Inti the ViewModel.
-        mViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
+        mViewModel= ViewModelProviders.of(getActivity(), viewModelFactory).get(MainViewModel.class);
 
         // Inti the 'match_group' ListView.
         mListView = matchGroupLayout.findViewById(R.id.matched_group_list);
@@ -76,8 +80,8 @@ public class ViewMatchFragment extends Fragment {
         listData = new ArrayList<String>();
         //int index = mViewModel.getSelectedIndex().getValue();
         //TODO: Find the correct result by the index id saved at the last page.
-        List<UserInfo> membersList = mViewModel.getMembersList().getValue();
-        for(UserInfo user : membersList) {
+        List<User> membersList = mViewModel.getMembersList().getValue();
+        for(User user : membersList) {
             // TODO: What format should the members info be displayed into??
             listData.add(user.toMatchResultString());
         }

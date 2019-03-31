@@ -1,13 +1,5 @@
 package org.cs7cs3.team7.journeysharing;
 
-import com.google.gson.Gson;
-
-import org.cs7cs3.team7.journeysharing.Models.UserInfo;
-import org.cs7cs3.team7.wifidirect.Message;
-
-import java.util.Date;
-import java.util.HashMap;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -23,17 +15,17 @@ public class TestGson {
 //        msg.setMessageText("Jia-test");
 //        msg.setTimeStamp("12:00");
 //
-//        UserInfo me = new UserInfo();
-//        me.setName("mengxuan");
+//        User me = new User();
+//        me.setNames("mengxuan");
 //        me.setGender("Male");
 //        me.setPhoneNum("123");
-//        HashMap<String, UserInfo> list = new HashMap<>();
-//        UserInfo jinchi = new UserInfo();
+//        HashMap<String, User> list = new HashMap<>();
+//        User jinchi = new User();
 //        jinchi.setPhoneNum("456");
 //        jinchi.setGender("Male");
-//        jinchi.setName("jinchi");
-//        UserInfo Paras = new UserInfo();
-//        Paras.setName("paras");
+//        jinchi.setNames("jinchi");
+//        User Paras = new User();
+//        Paras.setNames("paras");
 //        Paras.setGender("Male");
 //        Paras.setPhoneNum("123");
 //        list.put("Jinchi", jinchi);

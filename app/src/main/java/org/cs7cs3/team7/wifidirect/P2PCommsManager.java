@@ -6,9 +6,9 @@ import android.os.Parcelable;
 import android.util.Log;
 
 import org.cs7cs3.team7.journeysharing.Constants;
-import org.cs7cs3.team7.journeysharing.Models.JourneyRequestInfo;
-import org.cs7cs3.team7.journeysharing.Models.MatchingResultInfo;
-import org.cs7cs3.team7.journeysharing.Models.UserInfo;
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequest;
+import org.cs7cs3.team7.journeysharing.Models.MatchingResult;
+import org.cs7cs3.team7.journeysharing.database.entity.User;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +27,7 @@ public class P2PCommsManager implements ICommsManager {
     private static String WIFI_P2P_DEBUG_LABEL = "JINCHI";
 
     private Context context;
+    private String userLoginOnLocal;
     private P2PNetworkManager networkManager;
     private Thread networkManagerMonitorThread;
     private String serverIPAddress;
@@ -42,8 +43,9 @@ public class P2PCommsManager implements ICommsManager {
 
     private DistributedMatching p2pMatching;
 
-    public P2PCommsManager(Context context) {
+    public P2PCommsManager(Context context, String userLoginOnLocal) {
         this.context = context;
+        this.userLoginOnLocal = userLoginOnLocal;
         this.networkManager = new P2PNetworkManager(context, this);
         this.thisDeviceActsAsServer = false;
         this.thisDeviceConnected = false;
@@ -56,14 +58,14 @@ public class P2PCommsManager implements ICommsManager {
     /***
      * Wrapper method that the UI can use to request a Journey Match
      */
-    public void requestJourneyMatch(JourneyRequestInfo journeyRequestInfo) {
+    public void requestJourneyMatch(JourneyRequest journeyRequest) {
         Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN P2PCommsManager.requestJourneyMatch()");
-        Log.d(WIFI_P2P_DEBUG_LABEL, "journeyRequestInfo: " + journeyRequestInfo);
+        Log.d(WIFI_P2P_DEBUG_LABEL, "journeyRequest: " + journeyRequest);
         //At this point, if there is no connection, the message will be saved with destinationIP = null
         //Thus, when pulling the messages, it is necessary to check if destinationIP is null and if so, replacing with
         //serverIPAddress
         Message message = new Message(this.serverIPAddress, MESSAGE_TYPES.JOURNEY_MATCH_REQUEST);
-        message.setPayload(journeyRequestInfo);
+        message.setPayload(journeyRequest);
         Log.d(WIFI_P2P_DEBUG_LABEL, "Adding a message to the queue");
         pendingMessagesToSendQueue.add(message);
 
@@ -84,18 +86,18 @@ public class P2PCommsManager implements ICommsManager {
     /***
      * Wrapper method that the matching process can use to inform peers of result of the matching
      */
-    public void broadcastMatchingResult(List<MatchingResultInfo> matchingResultInfoList) {
+    public void broadcastMatchingResult(List<MatchingResult> matchingResultList) {
         Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN P2PCommsManager.broadcastMatchingResult()");
-        Log.d(WIFI_P2P_DEBUG_LABEL, "Count of groups: " + matchingResultInfoList.size());
-        for (MatchingResultInfo matchingResultInfo : matchingResultInfoList) {
-            Log.d(WIFI_P2P_DEBUG_LABEL, "Count of one group: " + matchingResultInfo.getGroupMembers().size());
-            for (UserInfo userInfo : matchingResultInfo.getGroupMembers()) {
-                String destinationIP = clients.get(userInfo.getId());
-                Log.d(WIFI_P2P_DEBUG_LABEL, "User Info in the group: " + userInfo);
+        Log.d(WIFI_P2P_DEBUG_LABEL, "Count of groups: " + matchingResultList.size());
+        for (MatchingResult matchingResult : matchingResultList) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Count of one group: " + matchingResult.getGroupMembers().size());
+            for (User user : matchingResult.getGroupMembers()) {
+                String destinationIP = clients.get(user.getLogin());
+                Log.d(WIFI_P2P_DEBUG_LABEL, "User in the group: " + user);
                 if (destinationIP != null) {
                     Log.d(WIFI_P2P_DEBUG_LABEL, "Preparing message for destinationIP: " + destinationIP);
                     Message message = new Message(destinationIP, MESSAGE_TYPES.MATCHING_RESULT);
-                    message.setPayload(matchingResultInfo);
+                    message.setPayload(matchingResult);
                     Log.d(WIFI_P2P_DEBUG_LABEL, "Adding a message to the queue");
                     Log.d(WIFI_P2P_DEBUG_LABEL, "Message: " + message);
                     pendingMessagesToSendQueue.add(message);
@@ -105,7 +107,17 @@ public class P2PCommsManager implements ICommsManager {
                         Log.d(WIFI_P2P_DEBUG_LABEL, "You are not in the network. Aborting.");
                     }
                 } else {
-                    Log.d(WIFI_P2P_DEBUG_LABEL, "Skipping message with null destinationIP");
+                    //If this is a message for this device
+                    if (user.getLogin().equals(userLoginOnLocal)) {
+                        Log.d(WIFI_P2P_DEBUG_LABEL, "Message for this device, so no need to actually send a message. Instead, raise a broadcast");
+                        //Raise local broadcast to update interface with the match result
+                        Intent intent = new Intent(Constants.JOURNEY_MATCH_RESULT_INTENT_ACTION);
+                        intent.putExtra(Constants.JOURNEY_MATCH_RESULT_INTENT_ACTION_PARCELABLE_KEY, matchingResult);
+                        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                    }
+                    else {
+                        Log.d(WIFI_P2P_DEBUG_LABEL, "Skipping message with null destinationIP since there isn't supposed to be one of that kind on this method");
+                    }
                 }
             }
         }
@@ -132,7 +144,7 @@ public class P2PCommsManager implements ICommsManager {
             } else if (message.getMessageType() == MESSAGE_TYPES.JOURNEY_MATCH_REQUEST) {
                 //don't send message but put it in local data structure
                 //interacting with matching
-                p2pMatching.addJourneyRequest((JourneyRequestInfo) message.getPayload());
+                p2pMatching.addJourneyRequest((JourneyRequest) message.getPayload());
             }
         } else {
             Log.d(WIFI_P2P_DEBUG_LABEL, "Polling a message from the queue");
@@ -188,15 +200,15 @@ public class P2PCommsManager implements ICommsManager {
     public void notifyMessageReceived(Message message) {
         if (message.getMessageType() == MESSAGE_TYPES.JOURNEY_MATCH_REQUEST) {
             if (this.thisDeviceActsAsServer) {
-                JourneyRequestInfo journeyRequestInfo = (JourneyRequestInfo) message.getPayload();
-                Log.d(WIFI_P2P_DEBUG_LABEL, "Adding to the clients hashmap (key, value):" + journeyRequestInfo.getUserInfo().getId() + ", " + message.getOriginIP());
-                clients.put(journeyRequestInfo.getUserInfo().getId(), message.getOriginIP());
-                p2pMatching.addJourneyRequest(journeyRequestInfo);
+                JourneyRequest journeyRequest = (JourneyRequest) message.getPayload();
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Adding to the clients hashmap (key, value):" + journeyRequest.getUser().getLogin() + ", " + message.getOriginIP());
+                clients.put(journeyRequest.getUser().getLogin(), message.getOriginIP());
+                p2pMatching.addJourneyRequest(journeyRequest);
             }
         } else if (message.getMessageType() == MESSAGE_TYPES.MATCHING_RESULT) {
             //Raise local broadcast to update interface with the match result
-            Intent intent = new Intent(Constants.JOURNEY_MATCHED_INTENT_ACTION);
-            intent.putExtra(Constants.JOURNEY_MATCHED_INTENT_ACTION_PARCELABLE_KEY, (Parcelable) message.getPayload());
+            Intent intent = new Intent(Constants.JOURNEY_MATCH_RESULT_INTENT_ACTION);
+            intent.putExtra(Constants.JOURNEY_MATCH_RESULT_INTENT_ACTION_PARCELABLE_KEY, (Parcelable) message.getPayload());
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         }
     }

@@ -1,10 +1,10 @@
 package org.cs7cs3.team7.wifidirect;
 
-import org.cs7cs3.team7.journeysharing.Models.JourneyRequestInfo;
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequest;
 
 public class DummyCommsManager implements ICommsManager {
     @Override
-    public void requestJourneyMatch(JourneyRequestInfo userInfo) {
+    public void requestJourneyMatch(JourneyRequest userInfo) {
     }
 
     @Override

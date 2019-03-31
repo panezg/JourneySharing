@@ -25,16 +25,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import javax.inject.Inject;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 //
 
 public class TypeAddressFragment extends Fragment implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    @Inject
+    ViewModelProvider.Factory viewModelFactory;
     private MainViewModel mViewModel;
     private Button addressSaveButton;
     private EditText inputAddress;
@@ -56,7 +61,7 @@ public class TypeAddressFragment extends Fragment implements OnMapReadyCallback 
         super.onActivityCreated(savedInstanceState);
 
         // Inti the ViewModel.
-        mViewModel = ViewModelProviders.of(Objects.requireNonNull(getActivity())).get(MainViewModel.class);
+        mViewModel= ViewModelProviders.of(getActivity(), viewModelFactory).get(MainViewModel.class);
 
         //TODO: Exception here should be handled.
         // Inti the addressSaveButton and Set its onClick listener.

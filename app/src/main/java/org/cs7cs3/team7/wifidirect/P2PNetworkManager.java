@@ -28,6 +28,7 @@ public class P2PNetworkManager implements WifiP2pManager.PeerListListener, WifiP
     private Context context;
     private P2PCommsManager commsManager;
     private String thisDeviceMACAddress;
+    private boolean broadcastRegistered;
 
     //WiFi P2P group state variables
     private boolean isWifiP2pEnabled = false;
@@ -41,7 +42,6 @@ public class P2PNetworkManager implements WifiP2pManager.PeerListListener, WifiP
         this.commsManager = commsManager;
         //Enabling and resetting WiFi
         wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        //wifiManager.setWifiEnabled(true);
         wifiManager.setWifiEnabled(false);
         wifiManager.setWifiEnabled(true);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -71,20 +71,28 @@ public class P2PNetworkManager implements WifiP2pManager.PeerListListener, WifiP
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         //To capture events related to status changes of this device
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+        context.registerReceiver(wifiDirectBroadcastReceiver, intentFilter);
+        this.broadcastRegistered = true;
     }
 
 
     public void onResume() {
         Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onResume() of P2PNetworkManager");
-        Log.d(WIFI_P2P_DEBUG_LABEL, "Registering WiFi Direct Broadcast Receiver with the intent filter");
-        context.registerReceiver(wifiDirectBroadcastReceiver, intentFilter);
+        if (!this.broadcastRegistered) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Registering WiFi Direct Broadcast Receiver with the intent filter");
+            context.registerReceiver(wifiDirectBroadcastReceiver, intentFilter);
+            this.broadcastRegistered = !this.broadcastRegistered;
+        }
         Log.d(WIFI_P2P_DEBUG_LABEL, "END onResume() of P2PNetworkManager");
     }
 
     public void onPause() {
         Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onPause() of P2PNetworkManager");
-        Log.d(WIFI_P2P_DEBUG_LABEL, "Unregistering WiFi Direct Broadcast Receiver");
-        context.unregisterReceiver(wifiDirectBroadcastReceiver);
+        if (this.broadcastRegistered) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Unregistering WiFi Direct Broadcast Receiver");
+            context.unregisterReceiver(wifiDirectBroadcastReceiver);
+            this.broadcastRegistered = !this.broadcastRegistered;
+        }
         Log.d(WIFI_P2P_DEBUG_LABEL, "END onPause() of P2PNetworkManager");
     }
 

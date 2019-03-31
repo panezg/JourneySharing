@@ -7,29 +7,30 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
 
-import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.Toast;
 
-import org.cs7cs3.team7.journeysharing.Models.JourneyRequestInfo;
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequest;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 public class ScheduleJourneyFragment extends Fragment {
     private ListView scheduleList;
+    @Inject
+    ViewModelProvider.Factory viewModelFactory;
     private MainViewModel mViewModel;
 
     static ScheduleJourneyFragment newInstance() {
@@ -45,7 +46,7 @@ public class ScheduleJourneyFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        mViewModel = ViewModelProviders.of(getActivity()).get(MainViewModel.class);
+        mViewModel= ViewModelProviders.of(getActivity(), viewModelFactory).get(MainViewModel.class);
         scheduleList=(ListView)getActivity().findViewById(R.id.scheduleList);
         ScheduleJourneyFragment scheduleJourneyFragment= new ScheduleJourneyFragment();
         SimpleAdapter adapter = new SimpleAdapter(getContext(),scheduleJourneyFragment.getListOfHistory(mViewModel.getListOfHistory(),mViewModel.getOfflineRecord()),R.layout.vlist,
@@ -65,23 +66,23 @@ public class ScheduleJourneyFragment extends Fragment {
     }
 
 
-    private List getListOfHistory(MutableLiveData<List<JourneyRequestInfo>> listofhistory, MutableLiveData<JourneyRequestInfo> offlineRecord){
+    private List getListOfHistory(MutableLiveData<List<JourneyRequest>> listofhistory, MutableLiveData<JourneyRequest> offlineRecord){
         List<Map<String,Object>> showlist = new ArrayList<Map<String, Object>>();
 
         //convert online date to hashmap and add the hashmap to the showlist
-        List<JourneyRequestInfo> onlinerequestInfos=new ArrayList<>();
+        List<JourneyRequest> onlinerequestInfos=new ArrayList<>();
         onlinerequestInfos=listofhistory.getValue();
         Map<String,Object> map=new HashMap<>();
         int count=1;
-        for(JourneyRequestInfo journeyRequestInfo: onlinerequestInfos) {
+        for(JourneyRequest journeyRequest : onlinerequestInfos) {
             if (count == 9) {
                 break;
             }
             //TODO: add oderId
-            String date = journeyRequestInfo.getDate();
-            String des = journeyRequestInfo.getDestination();
-            String time = journeyRequestInfo.getTime();
-            JourneyRequestInfo.JourneyRequestStatus state = journeyRequestInfo.getState();
+            String date = journeyRequest.getDate();
+            String des = journeyRequest.getDestination();
+            String time = journeyRequest.getTime();
+            JourneyRequest.JourneyRequestStatus state = journeyRequest.getState();
             map.put("date", date);
             map.put("time", time);
             map.put("destination", des);
@@ -94,7 +95,7 @@ public class ScheduleJourneyFragment extends Fragment {
             String offlinedate=offlineRecord.getValue().getDate();
             String offlinedes=offlineRecord.getValue().getDestination();
             String offlintime=offlineRecord.getValue().getTime();
-            JourneyRequestInfo.JourneyRequestStatus offlinestate=offlineRecord.getValue().getState();
+            JourneyRequest.JourneyRequestStatus offlinestate=offlineRecord.getValue().getState();
             //TODO: add offline orderID
             offlinemap.put("date",offlinedate);
             offlinemap.put("time",offlintime);

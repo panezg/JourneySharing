@@ -14,6 +14,6 @@ public class Constants {
 
     public static String HOST = "http://35.196.96.75/";
 
-    public static final String JOURNEY_MATCHED_INTENT_ACTION = "JOURNEY_MATCHED";
-    public static final String JOURNEY_MATCHED_INTENT_ACTION_PARCELABLE_KEY = "matchingResultInfo";
+    public static final String JOURNEY_MATCH_RESULT_INTENT_ACTION = "JOURNEY_MATCH_RESULT";
+    public static final String JOURNEY_MATCH_RESULT_INTENT_ACTION_PARCELABLE_KEY = "matchingResult";
 }
