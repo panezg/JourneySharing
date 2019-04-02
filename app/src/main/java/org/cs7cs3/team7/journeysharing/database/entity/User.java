@@ -1,5 +1,8 @@
 package org.cs7cs3.team7.journeysharing.database.entity;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Date;
 
 import androidx.annotation.NonNull;
@@ -8,13 +11,23 @@ import androidx.room.PrimaryKey;
 
 @Entity
 public class User {
+    public static final int GENDER_MALE = 0;
+    public static final int GENDER_FEMALE = 1;
+
     @PrimaryKey
     @NonNull
     private int id;
     private String login;
+    @Expose
+    @SerializedName("userName")
     private String names;
+    @Expose
+    @SerializedName("phoneNumber")
     private String phoneNum;
     private String gender;
+    @Expose
+    @SerializedName("gender")
+    private int genderCode;
     private Date lastRefresh;
 
     // --- Constructors ---
@@ -33,10 +46,11 @@ public class User {
     public String toString() {
         return "User{" +
                 "id=" + id +
-                ", login=" + login +
+                ", login='" + login + '\'' +
                 ", names='" + names + '\'' +
                 ", phoneNum='" + phoneNum + '\'' +
                 ", gender='" + gender + '\'' +
+                ", genderCode=" + genderCode +
                 ", lastRefresh=" + lastRefresh +
                 '}';
     }
@@ -87,6 +101,20 @@ public class User {
 
     public void setGender(String gender) {
         this.gender = gender;
+        if (gender.equals("MALE")) {
+            this.genderCode = GENDER_MALE;
+        }
+        else if (gender.equals("FEMALE"))  {
+            this.genderCode = GENDER_FEMALE;
+        }
+    }
+
+    public int getGenderCode() {
+        return this.genderCode;
+    }
+
+    public void setGenderCode(int genderCode) {
+        this.genderCode = genderCode;
     }
 
     public Date getLastRefresh() {

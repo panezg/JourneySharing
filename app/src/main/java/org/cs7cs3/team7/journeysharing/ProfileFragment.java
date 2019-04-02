@@ -42,7 +42,6 @@ public class ProfileFragment extends Fragment {
         this.configureDagger();
 
         View userInfoLayout = getView().findViewById(R.id.user_info_include);
-        loginEditText = userInfoLayout.findViewById(R.id.login_text);
         namesEditText = userInfoLayout.findViewById(R.id.names_text);
         phoneEditText = userInfoLayout.findViewById(R.id.phone_number_text);
         genderSpinner = userInfoLayout.findViewById(R.id.gender_spinner);
@@ -53,8 +52,7 @@ public class ProfileFragment extends Fragment {
         saveButton.setOnClickListener(v -> {
             Log.d("JINCHI", "Saving...");
             blockAllComponents();
-            viewModel.update(loginEditText.getText().toString(),
-                    namesEditText.getText().toString(),
+            viewModel.update(namesEditText.getText().toString(),
                     phoneEditText.getText().toString(),
                     genderSpinner.getSelectedItem().toString());
             unblockAllComponents();
@@ -95,7 +93,9 @@ public class ProfileFragment extends Fragment {
             loginEditText.setText(user.getLogin());
             namesEditText.setText(user.getNames());
             phoneEditText.setText(user.getPhoneNum());
+            //wrong code
             genderSpinner.setSelection(0);
+            //genderSpinner.setSelection(user.getGenderCode());
             //genderSpinner.setSelection(userInfo.getGender());
         } else
         {

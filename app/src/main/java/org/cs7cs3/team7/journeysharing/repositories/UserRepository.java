@@ -55,7 +55,6 @@ public class UserRepository {
         refreshUser(login); // try to refresh data if possible via API
         //this is an async call, and always returns null. When a UI uses the LiveData, the Dao eventually provides the right value
         return userDao.load(login); // return a LiveData directly from the database.
-
     }
 
     public User getUserSync(String login) {
@@ -98,21 +97,28 @@ public class UserRepository {
                     Log.e("JINCHI", "DATA REFRESHED FROM NETWORK");
                     //Toast.makeText(App.context, "Data refreshed from network !", Toast.LENGTH_LONG).show();
                     executor.execute(() -> {
-                        Log.e("JINCHI", "Executing second part of save-22 save");
                         if (response.isSuccessful()) {
-                            JsonElement jsonElement = response.body().getData();
-                            user.setId(jsonElement.getAsJsonObject().get("id").getAsInt());
-                            user.setLastRefresh(new Date());
-                            //saving to cache SQLite
-                            userDao.save(user);
-
-                            //Saving to preferences
-                            SharedPreferences sharedPref = App.context.getSharedPreferences(SHARED_PREFERENCES_FILE_KEY, App.context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPref.edit();
-                            editor.putString(SHARED_PREFERENCES_USER_LOGIN, user.getLogin());
-                            editor.commit();
+                            HTTPResponse httpResponse = response.body();
+                            if (httpResponse.getStatus().equals("success")) {
+                                Log.e("JINCHI", "Successful response");
+                                JsonElement jsonElement = response.body().getData();
+                                user.setId(jsonElement.getAsJsonObject().get("id").getAsInt());
+                                user.setLastRefresh(new Date());
+                                //saving to cache SQLite
+                                userDao.save(user);
+                                //Saving to preferences
+                                SharedPreferences sharedPref = App.context.getSharedPreferences(SHARED_PREFERENCES_FILE_KEY, App.context.MODE_PRIVATE);
+                                SharedPreferences.Editor editor = sharedPref.edit();
+                                editor.putString(SHARED_PREFERENCES_USER_LOGIN, user.getLogin());
+                                editor.commit();
+                            }
+                            else {
+                                Log.e("JINCHI", "Failure response at API level response within HTTP Response");
+                            }
                         }
                         else {
+                            Log.e("JINCHI", "Failure at HTTP Response leevel");
+                            /*
                             //remove this code
                             user.setId(999);
                             user.setLastRefresh(new Date());
@@ -125,6 +131,7 @@ public class UserRepository {
                             SharedPreferences.Editor editor = sharedPref.edit();
                             editor.putString(SHARED_PREFERENCES_USER_LOGIN, user.getLogin());
                             editor.commit();
+                            */
                         }
                     });
                 }
