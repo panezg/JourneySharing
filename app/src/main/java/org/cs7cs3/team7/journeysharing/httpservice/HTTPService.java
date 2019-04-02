@@ -22,7 +22,7 @@ public interface HTTPService {
     Call<HTTPResponse> save(@Body UserRequest user);
 
 //    @POST("schedule/add")
-//    Call<String> addSchedule(@Body Schedule schedule);
+//    Call<String> addSchedule(@Body ScheduleReuest schedule);
 
 
 

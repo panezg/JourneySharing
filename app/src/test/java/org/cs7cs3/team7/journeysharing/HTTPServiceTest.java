@@ -34,6 +34,7 @@ public class HTTPServiceTest {
 
         Call<HTTPResponse> res = client.save(userRequest);
         Response<HTTPResponse> response =  res.execute();
+        System.out.println(res.request().toString());
         if(response.isSuccessful()){
             System.out.println("succ");
             JsonElement user = response.body().getData();
@@ -97,5 +98,10 @@ public class HTTPServiceTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void testSchedule() throws IOException{
+
     }
 }
