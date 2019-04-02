@@ -28,6 +28,7 @@ public class P2PNetworkManager implements WifiP2pManager.PeerListListener, WifiP
     private Context context;
     private P2PCommsManager commsManager;
     private String thisDeviceMACAddress;
+    private boolean broadcastRegistered;
 
     //WiFi P2P group state variables
     private boolean isWifiP2pEnabled = false;
@@ -41,7 +42,6 @@ public class P2PNetworkManager implements WifiP2pManager.PeerListListener, WifiP
         this.commsManager = commsManager;
         //Enabling and resetting WiFi
         wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        //wifiManager.setWifiEnabled(true);
         wifiManager.setWifiEnabled(false);
         wifiManager.setWifiEnabled(true);
         WifiInfo wifiInfo = wifiManager.getConnectionInfo();
@@ -71,20 +71,28 @@ public class P2PNetworkManager implements WifiP2pManager.PeerListListener, WifiP
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         //To capture events related to status changes of this device
         intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+        context.registerReceiver(wifiDirectBroadcastReceiver, intentFilter);
+        this.broadcastRegistered = true;
     }
 
 
     public void onResume() {
         Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onResume() of P2PNetworkManager");
-        Log.d(WIFI_P2P_DEBUG_LABEL, "Registering WiFi Direct Broadcast Receiver with the intent filter");
-        context.registerReceiver(wifiDirectBroadcastReceiver, intentFilter);
+        if (!this.broadcastRegistered) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Registering WiFi Direct Broadcast Receiver with the intent filter");
+            context.registerReceiver(wifiDirectBroadcastReceiver, intentFilter);
+            this.broadcastRegistered = !this.broadcastRegistered;
+        }
         Log.d(WIFI_P2P_DEBUG_LABEL, "END onResume() of P2PNetworkManager");
     }
 
     public void onPause() {
         Log.d(WIFI_P2P_DEBUG_LABEL, "BEGIN onPause() of P2PNetworkManager");
-        Log.d(WIFI_P2P_DEBUG_LABEL, "Unregistering WiFi Direct Broadcast Receiver");
-        context.unregisterReceiver(wifiDirectBroadcastReceiver);
+        if (this.broadcastRegistered) {
+            Log.d(WIFI_P2P_DEBUG_LABEL, "Unregistering WiFi Direct Broadcast Receiver");
+            context.unregisterReceiver(wifiDirectBroadcastReceiver);
+            this.broadcastRegistered = !this.broadcastRegistered;
+        }
         Log.d(WIFI_P2P_DEBUG_LABEL, "END onPause() of P2PNetworkManager");
     }
 
@@ -184,10 +192,9 @@ public class P2PNetworkManager implements WifiP2pManager.PeerListListener, WifiP
         boolean isThereAtLeastOnePhoneDevice = false;
         boolean doesGOExist = false;
         WifiP2pDevice wifiP2PGO = null;
-        WifiP2pDevice wifiP2PWithGreatestMAC = null;
-        String greatestMACAddress = Constants.THIS_DEVICE_MAC_ADDRESS;
+        WifiP2pDevice wifiP2PWithLowestMAC = null;
 
-        //process the list and look for a group owner or the phone device with largest MAC
+        //process the list and look for a group owner or the phone device with lowest MAC
         for (WifiP2pDevice peer : peerList) {
             Log.d(WIFI_P2P_DEBUG_LABEL, "Device Found in onPeersAvailable " + peer.deviceAddress + " " + peer.deviceName);
             Log.d(WIFI_P2P_DEBUG_LABEL, "is Peer Group Owner? = " + peer.isGroupOwner());
@@ -208,10 +215,10 @@ public class P2PNetworkManager implements WifiP2pManager.PeerListListener, WifiP
                 break;
             }
 
-            if (wifiP2PWithGreatestMAC == null) {
-                wifiP2PWithGreatestMAC = peer;
+            if (wifiP2PWithLowestMAC == null) {
+                wifiP2PWithLowestMAC = peer;
             } else {
-                wifiP2PWithGreatestMAC = maxByMAC(wifiP2PWithGreatestMAC, peer);
+                wifiP2PWithLowestMAC = minByMAC(wifiP2PWithLowestMAC, peer);
             }
         }
 
@@ -234,16 +241,16 @@ public class P2PNetworkManager implements WifiP2pManager.PeerListListener, WifiP
                 Log.d(WIFI_P2P_DEBUG_LABEL, "Skip more analysis since you are already part of a group, and connected to the group owner");
             }
         } else {
-            //If the device with the greatest MAC address is not this device, but one in the peer list, and
+            //If the device with the lowest MAC address is not this device, but one in the peer list, and
             //if such device's status is available, then wait for such device to create the group
-            if (wifiP2PWithGreatestMAC.deviceAddress.compareTo(Constants.THIS_DEVICE_MAC_ADDRESS) > 0 &&
-                    wifiP2PWithGreatestMAC.status == WifiP2pDevice.AVAILABLE) {
-                Log.d(WIFI_P2P_DEBUG_LABEL, "This device should wait for the device with largest MAC to form the group");
+            if (wifiP2PWithLowestMAC.deviceAddress.compareTo(Constants.THIS_DEVICE_MAC_ADDRESS) < 0 &&
+                    wifiP2PWithLowestMAC.status == WifiP2pDevice.AVAILABLE) {
+                Log.d(WIFI_P2P_DEBUG_LABEL, "This device should wait for the device with lowest MAC to form the group");
             }
-            //If this device is the one with the greatest MAC address or if the device with the greatest
+            //If this device is the one with the lowest MAC address or if the device with the lowest
             //MAC address is not available, then proceed to form a group
             else {
-                Log.d(WIFI_P2P_DEBUG_LABEL, "Either this devices is the one with greatest MAC, or the peer with the greatest MAC is NOT AVAILABLE");
+                Log.d(WIFI_P2P_DEBUG_LABEL, "Either this devices is the one with lowest MAC, or the peer with the lowest MAC is NOT AVAILABLE");
                 Log.d(WIFI_P2P_DEBUG_LABEL, "So, this device will proceed to form a group");
                 Log.d(WIFI_P2P_DEBUG_LABEL, "Calling P2PNetworkManager.createGroup()");
                 this.createGroup();
@@ -253,12 +260,12 @@ public class P2PNetworkManager implements WifiP2pManager.PeerListListener, WifiP
     }
 
     /***
-     * Returns the device with greatest MAC address from a pair of devices
+     * Returns the device with lowest MAC address from a pair of devices
      */
-    private WifiP2pDevice maxByMAC(WifiP2pDevice device1, WifiP2pDevice device2) {
+    private WifiP2pDevice minByMAC(WifiP2pDevice device1, WifiP2pDevice device2) {
         int result = device1.deviceAddress.compareTo(device2.deviceAddress);
 
-        if (result > 0) {
+        if (result < 0) {
             return device1;
         } else if (result == 0) {
             return device1;

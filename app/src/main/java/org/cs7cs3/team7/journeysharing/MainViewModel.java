@@ -1,41 +1,49 @@
 package org.cs7cs3.team7.journeysharing;
 
+import android.app.Activity;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
-import org.cs7cs3.team7.journeysharing.Models.JourneyRequestInfo;
-import org.cs7cs3.team7.journeysharing.Models.UserInfo;
-import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequest;
+import org.cs7cs3.team7.journeysharing.database.entity.User;
+import org.cs7cs3.team7.journeysharing.repositories.UserRepository;
+import org.cs7cs3.team7.wifidirect.CommsManagerFactory;
+import org.cs7cs3.team7.wifidirect.ICommsManager;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class MainViewModel extends ViewModel {
     /*
     ------------------------------------ ViewModel For OnDemandJourneyFragment -----------------------------------
      */
 
+    private Activity mainActivity;
+    private SharedPreferences sharedPreferences;
+    private ICommsManager commsManager;
+    private UserRepository userRepository;
+    private String userLoginOnLocal;
+
     //Data for OnDemandJourneyFragment
     private MutableLiveData<String> from;
     private MutableLiveData<String> to;
     private MutableLiveData<Boolean> isDestination;
 
-    private MutableLiveData<UserInfo> sender;
+    private MutableLiveData<User> sender;
     private MutableLiveData<String> Time;
     private MutableLiveData<String> Date;
     // Only for P2P part.
-    private MutableLiveData<List<UserInfo>> membersList;
+    private MutableLiveData<List<User>> membersList;
 
     // Preferences
     private MutableLiveData<String> genderPreference;
@@ -43,19 +51,68 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<Integer> preMethodItemIndexSelected;
     private MutableLiveData<String> methodPreference;
 
-    public MutableLiveData<UserInfo> getSender() {
+    // --- Constructor
+
+    @Inject
+    public MainViewModel(UserRepository userRepository) {
+        Log.d("JINCHI", "Creating ProfileViewModel");
+        this.userRepository = userRepository;
+        this.userLoginOnLocal = userRepository.recoverUserLogin();
+        this.commsManager = CommsManagerFactory.getCommsManager(App.context, userLoginOnLocal);
+        this.init();
+    }
+
+    // --- Initialization
+
+    public void init() {
+        // Initialization of data in OnDemandJourneyFragment
+        from = new MutableLiveData<>();
+        setFrom("Default");
+        to = new MutableLiveData<>();
+        setTo("Default");
+        isDestination = new MutableLiveData<>();
+        setIsDestination(false);
+        Time = new MutableLiveData<>();
+        setTime("Time");
+        Date = new MutableLiveData<>();
+        setDate("Date");
+        preGenderItemIndexSelected = new MutableLiveData<>();
+        setPreGenderItemIndexSelected(0);
+        genderPreference = new MutableLiveData<>();
+        setGenderPreference("Male");
+        preMethodItemIndexSelected = new MutableLiveData<>();
+        setPreMethodItemIndexSelected(0);
+        methodPreference = new MutableLiveData<>();
+        setMethodPreference("Walk");
+
+
+        sender = new MutableLiveData<>();
+        // TODO: Need to check if 0 represents Male.
+        membersList = new MutableLiveData<>();
+        setMembersList(new ArrayList<User>());
+
+        // Initialization of data in ScheduledJourneyFragment.
+        offlineRecord = new MutableLiveData<>();
+        listOfHistory = new MutableLiveData<>();
+        selectedIndex = new MutableLiveData<>();
+        resultsOfOnlineModel = new MutableLiveData<>();
+    }
+
+    // ---
+
+    public MutableLiveData<User> getSender() {
         return sender;
     }
 
-    public void setSender(UserInfo sender) {
+    public void setSender(User sender) {
         this.sender.setValue(sender);
     }
 
-    public MutableLiveData<List<UserInfo>> getMembersList() {
+    public MutableLiveData<List<User>> getMembersList() {
         return membersList;
     }
 
-    public void setMembersList(List<UserInfo> membersList) {
+    public void setMembersList(List<User> membersList) {
         this.membersList.setValue(membersList);
     }
 
@@ -137,36 +194,36 @@ public class MainViewModel extends ViewModel {
      */
 
     // Only keep one single
-    private MutableLiveData<JourneyRequestInfo> offlineRecord;
+    private MutableLiveData<JourneyRequest> offlineRecord;
 
     // Hold history data get from backend.
-    private MutableLiveData<List<JourneyRequestInfo>> listOfHistory;
+    private MutableLiveData<List<JourneyRequest>> listOfHistory;
 
     private MutableLiveData<Integer> selectedIndex;
 
     // TODO: need to finalize the result data format
-    private MutableLiveData<Map<String, List<UserInfo>>> resultsOfOnlineModel;
+    private MutableLiveData<Map<String, List<User>>> resultsOfOnlineModel;
 
-    public MutableLiveData<JourneyRequestInfo> getOfflineRecord() {
+    public MutableLiveData<JourneyRequest> getOfflineRecord() {
         return offlineRecord;
     }
 
-    public void setOfflineRecord(JourneyRequestInfo offlineRecord) {
+    public void setOfflineRecord(JourneyRequest offlineRecord) {
         this.offlineRecord.setValue(offlineRecord);
     }
 
-    public void addRecordToList(JourneyRequestInfo record) {
-        List<JourneyRequestInfo> tmpList = listOfHistory.getValue();
+    public void addRecordToList(JourneyRequest record) {
+        List<JourneyRequest> tmpList = listOfHistory.getValue();
         tmpList.add(record);
         listOfHistory.setValue(tmpList);
     }
 
 
-    public MutableLiveData<List<JourneyRequestInfo>> getListOfHistory() {
+    public MutableLiveData<List<JourneyRequest>> getListOfHistory() {
         return listOfHistory;
     }
 
-    public void setListOfHistory(List<JourneyRequestInfo> listOfHistory) {
+    public void setListOfHistory(List<JourneyRequest> listOfHistory) {
         this.listOfHistory.setValue(listOfHistory);
     }
 
@@ -179,106 +236,47 @@ public class MainViewModel extends ViewModel {
     }
 
     /*
-    ------------------------------------ ViewModel For ProfileFragment -----------------------------------
+    ----------------------------------- User Actions --------------------------------------
      */
 
-    //Data for ProfileFragment.
-    private MutableLiveData<String> names;
-    private MutableLiveData<String> phone;
-    private MutableLiveData<Integer> genderItemIndexSelected;
-    private MutableLiveData<String> gender;
+    public void search(String genderPref, String methodPref, String destination, boolean isRealTime) {
+        Log.d("JINCHI", "Search: " + userLoginOnLocal);
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground( final Void ... params ) {
+                User user = userRepository.getUserSync(userLoginOnLocal);
+                Log.d("JINCHI", "Search: " + (user == null));
+                JourneyRequest journeyRequest = new JourneyRequest(user, genderPref, methodPref, destination, isRealTime);
+                journeyRequest.setState(JourneyRequest.JourneyRequestStatus.PENDING);
+                commsManager.requestJourneyMatch(journeyRequest);
+                // this line breaks this because it updates UI
+                // setOfflineRecord(journeyRequest);
 
-    // For sending Http request
-    private MutableLiveData<Integer> uniqueID;
+                return null;
+            }
+        }.execute();
 
-    //Getter and Setter of ProfileFragment.
-    public MutableLiveData<String> getNames() {
-        return names;
-    }
-
-    public MutableLiveData<String> getPhone() {
-        return phone;
-    }
-
-    public MutableLiveData<Integer> getGenderItemIndexSelected() {
-        return genderItemIndexSelected;
-    }
-
-    public void setNames(String names) {
-        this.names.setValue(names);
-    }
-
-    public void setPhone(String phone) {
-        this.phone.setValue(phone);
-    }
-
-    public void setGenderItemIndexSelected(int genderItemIndexSelected) {
-        this.genderItemIndexSelected.setValue(genderItemIndexSelected);
-    }
-
-    public MutableLiveData<Integer> getUniqueID() {
-        return uniqueID;
-    }
-
-    public void setUniqueID(Integer uniqueID) {
-        this.uniqueID.setValue(uniqueID);
-    }
-
-    public MutableLiveData<String> getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender.setValue(gender);
+        Log.d("JINCHI", "OnDemandJourneyFragment: After calling requestJourneyMatch()");
+        Toast.makeText(App.context, "Request Sent! Waiting for matching...", Toast.LENGTH_SHORT).show();
     }
 
     /*
-    ------------------------------------ Initialization -----------------------------------
+    ---------------------------------- UI Framework Actions ------------------------------
      */
+    public void resume() {
+        commsManager.onResume();
+    }
 
-    public void init() {
+    public void pause() {
+        commsManager.onPause();
+    }
 
-        // Initialization of data in OnDemandJourneyFragment
-        from = new MutableLiveData<>();
-        setFrom("Default");
-        to = new MutableLiveData<>();
-        setTo("Default");
-        isDestination = new MutableLiveData<>();
-        setIsDestination(false);
-        Time = new MutableLiveData<>();
-        setTime("Time");
-        Date = new MutableLiveData<>();
-        setDate("Date");
-        preGenderItemIndexSelected = new MutableLiveData<>();
-        setPreGenderItemIndexSelected(0);
-        genderPreference = new MutableLiveData<>();
-        setGenderPreference("Male");
-        preMethodItemIndexSelected = new MutableLiveData<>();
-        setPreMethodItemIndexSelected(0);
-        methodPreference = new MutableLiveData<>();
-        setMethodPreference("Walk");
+    public void stop() {
+        commsManager.onStop();
+    }
 
-        // Initialization of data in ProfileFragment.
-        names = new MutableLiveData<>();
-        setNames("");
-        gender = new MutableLiveData<>();
-        setGender("Male");
-        genderItemIndexSelected = new MutableLiveData<>();
-        setGenderItemIndexSelected(0);
-        phone = new MutableLiveData<>();
-        setPhone("");
-        uniqueID = new MutableLiveData<>();
-
-        sender = new MutableLiveData<>();
-        setSender(new UserInfo("", names.getValue(), phone.getValue(), to.getValue()));
-        // TODO: Need to check if 0 represents Male.
-        membersList = new MutableLiveData<>();
-        setMembersList(new ArrayList<UserInfo>());
-
-        // Initialization of data in ScheduledJourneyFragment.
-        offlineRecord = new MutableLiveData<>();
-        listOfHistory = new MutableLiveData<>();
-        selectedIndex = new MutableLiveData<>();
-        resultsOfOnlineModel = new MutableLiveData<>();
+    public void destroy() {
+        commsManager.onDestroy();
+        //commsManager.clean();
     }
 }

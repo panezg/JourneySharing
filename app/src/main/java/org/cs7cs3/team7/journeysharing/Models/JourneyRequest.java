@@ -1,8 +1,10 @@
 package org.cs7cs3.team7.journeysharing.Models;
 
-public class JourneyRequestInfo {
+import org.cs7cs3.team7.journeysharing.database.entity.User;
 
-    public static enum JourneyRequestStatus {
+public class JourneyRequest {
+
+    public enum JourneyRequestStatus {
         FINISHED,
         SCHEDULED,
         PENDING
@@ -23,9 +25,9 @@ public class JourneyRequestInfo {
     private String destination;
     private String startPoint;
 
-    private UserInfo userInfo;
+    private User userInfo;
 
-    public JourneyRequestInfo(UserInfo userInfo, String gender, String method, String destination, boolean isRealTime) {
+    public JourneyRequest(User userInfo, String gender, String method, String destination, boolean isRealTime) {
         this.userInfo = userInfo;
         this.gender = gender;
         this.method = method;
@@ -41,7 +43,7 @@ public class JourneyRequestInfo {
         isOffline = offline;
     }
 
-    public UserInfo getUserInfo() {
+    public User getUser() {
         return userInfo;
     }
 
@@ -95,7 +97,7 @@ public class JourneyRequestInfo {
 
     @Override
     public String toString() {
-        return "JourneyRequestInfo{" +
+        return "JourneyRequest{" +
                 "state=" + state +
                 ", date='" + date + '\'' +
                 ", time='" + time + '\'' +

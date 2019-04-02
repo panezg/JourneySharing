@@ -3,8 +3,8 @@ package org.cs7cs3.team7.wifidirect;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 
-import org.cs7cs3.team7.journeysharing.Models.JourneyRequestInfo;
-import org.cs7cs3.team7.journeysharing.Models.MatchingResultInfo;
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequest;
+import org.cs7cs3.team7.journeysharing.Models.MatchingResult;
 
 public class Message {
     //TODO:  timeStamp could be useful
@@ -66,12 +66,12 @@ public class Message {
         Message message = new Gson().fromJson(JSON, Message.class);
         if (message.messageType == ICommsManager.MESSAGE_TYPES.JOURNEY_MATCH_REQUEST) {
             String tempJSON = new Gson().toJson(message.getPayload(), LinkedTreeMap.class);
-            JourneyRequestInfo journeyRequestInfo = new Gson().fromJson(tempJSON, JourneyRequestInfo.class);
-            message.setPayload(journeyRequestInfo);
+            JourneyRequest journeyRequest = new Gson().fromJson(tempJSON, JourneyRequest.class);
+            message.setPayload(journeyRequest);
         } else if (message.messageType == ICommsManager.MESSAGE_TYPES.MATCHING_RESULT) {
             String tempJSON = new Gson().toJson(message.getPayload(), LinkedTreeMap.class);
-            MatchingResultInfo matchingResultInfo = new Gson().fromJson(tempJSON, MatchingResultInfo.class);
-            message.setPayload(matchingResultInfo);
+            MatchingResult matchingResult = new Gson().fromJson(tempJSON, MatchingResult.class);
+            message.setPayload(matchingResult);
         }
         return message;
     }

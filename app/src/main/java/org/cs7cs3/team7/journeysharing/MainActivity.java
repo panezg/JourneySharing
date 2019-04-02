@@ -1,17 +1,28 @@
 package org.cs7cs3.team7.journeysharing;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
-import java.util.List;
+import javax.inject.Inject;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelProviders;
+import dagger.android.AndroidInjection;
+import dagger.android.DispatchingAndroidInjector;
+import dagger.android.support.HasSupportFragmentInjector;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements HasSupportFragmentInjector {
+    @Inject
+    DispatchingAndroidInjector<Fragment> dispatchingAndroidInjector;
+
+    @Inject
+    ViewModelProvider.Factory viewModelFactory;
+
     private MainViewModel mViewModel;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -19,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             //depending on state, would need to change to use ViewMatchFragment
             case R.id.nav_schedule_journey:
-                refreshScheduledList();
+                //refreshScheduledList();
                 Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
                 loadFragment(scheduleJourneyFragment);
                 return true;
@@ -28,8 +39,7 @@ public class MainActivity extends AppCompatActivity {
                 loadFragment(onDemandJourneyFragment);
                 return true;
             case R.id.nav_profile:
-                Fragment profileFragment = ProfileFragment.newInstance();
-                loadFragment(profileFragment);
+                loadFragment(new ProfileFragment());
                 return true;
         }
         return false;
@@ -38,24 +48,53 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
-        mViewModel.init();
+        Log.d("JINCHI", "OnCreate Activity");
+
         setContentView(R.layout.main_activity);
+
+        this.configureDagger();
+
+        ////
+        mViewModel = ViewModelProviders.of(this, viewModelFactory).get(MainViewModel.class);
+
+        //mViewModel.init(getApplicationContext(), this);
+        Log.d("JINCHI", "done");
+        //profileViewModel.init();
+
 
         BottomNavigationView navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         //loading default fragment
         //TODO: If basic flow hasn't completed, then load Profile; else, load default
         //need some kind of global property
-        Fragment profileFragment = ProfileFragment.newInstance();
-        loadFragment(profileFragment);
-        //NetworkManagerFactory.setSimulatorModeOn(true);
+
+        //Useful in case we want the Profile Fragment page to load info from other users
+        ProfileFragment fragment = new ProfileFragment();
+        //Bundle bundle = new Bundle();
+        //bundle.putString(ProfileFragment.UID_KEY, "");
+        //fragment.setArguments(bundle);
+
+        loadFragment(fragment);
         //CommsManagerFactory.setSimulatorModeOn(true);
+
         //TODO: don't allow navigation
         //else
         //Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
         //loadFragment(scheduleJourneyFragment);
     }
+
+    // --- Dagger configuration
+
+    @Override
+    public DispatchingAndroidInjector<Fragment> supportFragmentInjector() {
+        return dispatchingAndroidInjector;
+    }
+
+    private void configureDagger() {
+        AndroidInjection.inject(this);
+    }
+
+    // --- Other methods
 
     private void loadFragment(Fragment fragment) {
         // load fragment
@@ -73,4 +112,5 @@ public class MainActivity extends AppCompatActivity {
         //mViewModel.setOfflineRecord("data from sharedpreference");
         mViewModel.addRecordToList(mViewModel.getOfflineRecord().getValue());
     }
+
 }

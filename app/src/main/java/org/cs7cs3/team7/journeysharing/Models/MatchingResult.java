@@ -3,14 +3,16 @@ package org.cs7cs3.team7.journeysharing.Models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import org.cs7cs3.team7.journeysharing.database.entity.User;
+
 import java.util.List;
 
-public class MatchingResultInfo implements Parcelable {
+public class MatchingResult implements Parcelable {
 
     public enum MatchingResultStatus {MATCHED, NO_MATCH}
 
     // General fields
-    private List<UserInfo> groupMembers;
+    private List<User> groupMembers;
 
     // Fields for online mode
     private String meetingDate;
@@ -18,7 +20,7 @@ public class MatchingResultInfo implements Parcelable {
     private String meetingPlace;
     private MatchingResultStatus status;
 
-    public MatchingResultInfo(List<UserInfo> groupMembers) {
+    public MatchingResult(List<User> groupMembers) {
         this.groupMembers = groupMembers;
     }
 
@@ -46,7 +48,7 @@ public class MatchingResultInfo implements Parcelable {
         this.meetingPlace = meetingPlace;
     }
 
-    public List<UserInfo> getGroupMembers() {
+    public List<User> getGroupMembers() {
         return groupMembers;
     }
 
@@ -60,7 +62,7 @@ public class MatchingResultInfo implements Parcelable {
 
     @Override
     public String toString() {
-        return "MatchingResultInfo{" +
+        return "MatchingResult{" +
                 "groupMembers=" + groupMembers +
                 ", meetingDate='" + meetingDate + '\'' +
                 ", meetingTime='" + meetingTime + '\'' +
@@ -70,17 +72,17 @@ public class MatchingResultInfo implements Parcelable {
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
-        public MatchingResultInfo createFromParcel(Parcel in) {
-            return new MatchingResultInfo(in);
+        public MatchingResult createFromParcel(Parcel in) {
+            return new MatchingResult(in);
         }
 
-        public MatchingResultInfo[] newArray(int size) {
-            return new MatchingResultInfo[size];
+        public MatchingResult[] newArray(int size) {
+            return new MatchingResult[size];
         }
     };
 
-    public MatchingResultInfo(Parcel in) {
-        this.groupMembers = (List<UserInfo>) in.readArrayList(UserInfo.class.getClassLoader());
+    public MatchingResult(Parcel in) {
+        this.groupMembers = (List<User>) in.readArrayList(User.class.getClassLoader());
         this.meetingDate = in.readString();
         this.meetingTime = in.readString();
         this.meetingPlace = in.readString();

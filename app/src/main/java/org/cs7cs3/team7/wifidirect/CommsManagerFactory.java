@@ -6,12 +6,12 @@ public class CommsManagerFactory {
     private static ICommsManager icm;
     private static boolean isSimulatorModeOn = false;
 
-    public static ICommsManager getCommsManager(Context context) {
+    public static ICommsManager getCommsManager(Context context, String userLoginOnLocal) {
         if (icm == null) {
             if (isSimulatorModeOn) {
                 icm = new DummyCommsManager();
             } else {
-                icm = new P2PCommsManager(context);
+                icm = new P2PCommsManager(context, userLoginOnLocal);
             }
         }
         return icm;
