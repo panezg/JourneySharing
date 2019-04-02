@@ -30,7 +30,6 @@ public class ProfileFragment extends Fragment {
     ViewModelProvider.Factory viewModelFactory;
     private ProfileViewModel viewModel;
 
-    private EditText loginEditText;
     private EditText namesEditText;
     private EditText phoneEditText;
     private Spinner genderSpinner;
@@ -90,7 +89,6 @@ public class ProfileFragment extends Fragment {
         Log.d("JINCHI", "BEGIN updateUI()");
         Log.d("JINCHI", "Is user null in updateUI?" + (user == null));
         if (user != null) {
-            loginEditText.setText(user.getLogin());
             namesEditText.setText(user.getNames());
             phoneEditText.setText(user.getPhoneNum());
             //wrong code

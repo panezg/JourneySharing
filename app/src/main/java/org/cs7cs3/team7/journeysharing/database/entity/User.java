@@ -101,10 +101,10 @@ public class User {
 
     public void setGender(String gender) {
         this.gender = gender;
-        if (gender.equals("MALE")) {
+        if (gender.equals("Male")) {
             this.genderCode = GENDER_MALE;
         }
-        else if (gender.equals("FEMALE"))  {
+        else if (gender.equals("Female"))  {
             this.genderCode = GENDER_FEMALE;
         }
     }
