@@ -34,13 +34,13 @@ public class ProfileViewModel extends ViewModel {
         return user;
     }
 
-    public void update(String login, String names, String phoneNum, String gender) {
+    public void update(String names, String phoneNum, String gender) {
         if (user.getValue() == null) {
             MutableLiveData<User> userTemp = new MutableLiveData<>();
-            userTemp.setValue(new User(-1, login, names, phoneNum, gender));
+            userTemp.setValue(new User(-1, phoneNum, names, phoneNum, gender));
             user = userTemp;
         } else {
-            user.getValue().setLogin(login);
+            user.getValue().setLogin(phoneNum);
             user.getValue().setNames(names);
             user.getValue().setPhoneNum(phoneNum);
             user.getValue().setGender(gender);
