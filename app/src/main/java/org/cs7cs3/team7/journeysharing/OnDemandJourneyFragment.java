@@ -26,6 +26,7 @@ import org.cs7cs3.team7.journeysharing.Models.MatchingResult;
 import org.cs7cs3.team7.wifidirect.ICommsManager;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.concurrent.Semaphore;
 
@@ -164,7 +165,7 @@ public class OnDemandJourneyFragment extends Fragment {
         showDate = addressLayout.findViewById(R.id.ShowDate);
         showTime = addressLayout.findViewById(R.id.ShowTime);
         Calendar calendar = Calendar.getInstance();
-        DateFormat dateFormat = DateFormat.getDateInstance();
+        DateFormat dateFormatForDate = new SimpleDateFormat("yyyy/MM/dd");
         setDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -174,7 +175,7 @@ public class OnDemandJourneyFragment extends Fragment {
                         calendar.set(Calendar.YEAR, year);
                         calendar.set(Calendar.MONTH, month);
                         calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-                        String date = dateFormat.format(calendar.getTime());
+                        String date = dateFormatForDate.format(calendar.getTime());
                         showDate.setText(date);
                         Toast.makeText(getContext(), date.getClass().getName(), Toast.LENGTH_SHORT).show();
                         mViewModel.setDate(date);
@@ -190,7 +191,7 @@ public class OnDemandJourneyFragment extends Fragment {
         });
 
         timeSet = addressLayout.findViewById(R.id.SetTimeButton);
-        DateFormat timeFormat = DateFormat.getTimeInstance();
+        DateFormat timeFormat = new SimpleDateFormat("HH:mm");
         timeSet.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -285,6 +286,22 @@ public class OnDemandJourneyFragment extends Fragment {
                 mViewModel.addRecordToList(journeyRequestInfo);
                 */
                 Toast.makeText(this.getActivity(), "Request Sent! Please check details in the first page ", Toast.LENGTH_SHORT).show();
+                String fakeStartLon = "123";
+                String fakeStartLat = "123";
+                String fakeEndLon = "123";
+                String fakeEndLat = "123";
+                mViewModel.searchOnline(
+                        fromAddress.getText().toString(),
+                        toAddress.getText().toString(),
+                        showDate.getText().toString().replaceAll("/",""),
+                        showTime.getText().toString().replaceAll(":", ""),
+                        fakeStartLat,
+                        fakeStartLon,
+                        fakeEndLat,
+                        fakeEndLon,
+                        genderSpinner.getSelectedItem().toString(),
+                        methodSpinner.getSelectedItem().toString()
+                        );
             }
         });
 
