@@ -42,6 +42,10 @@ public class MainViewModel extends ViewModel {
     private MutableLiveData<User> sender;
     private MutableLiveData<String> Time;
     private MutableLiveData<String> Date;
+
+
+    private MutableLiveData<Double>Longtitute;
+    private MutableLiveData<Double>Latitude;
     // Only for P2P part.
     private MutableLiveData<List<User>> membersList;
 
@@ -84,6 +88,10 @@ public class MainViewModel extends ViewModel {
         setPreMethodItemIndexSelected(0);
         methodPreference = new MutableLiveData<>();
         setMethodPreference("Walk");
+        Latitude=new MutableLiveData<>();
+        setLatitude(0.0);
+        Longtitute=new MutableLiveData<>();
+        setLongtitute(0.0);
 
 
         sender = new MutableLiveData<>();
@@ -156,6 +164,14 @@ public class MainViewModel extends ViewModel {
     public void setDate(String date) {
         Date.setValue(date);
     }
+
+
+    public void setLongtitute(Double longtitute) { Longtitute.setValue(longtitute); }
+    public MutableLiveData<Double> getLongtitute() { return Longtitute; }
+
+    public MutableLiveData<Double> getLatitude() { return Latitude; }
+
+    public void setLatitude(Double latitude) { Latitude.setValue(latitude); }
 
     public MutableLiveData<String> getGenderPreference() {
         return genderPreference;
