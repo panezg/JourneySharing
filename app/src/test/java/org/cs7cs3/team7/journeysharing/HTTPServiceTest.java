@@ -3,6 +3,7 @@ package org.cs7cs3.team7.journeysharing;
 import com.google.gson.JsonElement;
 
 import org.cs7cs3.team7.journeysharing.Models.HTTPResponse;
+import org.cs7cs3.team7.journeysharing.Models.ScheduleRequest;
 import org.cs7cs3.team7.journeysharing.Models.UserRequest;
 import org.cs7cs3.team7.journeysharing.httpservice.HTTPClient;
 import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
@@ -34,6 +35,7 @@ public class HTTPServiceTest {
 
         Call<HTTPResponse> res = client.save(userRequest);
         Response<HTTPResponse> response =  res.execute();
+        System.out.println(res.request().toString());
         if(response.isSuccessful()){
             System.out.println("succ");
             JsonElement user = response.body().getData();
@@ -97,5 +99,34 @@ public class HTTPServiceTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void testSchedule() throws IOException{
+        HTTPService client = HTTPClient.INSTANCE.getClient();
+        ScheduleRequest scheduleRequest = new ScheduleRequest();
+        scheduleRequest.setCommuteType(0);
+        scheduleRequest.setEndPosition("end");
+        scheduleRequest.setEndPositionLatitude("123");
+        scheduleRequest.setEndPositionLongitude("123");
+        scheduleRequest.setGenderPreference(1);
+        scheduleRequest.setStartPosition("start");
+        scheduleRequest.setStartPositionLatitude("1234");
+        scheduleRequest.setStartPositionLongitude("1234");
+        scheduleRequest.setScheduleDateTime("201904021603");
+        scheduleRequest.setUserId(4);
+        Call<HTTPResponse> res = client.addSchedule(scheduleRequest);
+        Response<HTTPResponse> response = res.execute();
+        System.out.println(res.request().toString());
+        if(response.isSuccessful()){
+            System.out.println("succ");
+            HTTPResponse httpResponse = response.body();
+            System.out.println(httpResponse.getStatus());
+
+        }else {
+            System.out.println("fail");
+            System.out.println(response.errorBody().string());
+        }
+
     }
 }

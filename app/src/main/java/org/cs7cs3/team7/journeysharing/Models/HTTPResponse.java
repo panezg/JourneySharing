@@ -1,9 +1,12 @@
 package org.cs7cs3.team7.journeysharing.Models;
 
 import com.google.gson.JsonElement;
+import com.google.gson.annotations.Expose;
 
 public class HTTPResponse {
+    @Expose
     private String status;
+    @Expose
     private JsonElement data;
 
     public String getStatus() {

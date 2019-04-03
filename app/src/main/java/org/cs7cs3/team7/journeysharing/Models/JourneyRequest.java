@@ -9,6 +9,8 @@ public class JourneyRequest {
         SCHEDULED,
         PENDING
     }
+    public static final int METHOD_WALKING = 0;
+    public static final int METHOD_TAXI = 1;
 
     private JourneyRequestStatus state;
     private boolean isOffline;

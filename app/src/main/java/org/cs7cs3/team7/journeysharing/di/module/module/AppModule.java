@@ -62,7 +62,7 @@ public class AppModule {
 
     @Provides
     Gson provideGson() {
-        return new GsonBuilder().create();
+        return new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
     }
 
     @Provides
