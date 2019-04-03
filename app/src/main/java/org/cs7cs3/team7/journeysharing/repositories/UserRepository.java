@@ -72,17 +72,27 @@ public class UserRepository {
                     @Override
                     public void onResponse(Call<User> call, Response<User> response) {
                         Log.e("JINCHI", "DATA REFRESHED FROM NETWORK");
-                        Toast.makeText(App.context, "Data refreshed from network !", Toast.LENGTH_LONG).show();
                         executor.execute(() -> {
-                            Log.e("JINCHI", "Executing second part of save-11 refreshUser");
-                            User user = response.body();
-                            user.setLastRefresh(new Date());
-                            userDao.save(user);
+                            if (response.isSuccessful()) {
+                                //HTTPResponse httpResponse = response.body();
+                                //if (httpResponse.getStatus().equals("success")) {
+                                Log.e("JINCHI", "Executing second part of save-11 refreshUser");
+                                User user = response.body();
+                                user.setLastRefresh(new Date());
+                                userDao.save(user);
+                                //}
+                            }
+                            else {
+                                //TODO: We should throw exception if we were using cache correctly, but
+                                //for this project we will just let it go
+                                Log.e("JINCHI", "OnResponse handler of userRepository.refreshUser() but response at HTTP level was not successful");
+                            }
                         });
                     }
 
                     @Override
                     public void onFailure(Call<User> call, Throwable t) {
+                        Log.e("JINCHI", "On Failure handler of userRepository.refreshUser()");
                     }
                 });
             }
@@ -117,7 +127,7 @@ public class UserRepository {
                             }
                         }
                         else {
-                            Log.e("JINCHI", "Failure at HTTP Response leevel");
+                            Log.e("JINCHI", "Failure at HTTP Response level");
                             /*
                             //remove this code
                             user.setId(999);
