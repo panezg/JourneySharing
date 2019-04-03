@@ -133,7 +133,8 @@ public class UserRepository {
                             editor.commit();
                             */
                         }
-                    });
+                    }
+                    );
                 }
 
                 @Override
