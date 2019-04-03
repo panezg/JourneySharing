@@ -117,7 +117,8 @@ public class TypeAddressFragment extends Fragment implements OnMapReadyCallback 
                 if (actionId == EditorInfo.IME_ACTION_SEARCH
                         || actionId == EditorInfo.IME_ACTION_DONE
                         || event.getAction() == event.ACTION_DOWN
-                        || event.getAction() == event.KEYCODE_ENTER) {
+                        || event.getAction() == event.KEYCODE_ENTER
+                                                                        ) {
                     geolacation();
                     return (event.getKeyCode() == KeyEvent.KEYCODE_ENTER);
                 }
@@ -142,6 +143,10 @@ public class TypeAddressFragment extends Fragment implements OnMapReadyCallback 
         if (list.size() > 0) {
             Address address = list.get(0);
             Log.d("MAP Place", address.toString());
+            double Latitude=address.getLatitude();
+            mViewModel.setLatitude(Latitude);
+            double Longtitude=address.getLongitude();
+            mViewModel.setLongtitute(Longtitude);
             moveCamer(new LatLng(address.getLatitude(), address.getLongitude()), DEFAULT_ZOOM, address.getAddressLine(0));
         }
     }

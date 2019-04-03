@@ -22,4 +22,12 @@ public class ExampleUnitTest {
         long unixTimestamp = Instant.now().getEpochSecond();
         System.out.println(unixTimestamp);
     }
+
+    @Test
+    public void testTimeTransfer(){
+        String date = "2019/02/22";
+        String time = "22:50";
+        String res = date.replaceAll("/", "") + time.replaceAll(":", "");
+        System.out.println(res);
+    }
 }

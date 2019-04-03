@@ -59,6 +59,9 @@ public class ScheduleJourneyFragment extends Fragment {
                 Map<String, Object> map = (Map<String, Object>) parent.getItemAtPosition(position);
                 Log.d("JINCHI", map.get("date").toString());
                 mViewModel.setSelectedIndex(position);
+                //获取点击item的内容
+                String orderID= (String) map.get("orderID");
+                //TODO 根据获得的订单ID跳转到该ID的订单详情页面
                 Fragment viewMatchFragment = ViewMatchFragment.newInstance();
                 loadFragment(viewMatchFragment);
             }
@@ -183,11 +186,6 @@ public class ScheduleJourneyFragment extends Fragment {
         map.put("destination","tcd");
         map.put("state","undone");
         list.add(map);
-
-
-
-
-
 
         return list;
     }
