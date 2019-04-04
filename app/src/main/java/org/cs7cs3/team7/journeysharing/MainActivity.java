@@ -1,9 +1,20 @@
 package org.cs7cs3.team7.journeysharing;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.gson.JsonElement;
+
+import org.cs7cs3.team7.journeysharing.Models.HTTPResponse;
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequest;
+import org.cs7cs3.team7.journeysharing.database.entity.User;
+import org.cs7cs3.team7.journeysharing.httpservice.HTTPClient;
+import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
+
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -15,6 +26,9 @@ import androidx.lifecycle.ViewModelProviders;
 import dagger.android.AndroidInjection;
 import dagger.android.DispatchingAndroidInjector;
 import dagger.android.support.HasSupportFragmentInjector;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements HasSupportFragmentInjector {
     @Inject
@@ -108,6 +122,8 @@ public class MainActivity extends AppCompatActivity implements HasSupportFragmen
 
     private void refreshScheduledList() {
         // TODO: Refresh data according to the response from server end.
+
+        mViewModel.serarchResult();
     }
 
 }
