@@ -26,7 +26,6 @@ public class User {
     private String phoneNum;
     private String gender;
     @Expose
-    @SerializedName("gender")
     private int genderCode;
     private Date lastRefresh;
 

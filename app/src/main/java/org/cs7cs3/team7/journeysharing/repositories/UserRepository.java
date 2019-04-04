@@ -130,7 +130,6 @@ public class UserRepository {
                                 Log.e("JINCHI", "Saving to database: " + user.toString());
                                 userDao.save(user);
                                 Log.e("JINCHI", "Trying to load: " + user.getLogin());
-                                //mldUser.setValue(userDao.load(user.getLogin()));
                                 mldUser.postValue(userDao.load(user.getLogin()));
                             });
                             delegate.accept(true);

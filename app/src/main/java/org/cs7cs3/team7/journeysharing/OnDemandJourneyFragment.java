@@ -348,11 +348,16 @@ public class OnDemandJourneyFragment extends Fragment {
                     //journeyRequestInfo.setState(JourneyRequest.JourneyRequestStatus.FINISHED);
                     //mViewModel.setOfflineRecord(journeyRequestInfo);
                     waitingForMatchResult.release();
+                    // Skip to the viewMatchFragment.
+                    Fragment viewMatchFragment = ViewMatchFragment.newInstance();
+                    Log.d("JINCHI", "Loading ViewMatch Fragment!");
+                    loadFragment(viewMatchFragment);
                 }
                 else if (matchingResult.getStatus() == MatchingResult.MatchingResultStatus.NO_MATCH) {
                     Log.d("JINCHI", "Sorry no match");
-                    //TODO: Need to show a pop up error message
-                    //@Mengxuan
+                    waitingForMatchResult.release();
+
+                    Toast.makeText(context, "Sorry, there is no match for your request", Toast.LENGTH_SHORT).show();
                 }
             }
         };
@@ -369,10 +374,6 @@ public class OnDemandJourneyFragment extends Fragment {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                // Skip to the viewMatchFragment.
-                Fragment viewMatchFragment = ViewMatchFragment.newInstance();
-                Log.d("JINCHI", "Loading ViewMatch Fragment!");
-                loadFragment(viewMatchFragment);
             }
         });
         td.start();
