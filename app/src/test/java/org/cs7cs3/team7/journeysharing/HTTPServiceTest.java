@@ -1,6 +1,8 @@
 package org.cs7cs3.team7.journeysharing;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import org.cs7cs3.team7.journeysharing.Models.HTTPResponse;
 import org.cs7cs3.team7.journeysharing.Models.ScheduleRequest;
@@ -128,5 +130,69 @@ public class HTTPServiceTest {
             System.out.println(response.errorBody().string());
         }
 
+    }
+
+    @Test
+    public void checkSchedule() throws IOException{
+        HTTPService client = HTTPClient.INSTANCE.getClient();
+        int id = 6;
+        Call<HTTPResponse> res = client.checkSchedule(id);
+        Response<HTTPResponse> response = res.execute();
+        System.out.println(res.request().toString());
+        if(response.isSuccessful()){
+            System.out.println("succ");
+            HTTPResponse httpResponse = response.body();
+            System.out.println(httpResponse.getData().toString());
+            JsonElement element = httpResponse.getData();
+            JsonArray schedules =  element.getAsJsonArray();
+            for(JsonElement schedule : schedules){
+                System.out.println(schedule.toString());
+                System.out.println("ID:"+schedule.getAsJsonObject().get("id"));
+                System.out.println("Date:"+schedule.getAsJsonObject().get("scheduleDateTime"));
+                System.out.println("StartPos:"+schedule.getAsJsonObject().get("startPosition"));
+                System.out.println("endPos:"+schedule.getAsJsonObject().get("endPosition"));
+                JsonArray users = schedule.getAsJsonObject().getAsJsonArray("users");
+                for(JsonElement user : users){
+                    System.out.println("name: "+ user.getAsJsonObject().get("userName"));
+                    System.out.println("userId: " + user.getAsJsonObject().get("id"));
+                    System.out.println("phoneNumber: " + user.getAsJsonObject().get("phoneNumber"));
+                    System.out.println("gender: " + user.getAsJsonObject().get("gender"));
+                    System.out.println();
+                }
+                System.out.println();
+                System.out.println();
+                System.out.println();
+            }
+
+        }else {
+            System.out.println("fail");
+            System.out.println(response.errorBody().string());
+        }
+
+    }
+
+    /*
+    needed field
+        -schedule id
+        -date
+        -startposition
+        -endPosition
+        -users
+            -userName
+            -userId
+            -phoneNumber
+            -gender
+     */
+
+    public final String dummySchedule = "{\"data\":[{\"commuteType\":1,\"createBy\":\"SYS\",\"createDate\":1552492800000,\"endDuration\":57600000,\"endPosition\":\"howth\",\"endPositionLatitude\":\"200\",\"endPositionLongitude\":\"200\",\"engageTime\":1552572536000,\"genderPreference\":1,\"id\":1,\"ratingPreference\":3,\"startDuration\":-28800000,\"startPosition\":\"tcd\",\"startPositionLatitude\":\"100\",\"startPositionLongitude\":\"100\",\"status\":0,\"updateBy\":\"SYS\",\"updateDate\":1552492800000,\"userId\":1,\"users\":[{\"createBy\":\"sys\",\"createDate\":1550764800000,\"email\":\"1111@gmail.com\",\"gender\":\"1\",\"id\":1,\"phoneNumber\":993883838,\"updateBy\":\"sys\",\"updateDate\":1550764800000,\"userName\":\"John\"},{\"createBy\":\"sys\",\"createDate\":1552233600000,\"email\":\"1111@gmail.com\",\"gender\":\"1\",\"id\":2,\"phoneNumber\":993883839,\"updateBy\":\"sys\",\"updateDate\":1552233600000,\"userName\":\"John\"}],\"weekday\":1},{\"commuteType\":1,\"createBy\":\"SYS\",\"createDate\":1552924800000,\"endDuration\":57600000,\"endPosition\":\"howth\",\"endPositionLatitude\":\"200\",\"endPositionLongitude\":\"200\",\"engageTime\":1553001532000,\"genderPreference\":1,\"id\":3,\"ratingPreference\":3,\"startDuration\":-28800000,\"startPosition\":\"tcd\",\"startPositionLatitude\":\"100\",\"startPositionLongitude\":\"100\",\"status\":0,\"updateBy\":\"SYS\",\"updateDate\":1552924800000,\"userId\":1,\"users\":[],\"weekday\":2},{\"commuteType\":1,\"createBy\":\"SYS\",\"createDate\":1553702400000,\"endDuration\":57600000,\"endPositionLatitude\":\"200\",\"endPositionLongitude\":\"200\",\"engageTime\":1553788298000,\"genderPreference\":1,\"id\":6,\"ratingPreference\":3,\"startDuration\":-28800000,\"startPositionLatitude\":\"100\",\"startPositionLongitude\":\"100\",\"status\":0,\"updateBy\":\"SYS\",\"updateDate\":1553702400000,\"userId\":1,\"users\":[],\"weekday\":1},{\"commuteType\":1,\"createBy\":\"SYS\",\"createDate\":1554134400000,\"currentServer\":\"1\",\"endDuration\":1554134400000,\"endDuration2\":1554134400000,\"endPosition\":\"Dublin 6\",\"endPositionLatitude\":\"200\",\"endPositionLongitude\":\"200\",\"genderPreference\":1,\"id\":7,\"ratingPreference\":4,\"startDuration\":1554134400000,\"startDuration2\":1554134400000,\"startPosition\":\"tcd\",\"startPositionLatitude\":\"100\",\"startPositionLongitude\":\"100\",\"status\":0,\"updateBy\":\"SYS\",\"updateDate\":1554134400000,\"userId\":1,\"users\":[],\"weekday\":1},{\"commuteType\":1,\"createBy\":\"SYS\",\"createDate\":1554134400000,\"currentServer\":\"1\",\"endDuration\":1554134400000,\"endDuration2\":1554134400000,\"endPosition\":\"Dublin 6\",\"endPositionLatitude\":\"200\",\"endPositionLongitude\":\"200\",\"genderPreference\":1,\"id\":8,\"scheduleDateTime\":\"201904011200\",\"startDuration\":1554134400000,\"startDuration2\":1554134400000,\"startPosition\":\"tcd\",\"startPositionLatitude\":\"100\",\"startPositionLongitude\":\"100\",\"status\":0,\"updateBy\":\"SYS\",\"updateDate\":1554134400000,\"userId\":1,\"users\":[],\"weekday\":1}],\"status\":\"sucuess\"}";
+    @Test
+    public void parseSchedule(){
+        JsonElement element = new JsonParser().parse(dummySchedule).getAsJsonObject().get("data");
+        JsonArray schedules =  element.getAsJsonArray();
+        for(JsonElement schedule : schedules){
+            System.out.println(schedule);
+            System.out.println("ID:"+schedule.getAsJsonObject().get("id"));
+            System.out.println("Date:"+schedule.getAsJsonObject().get("scheduleDateTime"));
+        }
     }
 }
