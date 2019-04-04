@@ -1,5 +1,6 @@
 package org.cs7cs3.team7.journeysharing;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -52,7 +53,7 @@ public class ScheduleJourneyFragment extends Fragment {
         Map<Integer, String> posToJourneyId = new HashMap<>();
         SimpleAdapter adapter = new SimpleAdapter(getContext(),getListOfHistory(posToJourneyId),R.layout.vlist,
                 new String[]{"date","time","destination","state"},
-                new int[]{R.id.orderID,R.id.date,R.id.time,R.id.destination,R.id.state});
+                new int[]{R.id.date,R.id.time,R.id.destination,R.id.state});
         scheduleList.setAdapter(adapter);
         scheduleList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -60,9 +61,14 @@ public class ScheduleJourneyFragment extends Fragment {
                 mViewModel.setIsOnlineModel(true);
                 Map<String, Object> map = (Map<String, Object>) parent.getItemAtPosition(position);
                 Log.d("JINCHI", map.get("date").toString());
-                mViewModel.setSelectedIndex(posToJourneyId.get(position));
-                Fragment viewMatchFragment = ViewMatchFragment.newInstance();
-                loadFragment(viewMatchFragment);
+                String journeyId = posToJourneyId.get(position);
+                mViewModel.setSelectedIndex(journeyId);
+                if(!mViewModel.getListOfHistory().getValue().get(journeyId).getState().equals(JourneyRequest.JourneyRequestStatus.FINISHED)) {
+                    alertRegister();
+                } else {
+                    Fragment viewMatchFragment = ViewMatchFragment.newInstance();
+                    loadFragment(viewMatchFragment);
+                }
             }
         });
     }
@@ -104,75 +110,11 @@ public class ScheduleJourneyFragment extends Fragment {
         transaction.commit();
     }
 
-/*
-    private List<Map<String, Object>> getData() {
-        List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
-
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("orderID","111222333444");
-        map.put("date","01/01/2019");
-        map.put("time","12:00pm");
-        map.put("destination","tcd");
-        map.put("state","undone");
-        list.add(map);
-
-        map.put("orderID","111222333444");
-        map.put("date","01/01/2019");
-        map.put("time","12:00pm");
-        map.put("destination","tcd");
-        map.put("state","undone");
-        list.add(map);
-
-        map.put("orderID","111222333444");
-        map.put("date","01/01/2019");
-        map.put("time","12:00pm");
-        map.put("destination","tcd");
-        map.put("state","undone");
-        list.add(map);
-
-        map.put("orderID","111222333444");
-        map.put("date","01/01/2019");
-        map.put("time","12:00pm");
-        map.put("destination","tcd");
-        map.put("state","undone");
-        list.add(map);
-
-        map.put("orderID","111222333444");
-        map.put("date","01/01/2019");
-        map.put("time","12:00pm");
-        map.put("destination","tcd");
-        map.put("state","undone");
-        list.add(map);
-        map.put("orderID","111222333444");
-        map.put("date","01/01/2019");
-        map.put("time","12:00pm");
-        map.put("destination","tcd");
-        map.put("state","undone");
-        list.add(map);
-
-        map.put("orderID","111222333444");
-        map.put("date","01/01/2019");
-        map.put("time","12:00pm");
-        map.put("destination","tcd");
-        map.put("state","undone");
-        list.add(map);
-
-        map.put("orderID","111222333444");
-        map.put("date","01/01/2019");
-        map.put("time","12:00pm");
-        map.put("destination","tcd");
-        map.put("state","undone");
-        list.add(map);
-
-        map.put("orderID","111222333444");
-        map.put("date","01/01/2019");
-        map.put("time","12:00pm");
-        map.put("destination","tcd");
-        map.put("state","undone");
-        list.add(map);
-
-        return list;
+    private void alertRegister() {
+        new AlertDialog.Builder(getContext())
+                .setTitle("Notice")
+                .setMessage("Your request is still pending, please wait for more minutes.")
+                .setPositiveButton("OK", null)
+                .show();
     }
-
-*/
 }

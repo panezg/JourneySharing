@@ -7,12 +7,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequest;
 import org.cs7cs3.team7.journeysharing.database.entity.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -27,7 +31,8 @@ public class ViewMatchFragment extends Fragment {
     ViewModelProvider.Factory viewModelFactory;
     private MainViewModel mViewModel;
     private ListView mListView;
-    private ArrayList<String> listData;
+    private ArrayList<Map<String, Object>> listData;
+    private ListView detailsList;
 
     public static ViewMatchFragment newInstance() {
         return new ViewMatchFragment();
@@ -47,15 +52,6 @@ public class ViewMatchFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         View matchGroupLayout = view.findViewById(R.id.match_group_include);
-        ListView matchedGroupListView = matchGroupLayout.findViewById(R.id.matched_group_list);
-
-        //TODO: Need to add more detail to the list, as well as handle clicks that display the profile of users
-        /*
-        mViewModel.getNamesList().observe(this, namesList -> {
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_list_item_1, namesList);
-            matchedGroupListView.setAdapter(adapter);
-        });
-        */
     }
 
     @Override
@@ -68,41 +64,55 @@ public class ViewMatchFragment extends Fragment {
 
         //TODO: Exception here should be handled.
         // Inti the ViewModel.
-        mViewModel= ViewModelProviders.of(getActivity(), viewModelFactory).get(MainViewModel.class);
+        mViewModel = ViewModelProviders.of(getActivity(), viewModelFactory).get(MainViewModel.class);
 
         // Inti the 'match_group' ListView.
         mListView = matchGroupLayout.findViewById(R.id.matched_group_list);
+        detailsList = matchGroupLayout.findViewById(R.id.match_details_list);
+
         initData();
         initAdapter();
     }
 
     private void initData() {
-        listData = new ArrayList<String>();
+        listData = new ArrayList<>();
         //int index = mViewModel.getSelectedIndex().getValue();
         //TODO: Find the correct result by the index id saved at the last page.
         List<User> membersList;
-        if(mViewModel.getIsOnlineModel().getValue()) {
+        if(mViewModel.getIsOnlineModel().getValue() != null && !mViewModel.getIsOnlineModel().getValue()) {
             membersList = mViewModel.getMembersList().getValue();
         } else {
+            // Online Model
             String journeyID = mViewModel.getSelectedIndex().getValue();
             membersList = mViewModel.getResultsOfOnlineModel().getValue().get(journeyID);
         }
-        for(User u : membersList) {
-            listData.add(u.toMatchResultString());
+        if(membersList != null) {
+            for(User u : membersList) {
+                Map<String, Object> data = new HashMap<>();
+                data.put("Name ", "Name: " + u.getNames());
+                data.put("Phone ", "Phone#: " + u.getPhoneNum());
+                data.put("Gender ", "Gender: " + u.getGender());
+                listData.add(data);
+            }
         }
     }
 
     private void initAdapter() {
-        mListView.setAdapter(new ArrayAdapter<String>(this.getContext(), android.R.layout.simple_list_item_1, listData) {
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                TextView textView = (TextView) super.getView(position, convertView, parent);
-                //TODO: Could set the color and the text format here.
-                textView.setTextColor(Color.BLACK);
-                textView.setTextSize(14);
-                return textView;
-            }
-        });
+        SimpleAdapter adapter = new SimpleAdapter(getContext(), listData, R.layout.members_list,
+                new String[]{"Name ","Phone ","Gender ",},
+                new int[]{R.id.memberName, R.id.memberPhone, R.id.memberGender});
+        mListView.setAdapter(adapter);
+        if(mViewModel.getIsOnlineModel().getValue() != null && !mViewModel.getIsOnlineModel().getValue()) {
+            detailsList.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.simple_expandable_list_item_1, new ArrayList<>()));
+        } else {
+            String journeyID = mViewModel.getSelectedIndex().getValue();
+            JourneyRequest journeyRequest = mViewModel.getListOfHistory().getValue().get(journeyID);
+            ArrayList<String> dataList = new ArrayList<>();
+            dataList.add("Time:        " + journeyRequest.getTime());
+            dataList.add("Start Point: " + journeyRequest.getStartPoint());
+            dataList.add("Destination: " + journeyRequest.getDestination());
+            dataList.add("Method:      " + journeyRequest.getMethod());
+            detailsList.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.simple_expandable_list_item_1, dataList));
+        }
     }
-    //TODO: Need to add more detail to the list, as well as handle clicks that display the profile of users
 }
