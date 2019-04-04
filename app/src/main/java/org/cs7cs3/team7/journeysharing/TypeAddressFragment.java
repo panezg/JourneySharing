@@ -206,7 +206,7 @@ public class TypeAddressFragment extends Fragment implements OnMapReadyCallback 
 //        }catch (SecurityException e){
 //            Log.e("XINDI",e.getMessage());
 //        }
-        moveCamer(new LatLng(LocationUtils.latitude,LocationUtils.longitude),DEFAULT_ZOOM,"Current Location");
+        //moveCamer(new LatLng(LocationUtils.latitude,LocationUtils.longitude),DEFAULT_ZOOM,"Current Location");
     }
     private void geolacation() {
         Log.d("XINDI", "getlocate:geolocating");

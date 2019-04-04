@@ -2,10 +2,12 @@ package org.cs7cs3.team7.journeysharing;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
@@ -61,6 +63,7 @@ public class ViewMatchFragment extends Fragment {
         // Init the layout.
         //TODO: Exception here should be handled.
         View matchGroupLayout = getView().findViewById(R.id.match_group_include);
+        LinearLayout layout = getView().findViewById(R.id.fucking_layout);
 
         //TODO: Exception here should be handled.
         // Inti the ViewModel.
@@ -68,7 +71,7 @@ public class ViewMatchFragment extends Fragment {
 
         // Inti the 'match_group' ListView.
         mListView = matchGroupLayout.findViewById(R.id.matched_group_list);
-        detailsList = matchGroupLayout.findViewById(R.id.match_details_list);
+        detailsList = layout.findViewById(R.id.match_details_list);
 
         initData();
         initAdapter();

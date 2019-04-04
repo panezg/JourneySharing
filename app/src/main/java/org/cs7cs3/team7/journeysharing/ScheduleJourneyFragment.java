@@ -48,19 +48,19 @@ public class ScheduleJourneyFragment extends Fragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mViewModel= ViewModelProviders.of(getActivity(), viewModelFactory).get(MainViewModel.class);
-        scheduleList=(ListView)getActivity().findViewById(R.id.scheduleList);
+        scheduleList = (ListView)getActivity().findViewById(R.id.scheduleList);
        // ScheduleJourneyFragment scheduleJourneyFragment = new ScheduleJourneyFragment();
         Map<Integer, String> posToJourneyId = new HashMap<>();
         SimpleAdapter adapter = new SimpleAdapter(getContext(),getListOfHistory(posToJourneyId),R.layout.vlist,
-                new String[]{"date","time","destination","state"},
-                new int[]{R.id.date,R.id.time,R.id.destination,R.id.state});
+                new String[]{"date","time","start", "destination","state"},
+                new int[]{R.id.date,R.id.time,R.id.start, R.id.destination,R.id.state});
         scheduleList.setAdapter(adapter);
         scheduleList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 mViewModel.setIsOnlineModel(true);
                 Map<String, Object> map = (Map<String, Object>) parent.getItemAtPosition(position);
-                Log.d("JINCHI", map.get("date").toString());
+                //Log.d("JINCHI", map.get("date").toString());
                 String journeyId = posToJourneyId.get(position);
                 mViewModel.setSelectedIndex(journeyId);
                 if(!mViewModel.getListOfHistory().getValue().get(journeyId).getState().equals(JourneyRequest.JourneyRequestStatus.FINISHED)) {
@@ -79,21 +79,24 @@ public class ScheduleJourneyFragment extends Fragment {
 
         //convert online date to hashmap and add the hashmap to the showList
         Map<String, JourneyRequest> onlineRequestInfos = mViewModel.getListOfHistory().getValue();
-
-        Map<String, Object> map = new HashMap<>();
+        if(onlineRequestInfos == null || onlineRequestInfos.isEmpty())
+            return showList;
         int pos = 0;
         for(String journeyID : onlineRequestInfos.keySet()) {
-            //TODO: add oderId
+            Map<String, Object> map = new HashMap<>();
             JourneyRequest journeyRequest = onlineRequestInfos.get(journeyID);
             posToJourneyId.put(pos, journeyID);
-            String date = journeyRequest.getDate();
+            //String date = journeyRequest.getDate();
             String des = journeyRequest.getDestination();
             String time = journeyRequest.getTime();
+            Log.d("XINDI", "show" + time);
+            String start = journeyRequest.getStartPoint();
             JourneyRequest.JourneyRequestStatus state = journeyRequest.getState();
-            map.put("date", date);
-            map.put("time", time);
-            map.put("destination", des);
+//            map.put("date", date);
+            map.put("time", "Date: " + time);
+            map.put("destination", "Destination:" + des);
             map.put("state", state);
+            map.put("start", "Start Point: " + start);
             showList.add(map);
             pos++;
         }

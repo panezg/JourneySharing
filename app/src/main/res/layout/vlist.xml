@@ -3,28 +3,38 @@
     android:orientation="horizontal" android:layout_width="fill_parent"
     android:layout_height="fill_parent">
 
-    <LinearLayout android:orientation="vertical"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1">
+        android:layout_weight="1.5"
+        android:orientation="vertical">
         <!--<TextView android:id="@+id/orderID"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:textColor="@color/common_google_signin_btn_text_light_pressed" />-->
-        <TextView android:id="@+id/date"
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:textColor="@color/common_google_signin_btn_text_light_pressed" />-->
+        <TextView
+            android:id="@+id/date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/colorPrimaryDark" />
-        <TextView android:id="@+id/time"
+
+        <TextView
+            android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/common_google_signin_btn_text_light_pressed" />
-        <TextView android:id="@+id/destination"
+
+        <TextView
+            android:id="@+id/start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/common_google_signin_btn_text_light_pressed"
-            android:textSize="20dp"/>
+            android:textColor="@color/common_google_signin_btn_text_light_pressed" />
 
+        <TextView
+            android:id="@+id/destination"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/common_google_signin_btn_text_light_pressed" />
     </LinearLayout>
     <TextView android:id="@+id/state"
         android:layout_weight="1"
@@ -32,7 +42,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:textColor="@color/colorPrimary"
-        android:textSize="30dp"
+        android:textSize="27dp"
         />
 
 </LinearLayout>

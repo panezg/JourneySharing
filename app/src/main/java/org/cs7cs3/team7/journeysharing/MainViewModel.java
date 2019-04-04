@@ -121,6 +121,8 @@ public class MainViewModel extends ViewModel {
         resultsOfOnlineModel = new MutableLiveData<>();
         isOnlineModel = new MutableLiveData<>();
         isOnlineModel.setValue(true);
+        gotData = new MutableLiveData<>();
+        gotData.setValue(false);
     }
 
     // ---
@@ -241,7 +243,17 @@ public class MainViewModel extends ViewModel {
     // journeyID --> matchingResult
     private MutableLiveData<Map<String, List<User>>> resultsOfOnlineModel;
 
-//    public MutableLiveData<JourneyRequest> getOfflineRecord() {
+    private MutableLiveData<Boolean> gotData;
+
+    public MutableLiveData<Boolean> getGotData() {
+        return gotData;
+    }
+
+    public void setGotData(Boolean gotData) {
+        this.gotData.setValue(gotData);
+    }
+
+    //    public MutableLiveData<JourneyRequest> getOfflineRecord() {
 //        return offlineRecord;
 //    }
 
@@ -479,6 +491,7 @@ public class MainViewModel extends ViewModel {
     }
 
     public void serarchResult(){
+        Log.d("JINCHI", "Stasrt");
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(final Void... params) {
@@ -490,15 +503,17 @@ public class MainViewModel extends ViewModel {
                     public void onResponse(Call<HTTPResponse> call, Response<HTTPResponse> response) {
                         if(response.isSuccessful()){
                             JsonElement data = response.body().getData();
-                            if(data == null){
-
+                            if(data == null || data.isJsonNull()){
+                                setListOfHistory(new HashMap<>());
+                                setResultsOfOnlineModel(new HashMap<>());
                                 return;
                             }
+                            Log.d("JINCHI", data.toString());
                             Map<String, JourneyRequest> schedules = parseSchedule(data, user);
                             Map<String, List<User>> membersMap = parseMembers(data);
                             setListOfHistory(schedules);
                             setResultsOfOnlineModel(membersMap);
-
+                            setGotData(true);
                         }
                     }
 
@@ -531,11 +546,12 @@ public class MainViewModel extends ViewModel {
             JourneyRequest journeyRequest = new JourneyRequest(currentUser, gender, method, endPos, false);
             journeyRequest.setStartPoint(startPos);
             journeyRequest.setTime(time);
+            Log.d("XINDI", time);
 
             if(status.equals("1")){
                 journeyRequest.setState(JourneyRequest.JourneyRequestStatus.FINISHED);
             }else {
-                journeyRequest.setState(JourneyRequest.JourneyRequestStatus.SCHEDULED);
+                journeyRequest.setState(JourneyRequest.JourneyRequestStatus.PENDING);
             }
             res.put(id, journeyRequest);
         }
@@ -547,13 +563,17 @@ public class MainViewModel extends ViewModel {
         Map<String, List<User>> res = new HashMap<>();
         for(JsonElement schedule : schedules){
             JsonArray users = schedule.getAsJsonObject().getAsJsonArray("users");
+            Log.d("JINCHI", users.toString());
             String id = schedule.getAsJsonObject().get("id").toString();
             List<User> userInfos = new ArrayList<>();
             for(JsonElement user : users){
                 String userName = user.getAsJsonObject().get("userName").toString();
                 String userId = user.getAsJsonObject().get("id").toString();
                 String phoneNumber = user.getAsJsonObject().get("phoneNumber").toString();
-                int genderCode = Integer.parseInt(user.getAsJsonObject().get("gender").toString());
+                String genderStr = user.getAsJsonObject().get("gender").toString();
+                genderStr = genderStr.replaceAll("\"" ,"");
+                Log.d("JINCHI",genderStr);
+                int genderCode = Integer.parseInt(genderStr);
                 String gender = "Female";
                 if(genderCode == GENDER_MALE){
                     gender = "Male";

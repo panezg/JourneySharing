@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity implements HasSupportFragmen
         switch (item.getItemId()) {
             //depending on state, would need to change to use ViewMatchFragment
             case R.id.nav_schedule_journey:
-                //refreshScheduledList();
+                refreshScheduledList();
                 Fragment scheduleJourneyFragment = ScheduleJourneyFragment.newInstance();
                 loadFragment(scheduleJourneyFragment);
                 return true;

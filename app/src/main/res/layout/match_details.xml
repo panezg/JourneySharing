@@ -37,9 +37,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/match_details_label" />
 
-    <ListView
-        android:id="@+id/match_details_list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"></ListView>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
