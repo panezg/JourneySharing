@@ -490,7 +490,11 @@ public class MainViewModel extends ViewModel {
                     public void onResponse(Call<HTTPResponse> call, Response<HTTPResponse> response) {
                         if(response.isSuccessful()){
                             JsonElement data = response.body().getData();
-                            Map<String, JourneyRequest> schedules = parseSchedule(data, new User(1,"","dummy", "112", "1"));
+                            if(data == null){
+
+                                return;
+                            }
+                            Map<String, JourneyRequest> schedules = parseSchedule(data, user);
                             Map<String, List<User>> membersMap = parseMembers(data);
                             setListOfHistory(schedules);
                             setResultsOfOnlineModel(membersMap);
@@ -514,7 +518,11 @@ public class MainViewModel extends ViewModel {
         Map<String, JourneyRequest> res = new HashMap<>();
         for(JsonElement schedule : schedules){
             String gender = schedule.getAsJsonObject().get("genderPreference").toString();
-            String method = schedule.getAsJsonObject().get("commuteType").toString();
+            int methodCode = Integer.parseInt(schedule.getAsJsonObject().get("commuteType").toString());
+            String method = "Walking";
+            if(methodCode == JourneyRequest.METHOD_TAXI){
+                method = "Taxi";
+            }
             String endPos = schedule.getAsJsonObject().get("endPosition").toString();
             String startPos = schedule.getAsJsonObject().get("startPosition").toString();
             String status = schedule.getAsJsonObject().get("status").toString();
@@ -545,7 +553,11 @@ public class MainViewModel extends ViewModel {
                 String userName = user.getAsJsonObject().get("userName").toString();
                 String userId = user.getAsJsonObject().get("id").toString();
                 String phoneNumber = user.getAsJsonObject().get("phoneNumber").toString();
-                String gender = user.getAsJsonObject().get("gender").toString();
+                int genderCode = Integer.parseInt(user.getAsJsonObject().get("gender").toString());
+                String gender = "Female";
+                if(genderCode == GENDER_MALE){
+                    gender = "Male";
+                }
                 User userInfo = new User(Integer.parseInt(userId), "",  userName, phoneNumber, gender);
                 userInfos.add(userInfo);
             }
