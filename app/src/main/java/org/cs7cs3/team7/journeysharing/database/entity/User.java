@@ -26,7 +26,6 @@ public class User {
     private String phoneNum;
     private String gender;
     @Expose
-    @SerializedName("gender")
     private int genderCode;
     private Date lastRefresh;
 
@@ -37,7 +36,7 @@ public class User {
         this.login = login;
         this.names = names;
         this.phoneNum = phoneNum;
-        this.gender = gender;
+        this.setGender(gender);
     }
 
     // --- Other Methods ---

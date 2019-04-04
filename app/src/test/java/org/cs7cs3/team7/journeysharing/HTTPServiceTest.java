@@ -30,7 +30,7 @@ public class HTTPServiceTest {
 //        user.setGender(0);
 //        user.setPhoneNumber("121231");
 //        user.setUserName("bao lei");
-        UserRequest userRequest = new UserRequest("Bao lei", 1, "110");
+        UserRequest userRequest = new UserRequest("Bao lei", 0, "11000000");
 
 
         Call<HTTPResponse> res = client.save(userRequest);

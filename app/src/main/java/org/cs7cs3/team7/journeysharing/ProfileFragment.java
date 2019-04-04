@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import org.cs7cs3.team7.journeysharing.database.entity.User;
 import org.cs7cs3.team7.journeysharing.view_models.ProfileViewModel;
@@ -24,8 +25,6 @@ import dagger.android.support.AndroidSupportInjection;
 
 
 public class ProfileFragment extends Fragment {
-    public static final String UID_KEY = "uid";
-
     @Inject
     ViewModelProvider.Factory viewModelFactory;
     private ProfileViewModel viewModel;
@@ -46,18 +45,31 @@ public class ProfileFragment extends Fragment {
         genderSpinner = userInfoLayout.findViewById(R.id.gender_spinner);
         saveButton = getView().findViewById(R.id.save_button);
 
+        Log.d("JINCHI", "Before configureViewModel() call");
         this.configureViewModel();
+        Log.d("JINCHI", "After calling configureViewModel()");
 
         saveButton.setOnClickListener(v -> {
             Log.d("JINCHI", "Saving...");
             blockAllComponents();
-            viewModel.update(namesEditText.getText().toString(),
+            viewModel.save(namesEditText.getText().toString(),
                     phoneEditText.getText().toString(),
-                    genderSpinner.getSelectedItem().toString());
+                    genderSpinner.getSelectedItem().toString(),
+                    new SimpleCallback<Boolean>() {
+                        @Override
+                        public void accept(Boolean result) {
+                            if (result) {
+                                Toast.makeText(getContext(), "User information saved successfully", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getContext(), "A problem occurred when saving the information. Please, try again later", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
             unblockAllComponents();
         });
 
-        if (this.viewModel.getUser().getValue() == null) {
+
+        if (this.viewModel.isFirstTimeUse()) {
             alertRegister();
         }
     }
@@ -78,25 +90,26 @@ public class ProfileFragment extends Fragment {
 
     private void configureViewModel() {
         viewModel = ViewModelProviders.of(this, viewModelFactory).get(ProfileViewModel.class);
-        viewModel.getUser().observe(this, user -> updateUI(user));
+        viewModel.getUser().observe(this, user -> {
+            Log.d("JINCHI", "Noticed something changed at user from ProfileFragment");
+            updateUI(user);
+            Log.d("JINCHI", "END Noticed something changed at user from ProfileFragment");
+        });
     }
 
     // -----------------
     // UI
     // -----------------
 
-    private void updateUI(User user) {
+    private void updateUI(@Nullable User user) {
         Log.d("JINCHI", "BEGIN updateUI()");
-        Log.d("JINCHI", "Is user null in updateUI?" + (user == null));
+        Log.d("JINCHI", "Is user null in updateUI? " + (user == null));
         if (user != null) {
             namesEditText.setText(user.getNames());
             phoneEditText.setText(user.getPhoneNum());
-            //wrong code
-            genderSpinner.setSelection(0);
-            //genderSpinner.setSelection(user.getGenderCode());
-            //genderSpinner.setSelection(userInfo.getGender());
-        } else
-        {
+            //TODO: Verify this is the right gender code selection
+            genderSpinner.setSelection(user.getGenderCode());
+        } else {
             Log.d("JINCHI", "User is null");
         }
         Log.d("JINCHI", "END updateUI()");

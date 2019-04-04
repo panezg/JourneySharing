@@ -70,7 +70,7 @@ public class MainViewModel extends ViewModel {
 
     @Inject
     public MainViewModel(UserRepository userRepository) {
-        Log.d("JINCHI", "Creating ProfileViewModel");
+        Log.d("JINCHI", "Creating MainViewModel");
         this.userRepository = userRepository;
         this.userLoginOnLocal = userRepository.recoverUserLogin();
         this.commsManager = CommsManagerFactory.getCommsManager(App.context, userLoginOnLocal);
@@ -330,60 +330,125 @@ public class MainViewModel extends ViewModel {
                              String endLon,
                              String gender,
                              String method)  {
-        HTTPService client = HTTPClient.INSTANCE.getClient();
-        ScheduleRequest scheduleRequest = new ScheduleRequest();
-        int genderCode = -1;
-        int methodCode = -1;
-        if (gender.equals("MALE")) {
-            genderCode = GENDER_MALE;
-        }
-        else if (gender.equals("FEMALE"))  {
-            genderCode = GENDER_FEMALE;
-        }
 
-
-        if (method.equals("Walking")) {
-            methodCode = JourneyRequest.METHOD_WALKING;
-        }
-        else if (gender.equals("Taxi"))  {
-            methodCode = JourneyRequest.METHOD_TAXI;
-        }
-
-
-        scheduleRequest.setCommuteType(methodCode);
-        scheduleRequest.setEndPosition(toAddress);
-        scheduleRequest.setEndPositionLatitude(endLat);
-        scheduleRequest.setEndPositionLongitude(endLon);
-        scheduleRequest.setGenderPreference(genderCode);
-        scheduleRequest.setStartPosition(fromAddress);
-        scheduleRequest.setStartPositionLatitude(startLat);
-        scheduleRequest.setStartPositionLongitude(startLon);
-        scheduleRequest.setScheduleDateTime(showDate+showTime);
-        scheduleRequest.setUserId(1);
-        Call<HTTPResponse> res = client.addSchedule(scheduleRequest);
-        res.enqueue(new Callback<HTTPResponse>() {
+        new AsyncTask<Void, Void, Void>() {
             @Override
-            public void onResponse(Call<HTTPResponse> call, Response<HTTPResponse> response) {
-                if(response.isSuccessful()){
-                    System.out.println("succ");
-                    HTTPResponse httpResponse = response.body();
-                    System.out.println(httpResponse.getStatus());
-
-                }else {
-                    System.out.println("fail");
-                    try {
-                        System.out.println(response.errorBody().string());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+            protected Void doInBackground( final Void ... params ) {
+                User user = userRepository.getUserSync(userLoginOnLocal);
+                HTTPService client = HTTPClient.INSTANCE.getClient();
+                ScheduleRequest scheduleRequest = new ScheduleRequest();
+                int genderCode = -1;
+                int methodCode = -1;
+                if (gender.equals("Male")) {
+                    genderCode = GENDER_MALE;
                 }
-            }
+                else if (gender.equals("Female"))  {
+                    genderCode = GENDER_FEMALE;
+                }
 
-            @Override
-            public void onFailure(Call<HTTPResponse> call, Throwable t) {
 
+                if (method.equals("Walking")) {
+                    methodCode = JourneyRequest.METHOD_WALKING;
+                }
+                else if (gender.equals("Taxi"))  {
+                    methodCode = JourneyRequest.METHOD_TAXI;
+                }
+
+
+                scheduleRequest.setCommuteType(methodCode);
+                scheduleRequest.setEndPosition(toAddress);
+                scheduleRequest.setEndPositionLatitude(endLat);
+                scheduleRequest.setEndPositionLongitude(endLon);
+                scheduleRequest.setGenderPreference(genderCode);
+                scheduleRequest.setStartPosition(fromAddress);
+                scheduleRequest.setStartPositionLatitude(startLat);
+                scheduleRequest.setStartPositionLongitude(startLon);
+                scheduleRequest.setScheduleDateTime(showDate+showTime);
+                scheduleRequest.setUserId(user.getId());
+                Call<HTTPResponse> res = client.addSchedule(scheduleRequest);
+                res.enqueue(new Callback<HTTPResponse>() {
+                    @Override
+                    public void onResponse(Call<HTTPResponse> call, Response<HTTPResponse> response) {
+                        if(response.isSuccessful()){
+//                            System.out.println("succ");
+                            Log.d("JINCHI", "succ");
+                            HTTPResponse httpResponse = response.body();
+//                            System.out.println(httpResponse.getStatus());
+                            Log.d("JINCHI", httpResponse.getStatus());
+                        }else {
+                            System.out.println("fail");
+                            try {
+                                System.out.println(response.errorBody().string());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<HTTPResponse> call, Throwable t) {
+
+                    }
+                });
+
+                return null;
             }
-        });
+        }.execute();
+
+//        HTTPService client = HTTPClient.INSTANCE.getClient();
+//        ScheduleRequest scheduleRequest = new ScheduleRequest();
+//        int genderCode = -1;
+//        int methodCode = -1;
+//        if (gender.equals("MALE")) {
+//            genderCode = GENDER_MALE;
+//        }
+//        else if (gender.equals("FEMALE"))  {
+//            genderCode = GENDER_FEMALE;
+//        }
+//
+//
+//        if (method.equals("Walking")) {
+//            methodCode = JourneyRequest.METHOD_WALKING;
+//        }
+//        else if (gender.equals("Taxi"))  {
+//            methodCode = JourneyRequest.METHOD_TAXI;
+//        }
+//
+//
+//        scheduleRequest.setCommuteType(methodCode);
+//        scheduleRequest.setEndPosition(toAddress);
+//        scheduleRequest.setEndPositionLatitude(endLat);
+//        scheduleRequest.setEndPositionLongitude(endLon);
+//        scheduleRequest.setGenderPreference(genderCode);
+//        scheduleRequest.setStartPosition(fromAddress);
+//        scheduleRequest.setStartPositionLatitude(startLat);
+//        scheduleRequest.setStartPositionLongitude(startLon);
+//        scheduleRequest.setScheduleDateTime(showDate+showTime);
+//        scheduleRequest.setUserId(1);
+//        Call<HTTPResponse> res = client.addSchedule(scheduleRequest);
+//        res.enqueue(new Callback<HTTPResponse>() {
+//            @Override
+//            public void onResponse(Call<HTTPResponse> call, Response<HTTPResponse> response) {
+//                if(response.isSuccessful()){
+//                    System.out.println("succ");
+//                    HTTPResponse httpResponse = response.body();
+//                    System.out.println(httpResponse.getStatus());
+//
+//                }else {
+//                    System.out.println("fail");
+//                    try {
+//                        System.out.println(response.errorBody().string());
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<HTTPResponse> call, Throwable t) {
+//
+//            }
+//        });
 
 
     }
