@@ -66,6 +66,8 @@ public class TypeAddressFragment extends Fragment implements OnMapReadyCallback 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        LocationUtils.initLocation(getContext());
+        Log.d("XINDI",LocationUtils.latitude+""+LocationUtils.longitude);
     }
 
     @Override
@@ -96,9 +98,8 @@ public class TypeAddressFragment extends Fragment implements OnMapReadyCallback 
 
             Fragment onDemandJourneyFragment = OnDemandJourneyFragment.newInstance();
             loadFragment(onDemandJourneyFragment);
+            getDeviceLocation();
         });
-        getDeviceLocation();
-        getLocationPermission();
     }
 
     @Override
@@ -130,19 +131,19 @@ public class TypeAddressFragment extends Fragment implements OnMapReadyCallback 
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH
-                        || actionId == EditorInfo.IME_ACTION_DONE
-                        || event.getAction() == event.ACTION_DOWN
-                        || event.getAction() == event.KEYCODE_ENTER
+//                        || actionId == EditorInfo.IME_ACTION_DONE
+//                        || event.getAction() == event.ACTION_DOWN
+//                        || event.getAction() == event.KEYCODE_ENTER
                                                                         ) {
                     geolacation();
-                    return (event.getKeyCode() == KeyEvent.KEYCODE_ENTER);
+//                    return (event.getKeyCode() == KeyEvent.KEYCODE_ENTER);
                 }
                 return false;
             }
         });
     }
 
-    private void getLocationPermission(){
+    public void getLocationPermission(){
         String[] permission={Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION};
         if(ContextCompat.checkSelfPermission(getContext().getApplicationContext(),FINE_LOCATION)== PackageManager.PERMISSION_GRANTED){
             if(ContextCompat.checkSelfPermission(getContext().getApplicationContext(),COURSE_LOCATION)==PackageManager.PERMISSION_GRANTED){
@@ -177,33 +178,35 @@ public class TypeAddressFragment extends Fragment implements OnMapReadyCallback 
     }
 
     private void getDeviceLocation(){
-        Log.d("XINDI","get device loction");
-        mfusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(getContext());
-        if(mlocationpermission==true){
-            Log.d("XINDI","可以获取本机地址");
-        }else {
-            Log.d("XINDI","无法获取本机地址");
-        }
-        try {
-            if(mlocationpermission){
-                Task location=mfusedLocationProviderClient.getLastLocation();
-                location.addOnCompleteListener(new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if(task.isSuccessful()){
-                            Log.d("XINDI","get the device location");
-                            Location currentLocation=(Location)task.getResult();
-                            moveCamer(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()),DEFAULT_ZOOM,"current Location");
-                        }else {
-                            Log.d("XINDI","the device location is null");
-                        }
-                    }
-                });
-
-            }
-        }catch (SecurityException e){
-            Log.e("XINDI",e.getMessage());
-        }
+//        Log.d("XINDI","get device loction");
+//        mfusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(getContext());
+//        if(mlocationpermission==true){
+//            Log.d("XINDI","可以获取本机地址");
+//        }else {
+//            Log.d("XINDI","无法获取本机地址");
+//            getLocationPermission();
+//        }
+//        try {
+//            if(mlocationpermission){
+//                Task location=mfusedLocationProviderClient.getLastLocation();
+//                location.addOnCompleteListener(new OnCompleteListener() {
+//                    @Override
+//                    public void onComplete(@NonNull Task task) {
+//                        if(task.isSuccessful()){
+//                            Log.d("XINDI","get the device location");
+//                            Location currentLocation=(Location)task.getResult();
+//                            moveCamer(new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude()),DEFAULT_ZOOM,"current Location");
+//                        }else {
+//                            Log.d("XINDI","the device location is null");
+//                        }
+//                    }
+//                });
+//
+//            }
+//        }catch (SecurityException e){
+//            Log.e("XINDI",e.getMessage());
+//        }
+        moveCamer(new LatLng(LocationUtils.latitude,LocationUtils.longitude),DEFAULT_ZOOM,"Current Location");
     }
     private void geolacation() {
         Log.d("XINDI", "getlocate:geolocating");
@@ -242,3 +245,4 @@ public class TypeAddressFragment extends Fragment implements OnMapReadyCallback 
     }
 
 }
+
