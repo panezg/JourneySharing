@@ -94,17 +94,17 @@ public class ScheduleJourneyFragment extends Fragment {
             count++;
         }
             //convert offline date to hashmap and add the hashmap to the showlist
-            Map<String,Object> offlinemap=new HashMap<>();
-            String offlinedate=offlineRecord.getValue().getDate();
-            String offlinedes=offlineRecord.getValue().getDestination();
-            String offlintime=offlineRecord.getValue().getTime();
-            JourneyRequest.JourneyRequestStatus offlinestate=offlineRecord.getValue().getState();
-            //TODO: add offline orderID
-            offlinemap.put("date",offlinedate);
-            offlinemap.put("time",offlintime);
-            offlinemap.put("destination",offlinedes);
-            offlinemap.put("state",offlinestate);
-            showlist.add(0,offlinemap);
+//            Map<String,Object> offlinemap=new HashMap<>();
+//            String offlinedate=offlineRecord.getValue().getDate();
+//            String offlinedes=offlineRecord.getValue().getDestination();
+//            String offlintime=offlineRecord.getValue().getTime();
+//            JourneyRequest.JourneyRequestStatus offlinestate=offlineRecord.getValue().getState();
+//            //TODO: add offline orderID
+//            offlinemap.put("date",offlinedate);
+//            offlinemap.put("time",offlintime);
+//            offlinemap.put("destination",offlinedes);
+//            offlinemap.put("state",offlinestate);
+//            showlist.add(0,offlinemap);
 
 
         return showlist;
