@@ -111,7 +111,7 @@ public class MainViewModel extends ViewModel {
         setMembersList(new ArrayList<User>());
 
         // Initialization of data in ScheduledJourneyFragment.
-        offlineRecord = new MutableLiveData<>();
+        //offlineRecord = new MutableLiveData<>();
         listOfHistory = new MutableLiveData<>();
         selectedIndex = new MutableLiveData<>();
         resultsOfOnlineModel = new MutableLiveData<>();
@@ -221,45 +221,64 @@ public class MainViewModel extends ViewModel {
      */
 
     // Only keep one single
-    private MutableLiveData<JourneyRequest> offlineRecord;
+//    private MutableLiveData<JourneyRequest> offlineRecord;
 
     // Hold history data get from backend.
-    private MutableLiveData<List<JourneyRequest>> listOfHistory;
+    // journeyID --> journeyRequest
+    private MutableLiveData<Map<String ,JourneyRequest>> listOfHistory;
 
-    private MutableLiveData<Integer> selectedIndex;
+    private MutableLiveData<String> selectedIndex;
+
+    private MutableLiveData<Boolean> isOnlineModel;
 
     // TODO: need to finalize the result data format
+    // journeyID --> matchingResult
     private MutableLiveData<Map<String, List<User>>> resultsOfOnlineModel;
 
-    public MutableLiveData<JourneyRequest> getOfflineRecord() {
-        return offlineRecord;
-    }
+//    public MutableLiveData<JourneyRequest> getOfflineRecord() {
+//        return offlineRecord;
+//    }
 
-    public void setOfflineRecord(JourneyRequest offlineRecord) {
-        this.offlineRecord.setValue(offlineRecord);
-    }
+//    public void setOfflineRecord(JourneyRequest offlineRecord) {
+//        this.offlineRecord.setValue(offlineRecord);
+//    }
 
-    public void addRecordToList(JourneyRequest record) {
-        List<JourneyRequest> tmpList = listOfHistory.getValue();
-        tmpList.add(record);
-        listOfHistory.setValue(tmpList);
-    }
+//    public void addRecordToList(JourneyRequest record) {
+//        List<JourneyRequest> tmpList = listOfHistory.getValue();
+//        tmpList.add(record);
+//        listOfHistory.setValue(tmpList);
+//    }
 
-
-    public MutableLiveData<List<JourneyRequest>> getListOfHistory() {
+    public MutableLiveData<Map<String, JourneyRequest>> getListOfHistory() {
         return listOfHistory;
     }
 
-    public void setListOfHistory(List<JourneyRequest> listOfHistory) {
+    public void setListOfHistory(Map<String, JourneyRequest> listOfHistory) {
         this.listOfHistory.setValue(listOfHistory);
     }
 
-    public MutableLiveData<Integer> getSelectedIndex() {
+    public MutableLiveData<String> getSelectedIndex() {
         return selectedIndex;
     }
 
-    public void setSelectedIndex(Integer selectedIndex) {
+    public void setSelectedIndex(String selectedIndex) {
         this.selectedIndex.setValue(selectedIndex);
+    }
+
+    public MutableLiveData<Map<String, List<User>>> getResultsOfOnlineModel() {
+        return resultsOfOnlineModel;
+    }
+
+    public void setResultsOfOnlineModel(Map<String, List<User>> resultsOfOnlineModel) {
+        this.resultsOfOnlineModel.setValue(resultsOfOnlineModel);
+    }
+
+    public MutableLiveData<Boolean> getIsOnlineModel() {
+        return isOnlineModel;
+    }
+
+    public void setIsOnlineModel(Boolean isOnlineModel) {
+        this.isOnlineModel.setValue(isOnlineModel);
     }
 
     /*
