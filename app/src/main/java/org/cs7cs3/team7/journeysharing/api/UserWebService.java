@@ -13,7 +13,7 @@ public interface UserWebService {
     @GET("hello")
     Call<HTTPResponse> hello();
 
-    @GET("/users/{user}")
+    @GET("/user/{user}")
     Call<User> getUser(@Path("user") String login);
 
     //Should be users/add

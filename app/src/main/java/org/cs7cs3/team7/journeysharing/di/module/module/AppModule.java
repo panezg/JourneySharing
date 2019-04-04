@@ -34,6 +34,8 @@ public class AppModule {
     LocalDatabase provideDatabase(Application application) {
         return Room.databaseBuilder(application,
                 LocalDatabase.class, "LocalDatabase.db")
+                //Found a way to use Room, Retrofit, and best practices without invoking DB on main thread
+                //.allowMainThreadQueries()
                 .build();
     }
 

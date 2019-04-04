@@ -70,7 +70,7 @@ public class MainViewModel extends ViewModel {
 
     @Inject
     public MainViewModel(UserRepository userRepository) {
-        Log.d("JINCHI", "Creating ProfileViewModel");
+        Log.d("JINCHI", "Creating MainViewModel");
         this.userRepository = userRepository;
         this.userLoginOnLocal = userRepository.recoverUserLogin();
         this.commsManager = CommsManagerFactory.getCommsManager(App.context, userLoginOnLocal);
