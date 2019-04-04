@@ -108,9 +108,6 @@ public class MainActivity extends AppCompatActivity implements HasSupportFragmen
 
     private void refreshScheduledList() {
         // TODO: Refresh data according to the response from server end.
-        //mViewModel.setListOfHistory("data from database");
-        //mViewModel.setOfflineRecord("data from sharedpreference");
-        mViewModel.addRecordToList(mViewModel.getOfflineRecord().getValue());
     }
 
 }

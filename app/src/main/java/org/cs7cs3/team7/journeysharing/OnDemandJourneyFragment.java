@@ -277,14 +277,6 @@ public class OnDemandJourneyFragment extends Fragment {
                 // Waiting the match to finish and received the message from server.
                 waitForMatchAndSkip();
             } else {
-                /* Move to ViewModel
-                @Mengxuan
-                journeyRequestInfo.setState(JourneyRequest.JourneyRequestStatus.PENDING);
-                journeyRequestInfo.setDate(mViewModel.getDate().getValue());
-                journeyRequestInfo.setTime(mViewModel.getTime().getValue());
-                journeyRequestInfo.setStartPoint(mViewModel.getFrom().getValue());
-                mViewModel.addRecordToList(journeyRequestInfo);
-                */
                 Toast.makeText(this.getActivity(), "Request Sent! Please check details in the first page ", Toast.LENGTH_SHORT).show();
                 String fakeStartLon = "123";
                 String fakeStartLat = "123";
@@ -339,9 +331,9 @@ public class OnDemandJourneyFragment extends Fragment {
             @Override
             public void onReceive(Context context, Intent intent) {
                 MatchingResult matchingResult = intent.getParcelableExtra(Constants.JOURNEY_MATCH_RESULT_INTENT_ACTION_PARCELABLE_KEY);
-                //Toast.makeText(context, message.getMessageText(), Toast.LENGTH_SHORT).show();
+                // Toast.makeText(context, message.getMessageText(), Toast.LENGTH_SHORT).show();
                 Log.d("JINCHI", "Local broadcast received in general receiver: " + matchingResult);
-
+                LoadingBar.cancel(mParent);
                 if (matchingResult.getStatus() == MatchingResult.MatchingResultStatus.MATCHED) {
                     mViewModel.setMembersList(matchingResult.getGroupMembers());
                     //JourneyRequest journeyRequestInfo = new JourneyRequest(userInfo, genderSpinner.getSelectedItem().toString(), methodSpinner.getSelectedItem().toString(), mViewModel.getTo().getValue(), false);
@@ -349,6 +341,7 @@ public class OnDemandJourneyFragment extends Fragment {
                     //mViewModel.setOfflineRecord(journeyRequestInfo);
                     waitingForMatchResult.release();
                     // Skip to the viewMatchFragment.
+                    mViewModel.setIsOnlineModel(false);
                     Fragment viewMatchFragment = ViewMatchFragment.newInstance();
                     Log.d("JINCHI", "Loading ViewMatch Fragment!");
                     loadFragment(viewMatchFragment);
