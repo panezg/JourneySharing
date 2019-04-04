@@ -4,7 +4,6 @@ import org.cs7cs3.team7.journeysharing.database.entity.User;
 
 import java.util.Date;
 
-import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -18,7 +17,7 @@ public interface UserDao {
     void save(User user);
 
     @Query("SELECT * FROM user WHERE login = :login")
-    LiveData<User> load(String login);
+    User load(String login);
 
     @Query("SELECT * FROM user WHERE login = :login")
     User loadSync(String login);
