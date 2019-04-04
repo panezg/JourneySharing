@@ -5,13 +5,19 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
 import org.cs7cs3.team7.journeysharing.Models.HTTPResponse;
+import org.cs7cs3.team7.journeysharing.Models.JourneyRequest;
 import org.cs7cs3.team7.journeysharing.Models.ScheduleRequest;
 import org.cs7cs3.team7.journeysharing.Models.UserRequest;
+import org.cs7cs3.team7.journeysharing.database.entity.User;
 import org.cs7cs3.team7.journeysharing.httpservice.HTTPClient;
 import org.cs7cs3.team7.journeysharing.httpservice.HTTPService;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -146,7 +152,7 @@ public class HTTPServiceTest {
         if(response.isSuccessful()){
             System.out.println("succ");
             HTTPResponse httpResponse = response.body();
-            System.out.println(httpResponse.getData().toString());
+//            System.out.println(httpResponse.getData().toString());
             JsonElement element = httpResponse.getData();
             JsonArray schedules =  element.getAsJsonArray();
             for(JsonElement schedule : schedules){
@@ -155,6 +161,7 @@ public class HTTPServiceTest {
                 System.out.println("Date:"+schedule.getAsJsonObject().get("scheduleDateTime"));
                 System.out.println("StartPos:"+schedule.getAsJsonObject().get("startPosition"));
                 System.out.println("endPos:"+schedule.getAsJsonObject().get("endPosition"));
+                System.out.println("status: "+schedule.getAsJsonObject().get("status"));
                 JsonArray users = schedule.getAsJsonObject().getAsJsonArray("users");
                 for(JsonElement user : users){
                     System.out.println("name: "+ user.getAsJsonObject().get("userName"));
@@ -181,15 +188,89 @@ public class HTTPServiceTest {
         -date
         -startposition
         -endPosition
+        -status
         -users
             -userName
             -userId
             -phoneNumber
             -gender
+            -status (if 1 succ other fail)
      */
 
+    @Test
+    public void testMapper() throws IOException{
+        HTTPService client = HTTPClient.INSTANCE.getClient();
+        int id = 6;
+        Call<HTTPResponse> res = client.checkSchedule(id);
+        Response<HTTPResponse> response = res.execute();
+        System.out.println(res.request().toString());
+        if(response.isSuccessful()){
+           JsonElement data = response.body().getData();
+           Map<String, JourneyRequest> schedules = parseSchedule(data, new User(1,"","dummy", "112", "1"));
+           Map<String, List<User>> membersMap = parseMembers(data);
+           for(Map.Entry<String, JourneyRequest> journey : schedules.entrySet()) {
+               System.out.println("id: "+ journey.getKey());
+               System.out.println("info: "+ journey.getValue().toString());
+            }
 
-    private void parseSchedule(JsonElement element){
+            System.out.println();
+           System.out.println();
+           for(Map.Entry<String, List<User>> members : membersMap.entrySet()){
+               System.out.println("id" + members.getKey());
+               for(User u : members.getValue()){
+                   System.out.println(u);
+                   System.out.println();
+               }
+           }
 
+        }else {
+
+        }
+    }
+
+
+    private Map<String, JourneyRequest> parseSchedule(JsonElement element, User currentUser){
+        JsonArray schedules =  element.getAsJsonArray();
+        Map<String, JourneyRequest> res = new HashMap<>();
+        for(JsonElement schedule : schedules){
+            String gender = schedule.getAsJsonObject().get("genderPreference").toString();
+            String method = schedule.getAsJsonObject().get("commuteType").toString();
+            String endPos = schedule.getAsJsonObject().get("endPosition").toString();
+            String startPos = schedule.getAsJsonObject().get("startPosition").toString();
+            String status = schedule.getAsJsonObject().get("status").toString();
+            String time = schedule.getAsJsonObject().get("scheduleDateTime").toString();
+            String id = schedule.getAsJsonObject().get("id").toString();
+            JourneyRequest journeyRequest = new JourneyRequest(currentUser, gender, method, endPos, false);
+            journeyRequest.setStartPoint(startPos);
+            journeyRequest.setTime(time);
+
+            if(status.equals("1")){
+                journeyRequest.setState(JourneyRequest.JourneyRequestStatus.FINISHED);
+            }else {
+                journeyRequest.setState(JourneyRequest.JourneyRequestStatus.SCHEDULED);
+            }
+            res.put(id, journeyRequest);
+        }
+        return res;
+    }
+
+    private Map<String, List<User>> parseMembers(JsonElement element){
+        JsonArray schedules =  element.getAsJsonArray();
+        Map<String, List<User>> res = new HashMap<>();
+        for(JsonElement schedule : schedules){
+            JsonArray users = schedule.getAsJsonObject().getAsJsonArray("users");
+            String id = schedule.getAsJsonObject().get("id").toString();
+            List<User> userInfos = new ArrayList<>();
+            for(JsonElement user : users){
+                String userName = user.getAsJsonObject().get("userName").toString();
+                String userId = user.getAsJsonObject().get("id").toString();
+                String phoneNumber = user.getAsJsonObject().get("phoneNumber").toString();
+                String gender = user.getAsJsonObject().get("gender").toString();
+                User userInfo = new User(Integer.parseInt(userId), "",  userName, phoneNumber, gender);
+                userInfos.add(userInfo);
+            }
+            res.put(id, userInfos);
+        }
+        return res;
     }
 }
