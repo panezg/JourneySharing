@@ -25,8 +25,6 @@ import dagger.android.support.AndroidSupportInjection;
 
 
 public class ProfileFragment extends Fragment {
-    public static final String UID_KEY = "uid";
-
     @Inject
     ViewModelProvider.Factory viewModelFactory;
     private ProfileViewModel viewModel;

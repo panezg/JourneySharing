@@ -37,7 +37,7 @@ public class User {
         this.login = login;
         this.names = names;
         this.phoneNum = phoneNum;
-        this.gender = gender;
+        this.setGender(gender);
     }
 
     // --- Other Methods ---
