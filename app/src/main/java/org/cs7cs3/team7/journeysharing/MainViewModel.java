@@ -6,6 +6,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+
 import org.cs7cs3.team7.journeysharing.Models.HTTPResponse;
 import org.cs7cs3.team7.journeysharing.Models.JourneyRequest;
 import org.cs7cs3.team7.journeysharing.Models.ScheduleRequest;
@@ -18,6 +21,7 @@ import org.cs7cs3.team7.wifidirect.ICommsManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -472,5 +476,93 @@ public class MainViewModel extends ViewModel {
 //        });
 
 
+    }
+
+    public void serarchResult(){
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(final Void... params) {
+                User user = userRepository.getUserSync(userLoginOnLocal);
+                HTTPService client = HTTPClient.INSTANCE.getClient();
+                Call<HTTPResponse> res = client.checkSchedule(user.getId());
+                res.enqueue(new Callback<HTTPResponse>() {
+                    @Override
+                    public void onResponse(Call<HTTPResponse> call, Response<HTTPResponse> response) {
+                        if(response.isSuccessful()){
+                            JsonElement data = response.body().getData();
+                            if(data == null){
+
+                                return;
+                            }
+                            Map<String, JourneyRequest> schedules = parseSchedule(data, user);
+                            Map<String, List<User>> membersMap = parseMembers(data);
+                            setListOfHistory(schedules);
+                            setResultsOfOnlineModel(membersMap);
+
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<HTTPResponse> call, Throwable t) {
+
+                    }
+                });
+                return null;
+            }
+        }.execute();
+    }
+
+
+    private Map<String, JourneyRequest> parseSchedule(JsonElement element, User currentUser){
+        JsonArray schedules =  element.getAsJsonArray();
+        Map<String, JourneyRequest> res = new HashMap<>();
+        for(JsonElement schedule : schedules){
+            String gender = schedule.getAsJsonObject().get("genderPreference").toString();
+            int methodCode = Integer.parseInt(schedule.getAsJsonObject().get("commuteType").toString());
+            String method = "Walking";
+            if(methodCode == JourneyRequest.METHOD_TAXI){
+                method = "Taxi";
+            }
+            String endPos = schedule.getAsJsonObject().get("endPosition").toString();
+            String startPos = schedule.getAsJsonObject().get("startPosition").toString();
+            String status = schedule.getAsJsonObject().get("status").toString();
+            String time = schedule.getAsJsonObject().get("scheduleDateTime").toString();
+            String id = schedule.getAsJsonObject().get("id").toString();
+            JourneyRequest journeyRequest = new JourneyRequest(currentUser, gender, method, endPos, false);
+            journeyRequest.setStartPoint(startPos);
+            journeyRequest.setTime(time);
+
+            if(status.equals("1")){
+                journeyRequest.setState(JourneyRequest.JourneyRequestStatus.FINISHED);
+            }else {
+                journeyRequest.setState(JourneyRequest.JourneyRequestStatus.SCHEDULED);
+            }
+            res.put(id, journeyRequest);
+        }
+        return res;
+    }
+
+    private Map<String, List<User>> parseMembers(JsonElement element){
+        JsonArray schedules =  element.getAsJsonArray();
+        Map<String, List<User>> res = new HashMap<>();
+        for(JsonElement schedule : schedules){
+            JsonArray users = schedule.getAsJsonObject().getAsJsonArray("users");
+            String id = schedule.getAsJsonObject().get("id").toString();
+            List<User> userInfos = new ArrayList<>();
+            for(JsonElement user : users){
+                String userName = user.getAsJsonObject().get("userName").toString();
+                String userId = user.getAsJsonObject().get("id").toString();
+                String phoneNumber = user.getAsJsonObject().get("phoneNumber").toString();
+                int genderCode = Integer.parseInt(user.getAsJsonObject().get("gender").toString());
+                String gender = "Female";
+                if(genderCode == GENDER_MALE){
+                    gender = "Male";
+                }
+                User userInfo = new User(Integer.parseInt(userId), "",  userName, phoneNumber, gender);
+                userInfos.add(userInfo);
+            }
+            res.put(id, userInfos);
+        }
+        return res;
     }
 }

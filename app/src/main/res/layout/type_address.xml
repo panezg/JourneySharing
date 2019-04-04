@@ -50,6 +50,7 @@ android:textSize="26dp"-->
         android:layout_marginTop="0dp"
         android:hint="input the place name"
         android:imeOptions="actionSearch"
+        android:singleLine="true"
         android:textSize="15sp"
         tools:ignore="MissingConstraints" />
 
