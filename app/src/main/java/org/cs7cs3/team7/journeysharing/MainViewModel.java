@@ -115,6 +115,8 @@ public class MainViewModel extends ViewModel {
         listOfHistory = new MutableLiveData<>();
         selectedIndex = new MutableLiveData<>();
         resultsOfOnlineModel = new MutableLiveData<>();
+        isOnlineModel = new MutableLiveData<>();
+        isOnlineModel.setValue(true);
     }
 
     // ---

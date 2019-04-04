@@ -333,6 +333,7 @@ public class OnDemandJourneyFragment extends Fragment {
                 MatchingResult matchingResult = intent.getParcelableExtra(Constants.JOURNEY_MATCH_RESULT_INTENT_ACTION_PARCELABLE_KEY);
                 // Toast.makeText(context, message.getMessageText(), Toast.LENGTH_SHORT).show();
                 Log.d("JINCHI", "Local broadcast received in general receiver: " + matchingResult);
+                LoadingBar.cancel(mParent);
                 if (matchingResult.getStatus() == MatchingResult.MatchingResultStatus.MATCHED) {
                     mViewModel.setMembersList(matchingResult.getGroupMembers());
                     //JourneyRequest journeyRequestInfo = new JourneyRequest(userInfo, genderSpinner.getSelectedItem().toString(), methodSpinner.getSelectedItem().toString(), mViewModel.getTo().getValue(), false);
@@ -340,6 +341,7 @@ public class OnDemandJourneyFragment extends Fragment {
                     //mViewModel.setOfflineRecord(journeyRequestInfo);
                     waitingForMatchResult.release();
                     // Skip to the viewMatchFragment.
+                    mViewModel.setIsOnlineModel(false);
                     Fragment viewMatchFragment = ViewMatchFragment.newInstance();
                     Log.d("JINCHI", "Loading ViewMatch Fragment!");
                     loadFragment(viewMatchFragment);

@@ -48,20 +48,19 @@ public class ScheduleJourneyFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         mViewModel= ViewModelProviders.of(getActivity(), viewModelFactory).get(MainViewModel.class);
         scheduleList=(ListView)getActivity().findViewById(R.id.scheduleList);
-        ScheduleJourneyFragment scheduleJourneyFragment= new ScheduleJourneyFragment();
-        SimpleAdapter adapter = new SimpleAdapter(getContext(),scheduleJourneyFragment.getListOfHistory(mViewModel.getListOfHistory(),mViewModel.getOfflineRecord()),R.layout.vlist,
-                new String[]{"orderID","date","time","destination","state"},
+       // ScheduleJourneyFragment scheduleJourneyFragment = new ScheduleJourneyFragment();
+        Map<Integer, String> posToJourneyId = new HashMap<>();
+        SimpleAdapter adapter = new SimpleAdapter(getContext(),getListOfHistory(posToJourneyId),R.layout.vlist,
+                new String[]{"date","time","destination","state"},
                 new int[]{R.id.orderID,R.id.date,R.id.time,R.id.destination,R.id.state});
         scheduleList.setAdapter(adapter);
         scheduleList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mViewModel.setIsOnlineModel(true);
                 Map<String, Object> map = (Map<String, Object>) parent.getItemAtPosition(position);
                 Log.d("JINCHI", map.get("date").toString());
-                mViewModel.setSelectedIndex(position);
-                //获取点击item的内容
-                String orderID= (String) map.get("orderID");
-                //TODO 根据获得的订单ID跳转到该ID的订单详情页面
+                mViewModel.setSelectedIndex(posToJourneyId.get(position));
                 Fragment viewMatchFragment = ViewMatchFragment.newInstance();
                 loadFragment(viewMatchFragment);
             }
@@ -69,19 +68,18 @@ public class ScheduleJourneyFragment extends Fragment {
     }
 
 
-    private List getListOfHistory(MutableLiveData<List<JourneyRequest>> listofhistory, MutableLiveData<JourneyRequest> offlineRecord){
-        List<Map<String,Object>> showlist = new ArrayList<Map<String, Object>>();
+    private List getListOfHistory(Map<Integer, String> posToJourneyId){
+        List<Map<String,Object>> showList = new ArrayList<>();
 
-        //convert online date to hashmap and add the hashmap to the showlist
-        List<JourneyRequest> onlinerequestInfos=new ArrayList<>();
-        onlinerequestInfos=listofhistory.getValue();
-        Map<String,Object> map=new HashMap<>();
-        int count=1;
-        for(JourneyRequest journeyRequest : onlinerequestInfos) {
-            if (count == 9) {
-                break;
-            }
+        //convert online date to hashmap and add the hashmap to the showList
+        Map<String, JourneyRequest> onlineRequestInfos = mViewModel.getListOfHistory().getValue();
+
+        Map<String, Object> map = new HashMap<>();
+        int pos = 0;
+        for(String journeyID : onlineRequestInfos.keySet()) {
             //TODO: add oderId
+            JourneyRequest journeyRequest = onlineRequestInfos.get(journeyID);
+            posToJourneyId.put(pos, journeyID);
             String date = journeyRequest.getDate();
             String des = journeyRequest.getDestination();
             String time = journeyRequest.getTime();
@@ -90,24 +88,10 @@ public class ScheduleJourneyFragment extends Fragment {
             map.put("time", time);
             map.put("destination", des);
             map.put("state", state);
-            showlist.add(map);
-            count++;
+            showList.add(map);
+            pos++;
         }
-            //convert offline date to hashmap and add the hashmap to the showlist
-//            Map<String,Object> offlinemap=new HashMap<>();
-//            String offlinedate=offlineRecord.getValue().getDate();
-//            String offlinedes=offlineRecord.getValue().getDestination();
-//            String offlintime=offlineRecord.getValue().getTime();
-//            JourneyRequest.JourneyRequestStatus offlinestate=offlineRecord.getValue().getState();
-//            //TODO: add offline orderID
-//            offlinemap.put("date",offlinedate);
-//            offlinemap.put("time",offlintime);
-//            offlinemap.put("destination",offlinedes);
-//            offlinemap.put("state",offlinestate);
-//            showlist.add(0,offlinemap);
-
-
-        return showlist;
+        return showList;
     }
 
 

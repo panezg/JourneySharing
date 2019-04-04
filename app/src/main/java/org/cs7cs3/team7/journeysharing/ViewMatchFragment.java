@@ -80,10 +80,15 @@ public class ViewMatchFragment extends Fragment {
         listData = new ArrayList<String>();
         //int index = mViewModel.getSelectedIndex().getValue();
         //TODO: Find the correct result by the index id saved at the last page.
-        List<User> membersList = mViewModel.getMembersList().getValue();
-        for(User user : membersList) {
-            // TODO: What format should the members info be displayed into??
-            listData.add(user.toMatchResultString());
+        List<User> membersList;
+        if(mViewModel.getIsOnlineModel().getValue()) {
+            membersList = mViewModel.getMembersList().getValue();
+        } else {
+            String journeyID = mViewModel.getSelectedIndex().getValue();
+            membersList = mViewModel.getResultsOfOnlineModel().getValue().get(journeyID);
+        }
+        for(User u : membersList) {
+            listData.add(u.toMatchResultString());
         }
     }
 
